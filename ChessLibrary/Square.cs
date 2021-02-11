@@ -1,6 +1,8 @@
-﻿namespace ChessLibrary
+﻿using System;
+
+namespace ChessLibrary
 {
-    public class Square
+    public class Square : ICloneable
     {
         public int Rank { get; set; }
         public Files File { get; set; }
@@ -16,6 +18,11 @@
                 }
                 return Colors.White;
             }
+        }
+
+        public object Clone()
+        {
+            return new Square() { Rank = this.Rank, File = this.File };
         }
     }
 }

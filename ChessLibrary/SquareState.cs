@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChessLibrary
 {
-    public class SquareState
+    public class SquareState : ICloneable
     {
         public Square Square { get; set; }
         public Piece? Piece { get; set; }
@@ -14,6 +14,11 @@ namespace ChessLibrary
         public SquareState(Square square)
         {
             Square = square;
+        }
+
+        public object Clone()
+        {
+            return new SquareState((Square)this.Square.Clone()) { Piece = this.Piece != null ? (Piece)this.Piece.Clone() : null };
         }
     }
 }

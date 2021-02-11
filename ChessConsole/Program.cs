@@ -12,11 +12,11 @@ namespace ChessConsole
             g.ResetGame();
             RenderBoard(g);
             Console.ReadLine();
-            g.AddMove(new Move(new Piece()
-            {
-                Color = Colors.White,
-                Type = PieceTypes.Pawn
-            }, Colors.White, new Square() { File = Files.E, Rank = 2 }, new Square() { File = Files.E, Rank = 4 }));
+            g.AddMove(new Move(null, Colors.White, new Square() { File = Files.E, Rank = 2 }, new Square() { File = Files.E, Rank = 4 }));
+            RenderBoard(g);
+            Console.ReadLine();
+
+            g.AddMove(new Move(null, Colors.Black, new Square() { File = Files.E, Rank = 7 }, new Square() { File = Files.E, Rank = 5 }));
             RenderBoard(g);
             Console.ReadLine();
         }
@@ -41,7 +41,25 @@ namespace ChessConsole
                                 }
                                 else if (square.Piece != null)
                                 {
+                                    if (square.Piece.Color == Colors.Black)
+                                    {
+                                        Console.BackgroundColor = ConsoleColor.White;
+                                        Console.ForegroundColor = ConsoleColor.Black;
+                                    }
+                                    else
+                                    {
+                                        Console.BackgroundColor = ConsoleColor.Black;
+                                        Console.ForegroundColor = ConsoleColor.White;
+                                    }
                                     Console.Write(square.Piece.Type.GetNotation());
+                                    if (square.Square.Color == Colors.Black)
+                                    {
+                                        Console.BackgroundColor = ConsoleColor.Black;
+                                    }
+                                    else
+                                    {
+                                        Console.BackgroundColor = ConsoleColor.White;
+                                    }
                                 }
                                 else
                                 {
@@ -50,7 +68,15 @@ namespace ChessConsole
                             }
                             else
                             {
-                                Console.Write(square.Square.Color.ToString().First());
+                                if (square.Square.Color == Colors.Black)
+                                {
+                                    Console.BackgroundColor = ConsoleColor.Black;
+                                }
+                                else
+                                {
+                                    Console.BackgroundColor = ConsoleColor.White;
+                                }
+                                Console.Write(" ");
                             }
                         }
                         Console.Write(" ");

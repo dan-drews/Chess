@@ -6,6 +6,14 @@ namespace ChessLibrary
 {
     public class Game
     {
+        public Colors PlayerToMove
+        {
+            get
+            {
+                return Moves.Count % 2 == 0 ? Colors.White : Colors.Black;
+            }
+        }
+
         public List<Move> Moves { get; private set; } = new List<Move>();
 
         public Board Board { get; } = new Board();
@@ -27,12 +35,21 @@ namespace ChessLibrary
 
         public Board AddMove(Move move)
         {
-            var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank));
-            if(legalMoves == null)
+            var startingSquare = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank);
+            if(startingSquare.Piece == null)
+            {
+                throw new Exception("No piece to move");
+            }
+            if(startingSquare.Piece.Color != PlayerToMove || startingSquare.Piece.Color != move.Player)
+            {
+                throw new Exception("Wrong Color Moving");
+            }
+            var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, startingSquare);
+            if (legalMoves == null)
             {
                 throw new Exception("Invalid move");
             }
-            if(legalMoves.Any(x=> x.Equals(move)))
+            if (legalMoves.Any(x => x.Equals(move)))
             {
                 Moves.Add(legalMoves[legalMoves.IndexOf(move)]);
                 var initialPiece = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece;

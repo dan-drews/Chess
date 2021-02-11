@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ChessLibrary
 {
-    public class Board
+    public class Board : ICloneable
     {
         private SquareState[,] Squares { get; }
 
@@ -30,6 +30,20 @@ namespace ChessLibrary
         public SquareState GetSquare(Files file, int rank)
         {
             return Squares[(int)file - 1, rank - 1];
+        }
+
+        public object Clone()
+        {
+            var newBoard = new Board();
+            for (Files file = Files.A; file <= Files.H; file++)
+            {
+                // Counting from 1 to 8 rather than 0 to 7 here to match the board labels
+                for (int rank = 1; rank <= 8; rank++)
+                {
+                    newBoard.Squares[(int)file - 1, rank - 1] = (SquareState)GetSquare(file, rank).Clone();
+                }
+            }
+            return newBoard;
         }
     }
 }
