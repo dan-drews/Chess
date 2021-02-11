@@ -1,0 +1,82 @@
+﻿<UserControl x:Class="ChessWindowsUi.ChessBoard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ChessWindowsUi"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="450">
+    <UniformGrid Columns="8" Rows="8" Margin="0,0,0,0">
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+        <Border Background="black"></Border>
+        <Border Background="white"></Border>
+    </UniformGrid>
+</UserControl>
