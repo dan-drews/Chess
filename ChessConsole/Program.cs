@@ -26,16 +26,16 @@ namespace ChessConsole
             Console.Clear();
             for (int j = 8; j >= 1; j--)
             {
-                for (int l = 0; l < 8; l++)
+                for (int l = 0; l < 6; l++)
                 {
                     for (Files i = Files.A; i <= Files.H; i++)
                     {
-                        for (int k = 0; k < 12; k++)
+                        for (int k = 0; k < 8; k++)
                         {
                             var square = g.Board.GetSquare(i, j);
-                            if (k > 3 && k < 9 && l > 1 && l < 6)
+                            if (k > 1 && k < 6 && l > 0 && l < 5)
                             {
-                                if (k == 4 || k == 8 || l == 2 || l == 5)
+                                if (k == 2 || k == 5 || l == 1 || l == 4)
                                 {
                                     Console.Write(" ");
                                 }
