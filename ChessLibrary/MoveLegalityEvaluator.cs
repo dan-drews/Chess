@@ -22,6 +22,8 @@ namespace ChessLibrary
             var result = new List<Move>();
 
             // TODO: All pieces are unable to make a move if it would put the king in check.
+
+
             int pawnDirection = color == Colors.White ? 1 : -1;
             if (piece.Type == PieceTypes.Pawn)
             {
