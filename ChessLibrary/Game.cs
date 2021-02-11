@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ChessLibrary
 {
@@ -22,6 +23,27 @@ namespace ChessLibrary
                 }
             }
             SetupBoard();
+        }
+
+        public Board AddMove(Move move)
+        {
+            var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank));
+            if(legalMoves == null)
+            {
+                throw new Exception("Invalid move");
+            }
+            if(legalMoves.Any(x=> x.Equals(move)))
+            {
+                Moves.Add(legalMoves[legalMoves.IndexOf(move)]);
+                var initialPiece = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece;
+                Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = null;
+                Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = initialPiece;
+                return Board;
+            }
+            else
+            {
+                throw new Exception("Invalid Move");
+            }
         }
 
         private void SetupBoard()

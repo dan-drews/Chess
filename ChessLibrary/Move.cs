@@ -22,5 +22,26 @@ namespace ChessLibrary
             DestinationSquare = destinationSquare;
         }
 
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            var comp = obj as Move;
+            if (comp == null)
+            {
+                return false;
+            }
+
+            return comp.Player == Player && comp.StartingSquare.File == StartingSquare.File && StartingSquare.Rank == comp.StartingSquare.Rank && comp.DestinationSquare.File == DestinationSquare.File && DestinationSquare.Rank == comp.DestinationSquare.Rank;
+        }
+
+        public override int GetHashCode()
+        {
+            return 17 * (int)StartingSquare.File + 18 * StartingSquare.Rank + 34 * (int)DestinationSquare.File * 79 * DestinationSquare.Rank;
+        }
+
     }
 }
