@@ -98,7 +98,38 @@ namespace ChessLibrary
         private static List<Move> GetValidKingMoves(Board b, Piece piece, Colors color, Square square)
         {
             // ToDo - Castling
-            return new List<Move>();
+
+            List<Move> potentialMoves = new List<Move>();
+            var targets = new (Files file, int rank)[]
+            {
+                (square.File - 1, square.Rank),
+                (square.File - 1, square.Rank + 1),
+                (square.File - 1, square.Rank - 1),
+
+                (square.File + 1, square.Rank),
+                (square.File + 1, square.Rank + 1),
+                (square.File + 1, square.Rank - 1),
+
+                (square.File, square.Rank - 1),
+                (square.File, square.Rank + 1),
+            };
+
+            foreach (var t in targets)
+            {
+                if (t.file >= Files.A && t.file <= Files.H && t.rank >= 1 && t.rank <= 8)
+                {
+                    var targetSquare = b.GetSquare(t.file, t.rank);
+                    if (targetSquare.Piece == null || targetSquare.Piece.Color != color)
+                    {
+                        potentialMoves.Add(new Move(piece, color, square, targetSquare.Square)
+                        {
+                            CapturedPiece = targetSquare.Piece
+                        });
+                    }
+                }
+            }
+
+            return potentialMoves;
         }
 
         private static List<Move> GetValidQueenMoves(Board b, Piece piece, Colors color, Square square)
@@ -200,6 +231,8 @@ namespace ChessLibrary
             }
 
             // TODO - En Passant
+
+            // TODO - Promotion
 
             return potentialMoves;
         }
