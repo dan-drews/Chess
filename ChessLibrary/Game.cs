@@ -54,7 +54,14 @@ namespace ChessLibrary
                 Moves.Add(legalMoves[legalMoves.IndexOf(move)]);
                 var initialPiece = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece;
                 Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = null;
-                Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = initialPiece;
+                if(move.PromotedPiece == null)
+                {
+                    Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = initialPiece;
+                }
+                else
+                {
+                    Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = move.PromotedPiece;
+                }
                 return Board;
             }
             else

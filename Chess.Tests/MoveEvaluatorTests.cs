@@ -9,18 +9,23 @@ namespace Chess.Tests
         [TestMethod]
         public void GetValidMoves_ForAllSquares_Provides20Moves()
         {
-            var g = new Game();
-            g.ResetGame();
             int count = 0;
-            for(Files file = Files.A; file <= Files.H; file++)
+
+            for (int i = 0; i < 10000; i++)
             {
-                for(int rank = 1; rank <= 8; rank++)
+                var g = new Game();
+                g.ResetGame();
+                count = 0;
+                for (Files file = Files.A; file <= Files.H; file++)
                 {
-                    var square = g.Board.GetSquare(file, rank);
-                    if(square?.Piece?.Color == Colors.White)
+                    for (int rank = 1; rank <= 8; rank++)
                     {
-                        var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, square);
-                        count += legalMoves?.Count ?? 0;
+                        var square = g.Board.GetSquare(file, rank);
+                        if (square?.Piece?.Color == Colors.White)
+                        {
+                            var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, square);
+                            count += legalMoves?.Count ?? 0;
+                        }
                     }
                 }
             }

@@ -35,12 +35,22 @@ namespace ChessLibrary
                 return false;
             }
 
-            return comp.Player == Player && comp.StartingSquare.File == StartingSquare.File && StartingSquare.Rank == comp.StartingSquare.Rank && comp.DestinationSquare.File == DestinationSquare.File && DestinationSquare.Rank == comp.DestinationSquare.Rank;
+            bool promotedPiecesMatch = comp.PromotedPiece == null || PromotedPiece == null
+                                        ? PromotedPiece == null && comp.PromotedPiece == null
+                                        : comp.PromotedPiece.Color == PromotedPiece.Color && PromotedPiece.Type == comp.PromotedPiece.Type;
+
+            return comp.Player == Player 
+                    && comp.StartingSquare.File == StartingSquare.File 
+                    && StartingSquare.Rank == comp.StartingSquare.Rank 
+                    && comp.DestinationSquare.File == DestinationSquare.File 
+                    && DestinationSquare.Rank == comp.DestinationSquare.Rank
+                    && promotedPiecesMatch;
         }
 
         public override int GetHashCode()
         {
-            return 17 * (int)StartingSquare.File + 18 * StartingSquare.Rank + 34 * (int)DestinationSquare.File * 79 * DestinationSquare.Rank;
+            return 17 * (int)StartingSquare.File + 18 * StartingSquare.Rank + 34 * (int)DestinationSquare.File + 79 * DestinationSquare.Rank
+                      + (PromotedPiece == null ? 0 : 103 * (int)PromotedPiece.Type + 151 * (int)PromotedPiece.Color);
         }
 
     }
