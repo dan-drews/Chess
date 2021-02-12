@@ -106,19 +106,10 @@ namespace ChessLibrary
                 for (Files file = square.File - 1; file >= Files.A; file--)
                 {
                     var targetSquare = b.GetSquare(file, square.Rank);
-                    if (targetSquare.Piece != null)
+                    if (AddMoveOrBreak(piece, color, square, result, targetSquare))
                     {
-                        if (targetSquare.Piece.Color != color)
-                        {
-                            result.Add(new Move(piece, color, square, targetSquare.Square)
-                            {
-                                CapturedPiece = targetSquare.Piece
-                            });
-                        }
                         break;
                     }
-
-                    result.Add(new Move(piece, color, square, targetSquare.Square));
                 }
             }
 
@@ -128,18 +119,10 @@ namespace ChessLibrary
                 for (int rank = square.Rank + 1; rank <= 8; rank++)
                 {
                     var targetSquare = b.GetSquare(square.File, rank);
-                    if (targetSquare.Piece != null)
+                    if (AddMoveOrBreak(piece, color, square, result, targetSquare))
                     {
-                        if (targetSquare.Piece.Color != color)
-                        {
-                            result.Add(new Move(piece, color, square, targetSquare.Square)
-                            {
-                                CapturedPiece = targetSquare.Piece
-                            });
-                        }
                         break;
                     }
-                    result.Add(new Move(piece, color, square, targetSquare.Square));
                 }
             }
 
@@ -149,18 +132,10 @@ namespace ChessLibrary
                 for (int rank = square.Rank - 1; rank >= 1; rank--)
                 {
                     var targetSquare = b.GetSquare(square.File, rank);
-                    if (targetSquare.Piece != null)
+                    if (AddMoveOrBreak(piece, color, square, result, targetSquare))
                     {
-                        if (targetSquare.Piece.Color != color)
-                        {
-                            result.Add(new Move(piece, color, square, targetSquare.Square)
-                            {
-                                CapturedPiece = targetSquare.Piece
-                            });
-                        }
                         break;
                     }
-                    result.Add(new Move(piece, color, square, targetSquare.Square));
                 }
             }
             return result;
@@ -174,79 +149,72 @@ namespace ChessLibrary
 
             while (rank + 1 <= 8 && file + 1 <= Files.H)
             {
+                rank = rank + 1;
+                file = file + 1;
                 var targetSquare = b.GetSquare(file, rank);
-                if (targetSquare.Piece != null)
+                if (AddMoveOrBreak(piece, color, square, result, targetSquare))
                 {
-                    if (targetSquare.Piece.Color != color)
-                    {
-                        result.Add(new Move(piece, color, square, targetSquare.Square)
-                        {
-                            CapturedPiece = targetSquare.Piece
-                        });
-                    }
                     break;
                 }
-                result.Add(new Move(piece, color, square, targetSquare.Square));
             }
 
             rank = square.Rank;
             file = square.File;
             while (rank - 1 >= 1 && file + 1 <= Files.H)
             {
+                rank = rank - 1;
+                file = file + 1;
                 var targetSquare = b.GetSquare(file, rank);
-                if (targetSquare.Piece != null)
+                if (AddMoveOrBreak(piece, color, square, result, targetSquare))
                 {
-                    if (targetSquare.Piece.Color != color)
-                    {
-                        result.Add(new Move(piece, color, square, targetSquare.Square)
-                        {
-                            CapturedPiece = targetSquare.Piece
-                        });
-                    }
                     break;
                 }
-                result.Add(new Move(piece, color, square, targetSquare.Square));
             }
 
             rank = square.Rank;
             file = square.File;
-            while (rank + 1 <= 8 && file - 1 <= Files.A)
+            while (rank + 1 <= 8 && file - 1 >= Files.A)
             {
+                rank = rank + 1;
+                file = file - 1;
                 var targetSquare = b.GetSquare(file, rank);
-                if (targetSquare.Piece != null)
+                if(AddMoveOrBreak(piece, color, square, result, targetSquare))
                 {
-                    if (targetSquare.Piece.Color != color)
-                    {
-                        result.Add(new Move(piece, color, square, targetSquare.Square)
-                        {
-                            CapturedPiece = targetSquare.Piece
-                        });
-                    }
                     break;
                 }
-                result.Add(new Move(piece, color, square, targetSquare.Square));
             }
 
             rank = square.Rank;
             file = square.File;
-            while (rank - 1 >= 1 && file - 1 <= Files.A)
+            while (rank - 1 >= 1 && file - 1 >= Files.A)
             {
+                rank = rank - 1;
+                file = file - 1;
                 var targetSquare = b.GetSquare(file, rank);
-                if (targetSquare.Piece != null)
+                if (AddMoveOrBreak(piece, color, square, result, targetSquare))
                 {
-                    if (targetSquare.Piece.Color != color)
-                    {
-                        result.Add(new Move(piece, color, square, targetSquare.Square)
-                        {
-                            CapturedPiece = targetSquare.Piece
-                        });
-                    }
                     break;
                 }
-                result.Add(new Move(piece, color, square, targetSquare.Square));
             }
 
-            return new List<Move>();
+            return result;
+        }
+
+        private static bool AddMoveOrBreak(Piece piece, Colors color, Square square, List<Move> result, SquareState targetSquare)
+        {
+            if (targetSquare.Piece != null)
+            {
+                if (targetSquare.Piece.Color != color)
+                {
+                    result.Add(new Move(piece, color, square, targetSquare.Square)
+                    {
+                        CapturedPiece = targetSquare.Piece
+                    });
+                }
+                return true;
+            }
+            result.Add(new Move(piece, color, square, targetSquare.Square));
+            return false;
         }
 
         private static List<Move> GetValidRookMoves(Board b, Piece piece, Colors color, Square square)

@@ -29,6 +29,30 @@ namespace Chess.Tests
         }
 
         [TestMethod]
+        public void GetValidMoves_AfterE4E5()
+        {
+            var g = new Game();
+            g.ResetGame();
+            g.AddMove(new Move(null, Colors.White, new Square() { File = Files.E, Rank = 2 }, new Square() { File = Files.E, Rank = 4 }));
+            g.AddMove(new Move(null, Colors.Black, new Square() { File = Files.E, Rank = 7 }, new Square() { File = Files.E, Rank = 5 }));
+            int count = 0;
+            for (Files file = Files.A; file <= Files.H; file++)
+            {
+                for (int rank = 1; rank <= 8; rank++)
+                {
+                    var square = g.Board.GetSquare(file, rank);
+                    if (square?.Piece?.Color == Colors.White)
+                    {
+                        var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, square);
+                        count += legalMoves?.Count ?? 0;
+                    }
+                }
+            }
+
+            Assert.AreEqual(29, count);
+        }
+
+        [TestMethod]
         public void GetValidMoves_ForRookWithEmptyBoardAndRandomKing_Provides14Moves()
         {
             var g = new Game();
@@ -43,7 +67,7 @@ namespace Chess.Tests
         }
 
         [TestMethod]
-        public void GetValidMoves_ForRookWithBlockedSpace_Provides20Moves()
+        public void GetValidMoves_ForRookWithBlockedSpace_Provides10Moves()
         {
             var g = new Game();
             g.Board.GetSquare(Files.B, 5).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook };
