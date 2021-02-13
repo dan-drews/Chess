@@ -8,6 +8,24 @@ namespace ChessLibrary
 {
     public static class MoveLegalityEvaluator
     {
+
+        public static List<Move> GetAllLegalMoves(Board b, Colors color)
+        {
+            var result = new List<Move>();
+            for (Files file = Files.A; file <= Files.H; file++)
+            {
+                for (int rank = 1; rank <= 8; rank++)
+                {
+                    var squareChecking = b.GetSquare(file, rank);
+                    if(squareChecking.Piece != null && squareChecking.Piece.Color == color)
+                    {
+                        result.AddRange(GetAllLegalMoves(b, squareChecking, false)!);
+                    }
+                }
+            }
+            return result;
+        }
+
         public static List<Move>? GetAllLegalMoves(Board b, SquareState squareState, bool ignoreCheck = false)
         {
             if (squareState.Piece == null)
@@ -74,6 +92,13 @@ namespace ChessLibrary
 
             return result;
         }
+
+        public static bool IsKingInCheck(Board b, Colors color)
+        {
+            SquareState kingSquareState = GetKingSquare(b, color);
+            return KingIsInCheck(color, b, kingSquareState);
+        }
+
         private static List<Move> GetValidStraightLineMovves(Board b, Piece piece, Colors color, Square square)
         {
             var result = new List<Move>();
@@ -178,7 +203,7 @@ namespace ChessLibrary
                 rank = rank + 1;
                 file = file - 1;
                 var targetSquare = b.GetSquare(file, rank);
-                if(AddMoveOrBreak(piece, color, square, result, targetSquare))
+                if (AddMoveOrBreak(piece, color, square, result, targetSquare))
                 {
                     break;
                 }

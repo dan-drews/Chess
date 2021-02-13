@@ -11,14 +11,67 @@ namespace ChessConsole
             var g = new Game();
             g.ResetGame();
             RenderBoard(g);
-            Console.ReadLine();
-            g.AddMove(new Move(null, Colors.White, new Square() { File = Files.E, Rank = 2 }, new Square() { File = Files.E, Rank = 4 }));
-            RenderBoard(g);
-            Console.ReadLine();
+            while (!g.IsGameOver) 
+            {
+                var move = Console.ReadLine();
+                if(move != null)
+                {
+                    var (start, end, _) = move.Split(' ');
+                    var startingSquare = ParseSquare(g.Board, start);
+                    var endSquare = ParseSquare(g.Board, end);
 
-            g.AddMove(new Move(null, Colors.Black, new Square() { File = Files.E, Rank = 7 }, new Square() { File = Files.E, Rank = 5 }));
-            RenderBoard(g);
-            Console.ReadLine();
+                    g.AddMove(new Move(startingSquare.Piece, g.PlayerToMove, startingSquare.Square, endSquare.Square)
+                    {
+                        CapturedPiece = endSquare.Piece
+                    });
+                }
+                RenderBoard(g);
+            }
+            Console.WriteLine("GAME OVER");
+        }
+
+        static SquareState ParseSquare(Board b, string sq)
+        {
+            char fileStr = sq.ToUpper().ToCharArray()[0];
+            Files f;
+            switch (fileStr)
+            {
+                case 'A':
+                    f = Files.A;
+                    break;
+                case 'B':
+                    f = Files.B;
+                    break;
+                case 'C':
+                    f = Files.C;
+                    break;
+                case 'D':
+                    f = Files.D;
+                    break;
+                case 'E':
+                    f = Files.E;
+                    break;
+                case 'F':
+                    f = Files.F;
+                    break;
+                case 'G':
+                    f = Files.G;
+                    break;
+                case 'H':
+                    f = Files.H;
+                    break;
+                default:
+                    throw new Exception("Invalid File");
+            }
+            char rankStr = sq.ToCharArray()[1];
+            int rank = int.Parse(rankStr.ToString());
+            if(rank < 0 || rank > 8)
+            {
+                throw new Exception("Invalid Rank");
+            }
+
+            return b.GetSquare(f, rank);
+
         }
 
         static void RenderBoard(Game g)
@@ -55,10 +108,12 @@ namespace ChessConsole
                                     if (square.Square.Color == Colors.Black)
                                     {
                                         Console.BackgroundColor = ConsoleColor.Black;
+                                        Console.ForegroundColor = ConsoleColor.White;
                                     }
                                     else
                                     {
                                         Console.BackgroundColor = ConsoleColor.White;
+                                        Console.ForegroundColor = ConsoleColor.Black;
                                     }
                                 }
                                 else
@@ -71,10 +126,12 @@ namespace ChessConsole
                                 if (square.Square.Color == Colors.Black)
                                 {
                                     Console.BackgroundColor = ConsoleColor.Black;
+                                    Console.ForegroundColor = ConsoleColor.White;
                                 }
                                 else
                                 {
                                     Console.BackgroundColor = ConsoleColor.White;
+                                    Console.ForegroundColor = ConsoleColor.Black;
                                 }
                                 Console.Write(" ");
                             }

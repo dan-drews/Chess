@@ -18,6 +18,22 @@ namespace ChessLibrary
 
         public Board Board { get; } = new Board();
 
+        public bool IsGameOver
+        {
+            get
+            {
+                return IsCheckmate;
+            }
+        }
+
+        public bool IsCheckmate
+        {
+            get
+            {
+                return MoveLegalityEvaluator.IsKingInCheck(Board, PlayerToMove) && !MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove).Any();
+            }
+        }
+
         public void ResetGame()
         {
             Moves = new List<Move>();
@@ -36,11 +52,11 @@ namespace ChessLibrary
         public Board AddMove(Move move)
         {
             var startingSquare = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank);
-            if(startingSquare.Piece == null)
+            if (startingSquare.Piece == null)
             {
                 throw new Exception("No piece to move");
             }
-            if(startingSquare.Piece.Color != PlayerToMove || startingSquare.Piece.Color != move.Player)
+            if (startingSquare.Piece.Color != PlayerToMove || startingSquare.Piece.Color != move.Player)
             {
                 throw new Exception("Wrong Color Moving");
             }
@@ -54,7 +70,7 @@ namespace ChessLibrary
                 Moves.Add(legalMoves[legalMoves.IndexOf(move)]);
                 var initialPiece = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece;
                 Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = null;
-                if(move.PromotedPiece == null)
+                if (move.PromotedPiece == null)
                 {
                     Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = initialPiece;
                 }
