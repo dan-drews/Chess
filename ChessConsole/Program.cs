@@ -1,5 +1,6 @@
 ﻿using ChessLibrary;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace ChessConsole
@@ -10,22 +11,39 @@ namespace ChessConsole
         {
             var g = new Game();
             g.ResetGame();
+            Stopwatch sw = new Stopwatch();
             RenderBoard(g);
-            while (!g.IsGameOver) 
-            {
-                var move = Console.ReadLine();
-                if(move != null)
-                {
-                    var (start, end, _) = move.Split(' ');
-                    var startingSquare = ParseSquare(g.Board, start);
-                    var endSquare = ParseSquare(g.Board, end);
 
-                    g.AddMove(new Move(startingSquare.Piece, g.PlayerToMove, startingSquare.Square, endSquare.Square)
+            while (!g.IsGameOver)
+            {
+                try
+                {
+                    var move = Console.ReadLine();
+                    if (move != null)
                     {
-                        CapturedPiece = endSquare.Piece
-                    });
+                        if (move.ToLower() == "analyze")
+                        {
+                            var bestMove = Engine.GetBestMove(g, Colors.White);
+                            Console.WriteLine($"{bestMove.StartingSquare.File}{bestMove.StartingSquare.Rank} {bestMove.DestinationSquare.File}{bestMove.DestinationSquare.Rank}");
+                        }
+                        else
+                        {
+                            var (start, end, _) = move.Split(' ');
+                            var startingSquare = ParseSquare(g.Board, start);
+                            var endSquare = ParseSquare(g.Board, end);
+
+                            g.AddMove(new Move(startingSquare.Piece, g.PlayerToMove, startingSquare.Square, endSquare.Square)
+                            {
+                                CapturedPiece = endSquare.Piece
+                            });
+                            RenderBoard(g);
+                        }
+                    }
                 }
-                RenderBoard(g);
+                catch (Exception)
+                {
+                    Console.WriteLine("There was a problem. Try again.");
+                }
             }
             Console.WriteLine("GAME OVER");
         }
@@ -65,7 +83,7 @@ namespace ChessConsole
             }
             char rankStr = sq.ToCharArray()[1];
             int rank = int.Parse(rankStr.ToString());
-            if(rank < 0 || rank > 8)
+            if (rank < 0 || rank > 8)
             {
                 throw new Exception("Invalid Rank");
             }

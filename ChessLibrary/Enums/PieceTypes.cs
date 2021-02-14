@@ -21,8 +21,6 @@ namespace ChessLibrary
 
         [PieceScore(9)]
         Queen,
-
-        [PieceScore(1000)]
         King
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ChessLibrary
 {
-    public class Move
+    public class Move : ICloneable
     {
         public Piece Piece { get; set; }
         public Colors Player { get; set; }
@@ -53,5 +53,13 @@ namespace ChessLibrary
                       + (PromotedPiece == null ? 0 : 103 * (int)PromotedPiece.Type + 151 * (int)PromotedPiece.Color);
         }
 
+        public object Clone()
+        {
+            return new Move((Piece)Piece.Clone(), Player, (Square)StartingSquare.Clone(), (Square)DestinationSquare.Clone())
+            {
+                CapturedPiece = CapturedPiece == null ? null : (Piece)CapturedPiece.Clone(),
+                PromotedPiece = PromotedPiece == null ? null : (Piece)PromotedPiece.Clone()
+            };
+        }
     }
 }

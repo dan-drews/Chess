@@ -4,8 +4,17 @@ using System.Linq;
 
 namespace ChessLibrary
 {
-    public class Game
+    public class Game : ICloneable
     {
+        public object Clone()
+        {
+            return new Game()
+            {
+                Board = (Board)Board.Clone(),
+                Moves = Moves.Select(x => (Move)x.Clone()).ToList(),
+            };
+        }
+
         public Colors PlayerToMove
         {
             get
@@ -16,7 +25,7 @@ namespace ChessLibrary
 
         public List<Move> Moves { get; private set; } = new List<Move>();
 
-        public Board Board { get; } = new Board();
+        public Board Board { get; private set; } = new Board();
 
         public bool IsGameOver
         {
@@ -32,6 +41,23 @@ namespace ChessLibrary
             {
                 return MoveLegalityEvaluator.IsKingInCheck(Board, PlayerToMove) && !MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove).Any();
             }
+        }
+
+        public int GetScore(Colors color)
+        {
+            int score = 0;
+            for (Files f = Files.A; f <= Files.H; f++)
+            {
+                for (int rank = 1; rank <= 8; rank++)
+                {
+                    var piece = Board.GetSquare(f, rank).Piece;
+                    if(piece != null && piece.Color == color)
+                    {
+                        score += piece.Score;
+                    }
+                }
+            }
+            return score;
         }
 
         public void ResetGame()
