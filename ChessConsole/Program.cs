@@ -11,7 +11,7 @@ namespace ChessConsole
         {
             var g = new Game();
             g.ResetGame();
-            Stopwatch sw = new Stopwatch();
+
             RenderBoard(g);
 
             while (!g.IsGameOver)
@@ -24,18 +24,45 @@ namespace ChessConsole
                         if (move.ToLower() == "analyze")
                         {
                             var bestMove = Engine.GetBestMove(g, Colors.White);
-                            Console.WriteLine($"{bestMove.StartingSquare.File}{bestMove.StartingSquare.Rank} {bestMove.DestinationSquare.File}{bestMove.DestinationSquare.Rank}");
+                            var promotion = string.Empty;
+                            if(bestMove.PromotedPiece != null)
+                            {
+                                promotion = $" - Promoted to {bestMove.PromotedPiece.Type}";
+                            }
+                            Console.WriteLine($"{bestMove.StartingSquare.File}{bestMove.StartingSquare.Rank} {bestMove.DestinationSquare.File}{bestMove.DestinationSquare.Rank}{promotion}");
                         }
                         else
                         {
-                            var (start, end, _) = move.Split(' ');
+                            var (start, end, promotion, _) = move.Split(' ');
                             var startingSquare = ParseSquare(g.Board, start);
                             var endSquare = ParseSquare(g.Board, end);
-
-                            g.AddMove(new Move(startingSquare.Piece, g.PlayerToMove, startingSquare.Square, endSquare.Square)
+                            var m = new Move(startingSquare.Piece, g.PlayerToMove, startingSquare.Square, endSquare.Square)
                             {
                                 CapturedPiece = endSquare.Piece
-                            });
+                            };
+
+                            if (startingSquare.Piece.Type == PieceTypes.Pawn && (endSquare.Square.Rank == 1 || endSquare.Square.Rank == 8))
+                            {
+                                // Promotion. Parse that.
+                                switch (promotion.ToLower())
+                                {
+                                    case "q":
+                                        m.PromotedPiece = new Piece() { Color = startingSquare.Piece.Color, Type = PieceTypes.Queen };
+                                        break;
+                                    case "b":
+                                        m.PromotedPiece = new Piece() { Color = startingSquare.Piece.Color, Type = PieceTypes.Bishop };
+                                        break;
+                                    case "r":
+                                        m.PromotedPiece = new Piece() { Color = startingSquare.Piece.Color, Type = PieceTypes.Rook };
+                                        break;
+                                    case "k":
+                                    case "n":
+                                        m.PromotedPiece = new Piece() { Color = startingSquare.Piece.Color, Type = PieceTypes.Knight };
+                                        break;
+                                }
+                            }
+                            g.AddMove(m);
+
                             RenderBoard(g);
                         }
                     }

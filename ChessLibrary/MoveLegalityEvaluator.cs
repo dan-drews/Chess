@@ -386,11 +386,45 @@ namespace ChessLibrary
                         });
                     }
                 }
+
+                var result = new List<Move>();
+                foreach (var move in potentialMoves)
+                {
+                    int endRank = color == Colors.White ? 8 : 1;
+                    if(move.DestinationSquare.Rank == endRank)
+                    {
+                        // Promotion. Don'd add this move, but add 1 for each promoted piece type
+                        result.Add(new Move(piece, color, move.StartingSquare, move.DestinationSquare)
+                        {
+                            CapturedPiece = move.CapturedPiece,
+                            PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Queen}
+                        });
+                        result.Add(new Move(piece, color, move.StartingSquare, move.DestinationSquare)
+                        {
+                            CapturedPiece = move.CapturedPiece,
+                            PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Knight }
+                        });
+                        result.Add(new Move(piece, color, move.StartingSquare, move.DestinationSquare)
+                        {
+                            CapturedPiece = move.CapturedPiece,
+                            PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Bishop }
+                        });
+                        result.Add(new Move(piece, color, move.StartingSquare, move.DestinationSquare)
+                        {
+                            CapturedPiece = move.CapturedPiece,
+                            PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Rook }
+                        });
+                    }
+                    else
+                    {
+                        result.Add(move);
+                    }
+                }
+                return result;
             }
 
             // TODO - En Passant
 
-            // TODO - Promotion
 
             return potentialMoves;
         }
@@ -457,6 +491,15 @@ namespace ChessLibrary
                     {
                         return false;
                     }
+                case PieceTypes.Pawn:
+                    int direction = piece.Color == Colors.Black ? -1 : 1;
+                    return Math.Abs(attacker.Square.File - target.Square.File) == 1 && attacker.Square.Rank + direction == target.Square.Rank;
+                case PieceTypes.King:
+                    return Math.Abs(attacker.Square.File - target.Square.File) <= 1 && Math.Abs(attacker.Square.Rank - target.Square.Rank) <= 1;
+                case PieceTypes.Knight:
+                    return (Math.Abs(attacker.Square.File - target.Square.File) == 1 && Math.Abs(attacker.Square.Rank - target.Square.Rank) == 2) || 
+                           (Math.Abs(attacker.Square.File - target.Square.File) == 2 && Math.Abs(attacker.Square.Rank - target.Square.Rank) == 1);
+
             }
 
             moves = GetAllLegalMoves(board, attacker, true);

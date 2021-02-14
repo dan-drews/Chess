@@ -95,5 +95,36 @@ namespace Chess.Tests
 
             Assert.AreEqual(4, moves.Count);
         }
+
+        [TestMethod]
+        public void GetValidMoves_PawnAttacking_DisallowsCheck()
+        {
+            var g = new Game();
+            g.ResetGame();
+
+            g.AddMove(new Move(g.Board.GetSquare(Files.B, 1).Piece, Colors.White, g.Board.GetSquare(Files.B, 1).Square, g.Board.GetSquare(Files.C, 3).Square));
+            g.AddMove(new Move(g.Board.GetSquare(Files.D, 7).Piece, Colors.Black, g.Board.GetSquare(Files.D, 7).Square, g.Board.GetSquare(Files.D, 5).Square));
+
+            g.AddMove(new Move(g.Board.GetSquare(Files.G, 1).Piece, Colors.White, g.Board.GetSquare(Files.G, 1).Square, g.Board.GetSquare(Files.F, 3).Square));
+            g.AddMove(new Move(g.Board.GetSquare(Files.G, 8).Piece, Colors.Black, g.Board.GetSquare(Files.G, 8).Square, g.Board.GetSquare(Files.F, 6).Square));
+
+            g.AddMove(new Move(g.Board.GetSquare(Files.H, 1).Piece, Colors.White, g.Board.GetSquare(Files.H, 1).Square, g.Board.GetSquare(Files.G, 1).Square));
+            g.AddMove(new Move(g.Board.GetSquare(Files.F, 6).Piece, Colors.Black, g.Board.GetSquare(Files.F, 6).Square, g.Board.GetSquare(Files.G, 4).Square));
+
+            g.AddMove(new Move(g.Board.GetSquare(Files.C, 3).Piece, Colors.White, g.Board.GetSquare(Files.C, 3).Square, g.Board.GetSquare(Files.D, 5).Square) { CapturedPiece = g.Board.GetSquare(Files.D, 5).Piece });
+            g.AddMove(new Move(g.Board.GetSquare(Files.F, 7).Piece, Colors.Black, g.Board.GetSquare(Files.F, 7).Square, g.Board.GetSquare(Files.F, 6).Square));
+
+            g.AddMove(new Move(g.Board.GetSquare(Files.D, 5).Piece, Colors.White, g.Board.GetSquare(Files.D, 5).Square, g.Board.GetSquare(Files.C, 7).Square) { CapturedPiece = g.Board.GetSquare(Files.C, 7).Piece });
+            g.AddMove(new Move(g.Board.GetSquare(Files.E, 8).Piece, Colors.Black, g.Board.GetSquare(Files.E, 8).Square, g.Board.GetSquare(Files.D, 7).Square));
+
+            g.AddMove(new Move(g.Board.GetSquare(Files.E, 2).Piece, Colors.White, g.Board.GetSquare(Files.E, 2).Square, g.Board.GetSquare(Files.E, 4).Square));
+            g.AddMove(new Move(g.Board.GetSquare(Files.D, 8).Piece, Colors.Black, g.Board.GetSquare(Files.D, 8).Square, g.Board.GetSquare(Files.C, 7).Square) { CapturedPiece = g.Board.GetSquare(Files.C, 7).Piece });
+
+            g.AddMove(new Move(g.Board.GetSquare(Files.E, 4).Piece, Colors.White, g.Board.GetSquare(Files.E, 4).Square, g.Board.GetSquare(Files.E, 5).Square));
+
+            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, g.Board.GetSquare(Files.D, 7));
+
+            Assert.AreEqual(4, moves.Count);
+        }
     }
 }

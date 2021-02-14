@@ -5,31 +5,30 @@ using System.Text;
 
 namespace ChessLibrary
 {
-    public class Piece : ICloneable
+    public class Piece
     {
         public PieceTypes Type { get; set; }
         public Colors Color { get; set; }
-
-        private int? _score = null;
         public int Score
         {
             get
             {
-                if(_score == null)
+                switch (Type)
                 {
-                    _score = Type.GetAttributeOfType<PieceScoreAttribute>()?.Score ?? 0;
+                    case PieceTypes.Pawn:
+                        return 1;
+                    case PieceTypes.Knight:
+                    case PieceTypes.Bishop:
+                        return 3;
+                    case PieceTypes.Rook:
+                        return 5;
+                    case PieceTypes.Queen:
+                        return 9;
+                    case PieceTypes.King:
+                        return 100;
                 }
-                return _score.Value;
+                return 0;
             }
-            private set
-            {
-                _score = value;
-            }
-        }
-
-        public object Clone()
-        {
-            return new Piece() { Type = this.Type, Color = this.Color, Score = this.Score };
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace ChessLibrary
 {
-    public class Square : ICloneable
+    public class Square
     {
         public int Rank { get; set; }
         public Files File { get; set; }
@@ -18,11 +18,6 @@ namespace ChessLibrary
                 }
                 return Colors.White;
             }
-        }
-
-        public object Clone()
-        {
-            return new Square() { Rank = this.Rank, File = this.File };
         }
     }
 }

@@ -29,8 +29,8 @@ namespace ChessLibrary
             {
                 gameScore.ChildrenGames = new List<GameScore>();
                 gameScore.ChildrenGames.Add(GetMoveScores(game, playerColor, opponentColor, currentDepth, null));
-                var bestGameAvg = gameScore.ChildrenGames[0].ChildrenGames!.Select(x => x.ChildrenMaxScoreDiff).Max();
-                var bestGames = gameScore.ChildrenGames[0].ChildrenGames!.Where(x => x.ChildrenMaxScoreDiff == bestGameAvg);
+                var bestGameAvg = gameScore.ChildrenGames[0].ChildrenGames!.Select(x => x.ChildrenMinScoreDiff).Max();
+                var bestGames = gameScore.ChildrenGames[0].ChildrenGames!.Where(x => x.ChildrenMinScoreDiff == bestGameAvg);
                 var gameAvg = bestGames.Max(x => x.ChildrenAvgScoreDiff);
                 var g = bestGames.First(x => x.ChildrenAvgScoreDiff == gameAvg);
                 return g.Move;
@@ -51,6 +51,15 @@ namespace ChessLibrary
                 IWinWithCheckmate = isCheckmate && game.PlayerToMove == opponentColor,
                 Move = move
             };
+            if (gameScore.OpponentWinsWithCheckmate)
+            {
+                gameScore.OpponentScore += 1000;
+            }
+
+            if (gameScore.IWinWithCheckmate)
+            {
+                gameScore.MyScore += 100;
+            }
 
             if (currentDepth <= MAX_DEPTH * 2 && !isCheckmate)
             {
@@ -58,10 +67,11 @@ namespace ChessLibrary
                 var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(game.Board, game.PlayerToMove);
                 if (legalMoves.Any())
                 {
-                    foreach (var m in legalMoves)
+                    var legalMoveSubset = legalMoves.ToList(); //.OrderBy(x => Guid.NewGuid()).Take((legalMoves.Count + 3) / 4).ToList();
+                    foreach (var m in legalMoveSubset)
                     {
                         var clonedGame = (Game)game.Clone();
-                        clonedGame.AddMove(m);
+                        clonedGame.AddMove(m, false);
                         gameScore.ChildrenGames.Add(GetMoveScores(clonedGame, playerColor, opponentColor, currentDepth + 1, m));
                     }
                     gameScore.ChildrenMinScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenMinScoreDiff).Min();

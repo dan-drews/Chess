@@ -18,7 +18,7 @@ namespace ChessLibrary
 
         public object Clone()
         {
-            return new SquareState((Square)this.Square.Clone()) { Piece = this.Piece != null ? (Piece)this.Piece.Clone() : null };
+            return new SquareState(Square) { Piece = Piece };
         }
     }
 }

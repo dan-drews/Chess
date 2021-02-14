@@ -46,6 +46,8 @@ namespace ChessLibrary
         public int GetScore(Colors color)
         {
             int score = 0;
+            int highestPiece = 0;
+            Colors opposingColor = color == Colors.Black ? Colors.White : Colors.Black;
             for (Files f = Files.A; f <= Files.H; f++)
             {
                 for (int rank = 1; rank <= 8; rank++)
@@ -54,8 +56,29 @@ namespace ChessLibrary
                     if(piece != null && piece.Color == color)
                     {
                         score += piece.Score;
+
+                        if((rank == 5 && f == Files.D) || 
+                           (rank == 4 && f == Files.D) ||
+                           (rank == 5 && f == Files.E) ||
+                           (rank == 4 && f == Files.E))
+                        {
+                            score += 2;
+                        }
+
+                        if(piece.Score > highestPiece)
+                        {
+                            highestPiece = piece.Score;
+                        }
                     }
                 }
+            }
+            if(MoveLegalityEvaluator.IsKingInCheck(Board, opposingColor))
+            {
+                score += highestPiece - 1;
+            }
+            if (MoveLegalityEvaluator.IsKingInCheck(Board, color))
+            {
+                score -= 8;
             }
             return score;
         }
@@ -75,7 +98,7 @@ namespace ChessLibrary
             SetupBoard();
         }
 
-        public Board AddMove(Move move)
+        public Board AddMove(Move move, bool validate = true)
         {
             var startingSquare = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank);
             if (startingSquare.Piece == null)
@@ -86,14 +109,25 @@ namespace ChessLibrary
             {
                 throw new Exception("Wrong Color Moving");
             }
-            var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, startingSquare);
-            if (legalMoves == null)
+            List<Move>? legalMoves = null;
+            if (validate)
             {
-                throw new Exception("Invalid move");
+                legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, startingSquare);
+                if (legalMoves == null)
+                {
+                    throw new Exception("Invalid move");
+                }
             }
-            if (legalMoves.Any(x => x.Equals(move)))
+            if (!validate || legalMoves!.Any(x => x.Equals(move)))
             {
-                Moves.Add(legalMoves[legalMoves.IndexOf(move)]);
+                if (validate)
+                {
+                    Moves.Add(legalMoves![legalMoves.IndexOf(move)]);
+                }
+                else
+                {
+                    Moves.Add(move);
+                }
                 var initialPiece = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece;
                 Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = null;
                 if (move.PromotedPiece == null)

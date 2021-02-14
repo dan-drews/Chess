@@ -55,10 +55,10 @@ namespace ChessLibrary
 
         public object Clone()
         {
-            return new Move((Piece)Piece.Clone(), Player, (Square)StartingSquare.Clone(), (Square)DestinationSquare.Clone())
+            return new Move(Piece, Player, StartingSquare, DestinationSquare)
             {
-                CapturedPiece = CapturedPiece == null ? null : (Piece)CapturedPiece.Clone(),
-                PromotedPiece = PromotedPiece == null ? null : (Piece)PromotedPiece.Clone()
+                CapturedPiece = CapturedPiece == null ? null : CapturedPiece,
+                PromotedPiece = PromotedPiece == null ? null : PromotedPiece
             };
         }
     }

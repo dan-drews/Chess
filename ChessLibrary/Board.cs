@@ -8,22 +8,24 @@ namespace ChessLibrary
     {
         private SquareState[,] Squares { get; }
 
-        public Board()
+        public Board(bool setup = true)
         {
             Squares = new SquareState[8, 8];
 
-            for (Files i = Files.A; i <= Files.H; i++)
+            if (setup)
             {
-                // Counting from 1 to 8 rather than 0 to 7 here to match the board labels
-                for (int j = 1; j <= 8; j++)
+                for (Files i = Files.A; i <= Files.H; i++)
                 {
-                    Squares[(int)i - 1, j - 1] = new SquareState(new Square()
+                    // Counting from 1 to 8 rather than 0 to 7 here to match the board labels
+                    for (int j = 1; j <= 8; j++)
                     {
-                        File = i,
-                        Rank = j
-                    });
+                        Squares[(int)i - 1, j - 1] = new SquareState(new Square()
+                        {
+                            File = i,
+                            Rank = j
+                        });
+                    }
                 }
-
             }
         }
 
@@ -34,7 +36,7 @@ namespace ChessLibrary
 
         public object Clone()
         {
-            var newBoard = new Board();
+            var newBoard = new Board(false);
             for (Files file = Files.A; file <= Files.H; file++)
             {
                 // Counting from 1 to 8 rather than 0 to 7 here to match the board labels
