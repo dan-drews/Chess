@@ -8,7 +8,7 @@ namespace ChessLibrary
 {
     public class Engine
     {
-        const decimal MAX_DEPTH = 2M;
+        const decimal MAX_DEPTH = 1.5M;
         public static Move? GetBestMove(Game game, Colors playerColor, int currentDepth = 1)
         {
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
@@ -29,8 +29,8 @@ namespace ChessLibrary
             {
                 gameScore.ChildrenGames = new List<GameScore>();
                 gameScore.ChildrenGames.Add(GetMoveScores(game, playerColor, opponentColor, currentDepth, null));
-                var bestGameAvg = gameScore.ChildrenGames[0].ChildrenGames!.Select(x => x.ChildrenMinScoreDiff).Max();
-                var bestGames = gameScore.ChildrenGames[0].ChildrenGames!.Where(x => x.ChildrenMinScoreDiff == bestGameAvg);
+                var bestGameAvg = gameScore.ChildrenGames[0].ChildrenGames!.Select(x => x.ChildrenMaxScoreDiff).Max();
+                var bestGames = gameScore.ChildrenGames[0].ChildrenGames!.Where(x => x.ChildrenMaxScoreDiff == bestGameAvg);
                 var gameAvg = bestGames.Max(x => x.ChildrenAvgScoreDiff);
                 var g = bestGames.First(x => x.ChildrenAvgScoreDiff == gameAvg);
                 return g.Move;
@@ -58,7 +58,7 @@ namespace ChessLibrary
 
             if (gameScore.IWinWithCheckmate)
             {
-                gameScore.MyScore += 100;
+                gameScore.MyScore += 500;
             }
 
             if (currentDepth <= MAX_DEPTH * 2 && !isCheckmate)
@@ -72,12 +72,25 @@ namespace ChessLibrary
                     {
                         var clonedGame = (Game)game.Clone();
                         clonedGame.AddMove(m, false);
-                        gameScore.ChildrenGames.Add(GetMoveScores(clonedGame, playerColor, opponentColor, currentDepth + 1, m));
+                        var score = GetMoveScores(clonedGame, playerColor, opponentColor, currentDepth + 1, m);
+                        //if(score.ScoreDiff >= gameScore.ScoreDiff - 8)
+                        //{
+                            gameScore.ChildrenGames.Add(score);
+                        //}
                     }
-                    gameScore.ChildrenMinScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenMinScoreDiff).Min();
-                    gameScore.ChildrenMaxScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenMaxScoreDiff).Max();
-                    gameScore.TotalChildren = gameScore.ChildrenGames.Count();
-                    gameScore.ChildrenAvgScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenAvgScoreDiff * x.TotalChildren).Average();
+                    if (gameScore.ChildrenGames.Any())
+                    {
+                        gameScore.ChildrenMinScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenMinScoreDiff).Min();
+                        gameScore.ChildrenMaxScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenMaxScoreDiff).Max();
+                        gameScore.TotalChildren = gameScore.ChildrenGames.Count();
+                        gameScore.ChildrenAvgScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenAvgScoreDiff * x.TotalChildren).Average();
+                    }
+                    else
+                    {
+                        gameScore.ChildrenAvgScoreDiff = gameScore.ScoreDiff;
+                        gameScore.ChildrenMaxScoreDiff = gameScore.ScoreDiff;
+                        gameScore.ChildrenMinScoreDiff = gameScore.ScoreDiff;
+                    }
                 }
                 else
                 {

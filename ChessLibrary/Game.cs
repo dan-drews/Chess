@@ -65,7 +65,7 @@ namespace ChessLibrary
                             score += 2;
                         }
 
-                        if(piece.Score > highestPiece)
+                        if(piece.Score > highestPiece && piece.Type != PieceTypes.King)
                         {
                             highestPiece = piece.Score;
                         }
