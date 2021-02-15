@@ -19,7 +19,7 @@ namespace Chess.Tests
                     var square = g.Board.GetSquare(file, rank);
                     if (square?.Piece?.Color == Colors.White)
                     {
-                        var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, square);
+                        var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, square, g.Moves);
                         count += legalMoves?.Count ?? 0;
                     }
                 }
@@ -43,7 +43,7 @@ namespace Chess.Tests
                     var square = g.Board.GetSquare(file, rank);
                     if (square?.Piece?.Color == Colors.White)
                     {
-                        var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, square);
+                        var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, square, g.Moves);
                         count += legalMoves?.Count ?? 0;
                     }
                 }
@@ -61,7 +61,7 @@ namespace Chess.Tests
             g.Board.GetSquare(Files.H, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King };
 
 
-            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, g.Board.GetSquare(Files.B, 5));
+            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, g.Board.GetSquare(Files.B, 5), g.Moves);
 
             Assert.AreEqual(14, moves.Count);
         }
@@ -76,7 +76,7 @@ namespace Chess.Tests
             g.Board.GetSquare(Files.H, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King };
 
 
-            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, g.Board.GetSquare(Files.B, 5));
+            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, g.Board.GetSquare(Files.B, 5), g.Moves);
 
             Assert.AreEqual(10, moves.Count);
         }
@@ -91,7 +91,7 @@ namespace Chess.Tests
             g.Board.GetSquare(Files.H, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King };
 
 
-            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, g.Board.GetSquare(Files.H, 3));
+            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, g.Board.GetSquare(Files.H, 3), g.Moves);
 
             Assert.AreEqual(4, moves.Count);
         }
@@ -122,7 +122,7 @@ namespace Chess.Tests
 
             g.AddMove(new Move(g.Board.GetSquare(Files.E, 4).Piece, Colors.White, g.Board.GetSquare(Files.E, 4).Square, g.Board.GetSquare(Files.E, 5).Square));
 
-            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, g.Board.GetSquare(Files.D, 7));
+            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, g.Board.GetSquare(Files.D, 7), g.Moves);
 
             Assert.AreEqual(4, moves.Count);
         }

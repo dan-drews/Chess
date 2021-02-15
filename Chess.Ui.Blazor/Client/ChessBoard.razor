@@ -28,7 +28,7 @@
         {
             TargetedSquares.Clear();
             selectedSquare = s;
-            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, s, false);
+            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, s, g.Moves, false);
             foreach (var m in moves)
             {
                 TargetedSquares.Add((m.DestinationSquare.File, m.DestinationSquare.Rank));

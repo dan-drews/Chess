@@ -39,7 +39,7 @@ namespace ChessLibrary
         {
             get
             {
-                return MoveLegalityEvaluator.IsKingInCheck(Board, PlayerToMove) && !MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove).Any();
+                return MoveLegalityEvaluator.IsKingInCheck(Board, PlayerToMove, Moves) && !MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves).Any();
             }
         }
 
@@ -72,11 +72,11 @@ namespace ChessLibrary
                     }
                 }
             }
-            if(MoveLegalityEvaluator.IsKingInCheck(Board, opposingColor))
+            if(MoveLegalityEvaluator.IsKingInCheck(Board, opposingColor, Moves))
             {
                 score += highestPiece - 1;
             }
-            if (MoveLegalityEvaluator.IsKingInCheck(Board, color))
+            if (MoveLegalityEvaluator.IsKingInCheck(Board, color, Moves))
             {
                 score -= 8;
             }
@@ -112,7 +112,7 @@ namespace ChessLibrary
             List<Move>? legalMoves = null;
             if (validate)
             {
-                legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, startingSquare);
+                legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, startingSquare, Moves);
                 if (legalMoves == null)
                 {
                     throw new Exception("Invalid move");
@@ -138,6 +138,31 @@ namespace ChessLibrary
                 {
                     Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = move.PromotedPiece;
                 }
+
+                if (initialPiece != null && initialPiece.Type == PieceTypes.King)
+                {
+                    var rank = initialPiece.Color == Colors.Black ? 8 : 1;
+                    if (move.StartingSquare.Rank == rank && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
+                    {
+                        // Castling.
+                        if (move.DestinationSquare.File == Files.G)
+                        {
+                            var rookCurrentSquare = Board.GetSquare(Files.H, rank);
+                            var targetRookSquare = Board.GetSquare(Files.F, rank);
+                            targetRookSquare.Piece = rookCurrentSquare.Piece;
+                            rookCurrentSquare.Piece = null;
+                        }
+
+                        if (move.DestinationSquare.File == Files.C)
+                        {
+                            var rookCurrentSquare = Board.GetSquare(Files.A, rank);
+                            var targetRookSquare = Board.GetSquare(Files.D, rank);
+                            targetRookSquare.Piece = rookCurrentSquare.Piece;
+                            rookCurrentSquare.Piece = null;
+                        }
+                    }
+                }
+
                 return Board;
             }
             else

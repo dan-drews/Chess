@@ -9,7 +9,7 @@ namespace ChessLibrary
     public static class MoveLegalityEvaluator
     {
 
-        public static List<Move> GetAllLegalMoves(Board b, Colors color)
+        public static List<Move> GetAllLegalMoves(Board b, Colors color, List<Move> pastMoves)
         {
             var result = new List<Move>();
             for (Files file = Files.A; file <= Files.H; file++)
@@ -19,14 +19,14 @@ namespace ChessLibrary
                     var squareChecking = b.GetSquare(file, rank);
                     if (squareChecking.Piece != null && squareChecking.Piece.Color == color)
                     {
-                        result.AddRange(GetAllLegalMoves(b, squareChecking, false)!);
+                        result.AddRange(GetAllLegalMoves(b, squareChecking, pastMoves, false)!);
                     }
                 }
             }
             return result;
         }
 
-        public static List<Move>? GetAllLegalMoves(Board b, SquareState squareState, bool ignoreCheck = false)
+        public static List<Move>? GetAllLegalMoves(Board b, SquareState squareState, List<Move> pastMoves, bool ignoreCheck = false)
         {
             if (squareState.Piece == null)
             {
@@ -58,7 +58,7 @@ namespace ChessLibrary
                     potentialMoves = GetValidQueenMoves(b, piece, color, square);
                     break;
                 case PieceTypes.King:
-                    potentialMoves = GetValidKingMoves(b, piece, color, square);
+                    potentialMoves = GetValidKingMoves(b, piece, color, square, pastMoves);
                     break;
                 default:
                     throw new Exception("Piece Move not Yet Handled");
@@ -79,11 +79,36 @@ namespace ChessLibrary
                 var initialPiece = tempBoard.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece;
                 tempBoard.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = null;
                 tempBoard.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = initialPiece;
+
+                if(initialPiece != null && initialPiece.Type == PieceTypes.King)
+                {
+                    var rank = color == Colors.Black ? 8 : 1;
+                    if(move.StartingSquare.Rank == rank && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
+                    {
+                        // Castling.
+                        if(move.DestinationSquare.File == Files.G)
+                        {
+                            var rookCurrentSquare = tempBoard.GetSquare(Files.H, rank);
+                            var targetRookSquare = tempBoard.GetSquare(Files.F, rank);
+                            targetRookSquare.Piece = rookCurrentSquare.Piece;
+                            rookCurrentSquare.Piece = null;
+                        }
+
+                        if (move.DestinationSquare.File == Files.C)
+                        {
+                            var rookCurrentSquare = tempBoard.GetSquare(Files.A, rank);
+                            var targetRookSquare = tempBoard.GetSquare(Files.D, rank);
+                            targetRookSquare.Piece = rookCurrentSquare.Piece;
+                            rookCurrentSquare.Piece = null;
+                        }
+                    }
+                }
+
                 // find the king after the move.
                 SquareState kingSquareState = GetKingSquare(tempBoard, color);
 
                 // Loop over all squares. If oponent is in square, see if opponent can legally attack king.
-                bool isInCheck = KingIsInCheck(color, tempBoard, kingSquareState);
+                bool isInCheck = KingIsInCheck(color, tempBoard, kingSquareState, pastMoves);
                 if (!isInCheck)
                 {
                     result.Add(move);
@@ -93,10 +118,10 @@ namespace ChessLibrary
             return result;
         }
 
-        public static bool IsKingInCheck(Board b, Colors color)
+        public static bool IsKingInCheck(Board b, Colors color, List<Move> pastMoves)
         {
             SquareState kingSquareState = GetKingSquare(b, color);
-            return KingIsInCheck(color, b, kingSquareState);
+            return KingIsInCheck(color, b, kingSquareState, pastMoves);
         }
 
         private static List<Move> GetValidStraightLineMovves(Board b, Piece piece, Colors color, Square square)
@@ -253,10 +278,8 @@ namespace ChessLibrary
             return GetValidDiagonalMoves(b, piece, color, square);
         }
 
-        private static List<Move> GetValidKingMoves(Board b, Piece piece, Colors color, Square square)
+        private static List<Move> GetValidKingMoves(Board b, Piece piece, Colors color, Square square, List<Move> pastMoves)
         {
-            // ToDo - Castling
-
             List<Move> potentialMoves = new List<Move>();
             var targets = new (Files file, int rank)[]
             {
@@ -271,6 +294,103 @@ namespace ChessLibrary
                 (square.File, square.Rank - 1),
                 (square.File, square.Rank + 1),
             };
+
+            if (square.File == Files.E)
+            {
+                int rank = color == Colors.White ? 1 : 8;
+                if (square.Rank == rank)
+                {
+                    // It's the proper tile to castle
+
+                    // Check and see if left rook is in place
+                    var leftRookSquare = b.GetSquare(Files.A, rank);
+                    if (leftRookSquare.Piece != null && leftRookSquare.Piece.Type == PieceTypes.Rook)
+                    {
+                        var canCastle = true;
+                        // See if king or that rook have moved.
+                        foreach(var m in pastMoves)
+                        {
+                            if((m.Piece.Color == piece.Color && m.Piece.Type == PieceTypes.King) || m.Piece == leftRookSquare.Piece)
+                            {
+                                canCastle = false;
+                                break;
+                            }
+                        }
+
+                        if (canCastle)
+                        {
+                            for(Files f = square.File - 1; f > Files.A; f--)
+                            {
+                                if(b.GetSquare(f, rank).Piece != null)
+                                {
+                                    canCastle = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (canCastle)
+                        {
+                            Colors attacker = color == Colors.White ? Colors.Black : Colors.White;
+                            if (IsSquareUnderAttack(attacker, b, b.GetSquare(Files.E, rank), pastMoves) ||
+                                IsSquareUnderAttack(attacker, b, b.GetSquare(Files.D, rank), pastMoves) ||
+                                IsSquareUnderAttack(attacker, b, b.GetSquare(Files.C, rank), pastMoves))
+                            {
+                                canCastle = false;
+                            }
+                        }
+
+                        if (canCastle)
+                        {
+                            potentialMoves.Add(new Move(piece, color, square, new Square() { File = Files.C, Rank = rank }));
+                        }
+                    }
+
+                    var rightRookSquare = b.GetSquare(Files.H, rank);
+                    if (rightRookSquare.Piece != null && rightRookSquare.Piece.Type == PieceTypes.Rook)
+                    {
+                        var canCastle = true;
+                        // See if king or that rook have moved.
+                        foreach (var m in pastMoves)
+                        {
+                            if ((m.Piece.Color == piece.Color && m.Piece.Type == PieceTypes.King) || m.Piece == rightRookSquare.Piece)
+                            {
+                                canCastle = false;
+                                break;
+                            }
+                        }
+
+                        if (canCastle)
+                        {
+                            for (Files f = square.File + 1; f < Files.H; f++)
+                            {
+                                if (b.GetSquare(f, rank).Piece != null)
+                                {
+                                    canCastle = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (canCastle)
+                        {
+                            Colors attacker = color == Colors.White ? Colors.Black : Colors.White;
+                            if (IsSquareUnderAttack(attacker, b, b.GetSquare(Files.E, rank), pastMoves) ||
+                                IsSquareUnderAttack(attacker, b, b.GetSquare(Files.F, rank), pastMoves) ||
+                                IsSquareUnderAttack(attacker, b, b.GetSquare(Files.G, rank), pastMoves))
+                            {
+                                canCastle = false;
+                            }
+                        }
+
+                        if (canCastle)
+                        {
+                            potentialMoves.Add(new Move(piece, color, square, new Square() { File = Files.G, Rank = rank }));
+                        }
+                    }
+
+                }
+            }
 
             foreach (var t in targets)
             {
@@ -391,13 +511,13 @@ namespace ChessLibrary
                 foreach (var move in potentialMoves)
                 {
                     int endRank = color == Colors.White ? 8 : 1;
-                    if(move.DestinationSquare.Rank == endRank)
+                    if (move.DestinationSquare.Rank == endRank)
                     {
                         // Promotion. Don'd add this move, but add 1 for each promoted piece type
                         result.Add(new Move(piece, color, move.StartingSquare, move.DestinationSquare)
                         {
                             CapturedPiece = move.CapturedPiece,
-                            PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Queen}
+                            PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Queen }
                         });
                         result.Add(new Move(piece, color, move.StartingSquare, move.DestinationSquare)
                         {
@@ -429,7 +549,7 @@ namespace ChessLibrary
             return potentialMoves;
         }
 
-        private static bool IsSquareUnderAttack(Colors attackingColor, Board board, SquareState square)
+        private static bool IsSquareUnderAttack(Colors attackingColor, Board board, SquareState square, List<Move> pastMoves)
         {
             for (Files file = Files.A; file <= Files.H; file++)
             {
@@ -438,7 +558,7 @@ namespace ChessLibrary
                     var squareChecking = board.GetSquare(file, rank);
                     if (squareChecking.Piece != null && squareChecking.Piece.Color == attackingColor)
                     {
-                        if (IsPieceAttackingSquare(board, squareChecking, square))
+                        if (IsPieceAttackingSquare(board, squareChecking, square, pastMoves))
                         {
                             return true;
                         }
@@ -448,13 +568,13 @@ namespace ChessLibrary
             return false;
         }
 
-        private static bool KingIsInCheck(Colors color, Board tempBoard, SquareState kingSquareState)
+        private static bool KingIsInCheck(Colors color, Board tempBoard, SquareState kingSquareState, List<Move> pastMoves)
         {
             var attackingColor = color == Colors.White ? Colors.Black : Colors.White;
-            return IsSquareUnderAttack(attackingColor, tempBoard, kingSquareState);
+            return IsSquareUnderAttack(attackingColor, tempBoard, kingSquareState, pastMoves);
         }
 
-        private static bool IsPieceAttackingSquare(Board board, SquareState attacker, SquareState target)
+        private static bool IsPieceAttackingSquare(Board board, SquareState attacker, SquareState target, List<Move> pastMoves)
         {
             var piece = attacker.Piece;
             List<Move>? moves;
@@ -463,7 +583,7 @@ namespace ChessLibrary
                 case PieceTypes.Rook:
                     if (attacker.Square.Rank == target.Square.Rank || attacker.Square.File == target.Square.File)
                     {
-                        moves = GetAllLegalMoves(board, attacker, true);
+                        moves = GetAllLegalMoves(board, attacker, pastMoves, true);
                         return moves != null && moves.Any(move => move.DestinationSquare.Rank == target.Square.Rank && move.DestinationSquare.File == target.Square.File);
                     }
                     else
@@ -474,7 +594,7 @@ namespace ChessLibrary
                     // They are diagonal in this case
                     if (Math.Abs(attacker.Square.Rank - target.Square.Rank) == Math.Abs(attacker.Square.File - target.Square.File))
                     {
-                        moves = GetAllLegalMoves(board, attacker, true);
+                        moves = GetAllLegalMoves(board, attacker, pastMoves, true);
                         return moves != null && moves.Any(move => move.DestinationSquare.Rank == target.Square.Rank && move.DestinationSquare.File == target.Square.File);
                     }
                     else
@@ -484,7 +604,7 @@ namespace ChessLibrary
                 case PieceTypes.Queen:
                     if (Math.Abs(attacker.Square.Rank - target.Square.Rank) == Math.Abs(attacker.Square.File - target.Square.File) || attacker.Square.Rank == target.Square.Rank || attacker.Square.File == target.Square.File)
                     {
-                        moves = GetAllLegalMoves(board, attacker, true);
+                        moves = GetAllLegalMoves(board, attacker, pastMoves, true);
                         return moves != null && moves.Any(move => move.DestinationSquare.Rank == target.Square.Rank && move.DestinationSquare.File == target.Square.File);
                     }
                     else
@@ -497,12 +617,12 @@ namespace ChessLibrary
                 case PieceTypes.King:
                     return Math.Abs(attacker.Square.File - target.Square.File) <= 1 && Math.Abs(attacker.Square.Rank - target.Square.Rank) <= 1;
                 case PieceTypes.Knight:
-                    return (Math.Abs(attacker.Square.File - target.Square.File) == 1 && Math.Abs(attacker.Square.Rank - target.Square.Rank) == 2) || 
+                    return (Math.Abs(attacker.Square.File - target.Square.File) == 1 && Math.Abs(attacker.Square.Rank - target.Square.Rank) == 2) ||
                            (Math.Abs(attacker.Square.File - target.Square.File) == 2 && Math.Abs(attacker.Square.Rank - target.Square.Rank) == 1);
 
             }
 
-            moves = GetAllLegalMoves(board, attacker, true);
+            moves = GetAllLegalMoves(board, attacker, pastMoves, true);
             return moves != null && moves.Any(move => move.DestinationSquare.Rank == target.Square.Rank && move.DestinationSquare.File == target.Square.File);
         }
 

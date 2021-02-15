@@ -64,7 +64,7 @@ namespace ChessLibrary
             if (currentDepth <= MAX_DEPTH * 2 && !isCheckmate)
             {
                 gameScore.ChildrenGames = new List<GameScore>();
-                var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(game.Board, game.PlayerToMove);
+                var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(game.Board, game.PlayerToMove, game.Moves);
                 if (legalMoves.Any())
                 {
                     var legalMoveSubset = legalMoves.ToList(); //.OrderBy(x => Guid.NewGuid()).Take((legalMoves.Count + 3) / 4).ToList();
