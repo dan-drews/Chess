@@ -28,11 +28,11 @@ namespace ChessLibrary
             if (!isCheckmate)
             {
                 gameScore.ChildrenGames = new List<GameScore>();
-                gameScore.ChildrenGames.Add(GetMoveScores(game, playerColor, opponentColor, currentDepth, null));
-                var bestGameAvg = gameScore.ChildrenGames[0].ChildrenGames!.Select(x => x.ChildrenMaxScoreDiff).Max();
-                var bestGames = gameScore.ChildrenGames[0].ChildrenGames!.Where(x => x.ChildrenMaxScoreDiff == bestGameAvg);
-                var gameAvg = bestGames.Max(x => x.ChildrenAvgScoreDiff);
-                var g = bestGames.First(x => x.ChildrenAvgScoreDiff == gameAvg);
+                gameScore.ChildrenGames.Add(GetMoveScores(game, playerColor, opponentColor, currentDepth, null, game));
+                var bestGameAvg = gameScore.ChildrenGames[0].ChildrenGames!.Select(x => x.ChildrenCountWithLowerScore / (double)(x.ChildrenCountWithHigherScore + x.ChildrenCountWithLowerScore + x.ChildrenCountWithNeutralScore)).Min();
+                var bestGames = gameScore.ChildrenGames[0].ChildrenGames!.Where(x => x.ChildrenCountWithLowerScore / (double)(x.ChildrenCountWithHigherScore + x.ChildrenCountWithLowerScore + x.ChildrenCountWithNeutralScore) == bestGameAvg);
+                var gameAvg = bestGames.Max(x => x.ChildrenCountWithHigherScore);
+                var g = bestGames.First(x => x.ChildrenCountWithHigherScore == gameAvg);
                 return g.Move;
             }
 
@@ -40,7 +40,7 @@ namespace ChessLibrary
             return null;
         }
 
-        private static GameScore GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move)
+        private static GameScore GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, Game currentGame)
         {
             var isCheckmate = game.IsCheckmate;
             var gameScore = new GameScore()
@@ -72,7 +72,7 @@ namespace ChessLibrary
                     {
                         var clonedGame = (Game)game.Clone();
                         clonedGame.AddMove(m, false);
-                        var score = GetMoveScores(clonedGame, playerColor, opponentColor, currentDepth + 1, m);
+                        var score = GetMoveScores(clonedGame, playerColor, opponentColor, currentDepth + 1, m, currentGame);
                         //if(score.ScoreDiff >= gameScore.ScoreDiff - 8)
                         //{
                             gameScore.ChildrenGames.Add(score);
@@ -84,6 +84,10 @@ namespace ChessLibrary
                         gameScore.ChildrenMaxScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenMaxScoreDiff).Max();
                         gameScore.TotalChildren = gameScore.ChildrenGames.Count();
                         gameScore.ChildrenAvgScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenAvgScoreDiff * x.TotalChildren).Average();
+                        int currentDiff = currentGame.GetScore(playerColor) - currentGame.GetScore(opponentColor);
+                        gameScore.ChildrenCountWithHigherScore = gameScore.ChildrenGames.Count(x => x.ScoreDiff > currentDiff) + gameScore.ChildrenGames.Sum(x=> x.ChildrenCountWithHigherScore);
+                        gameScore.ChildrenCountWithLowerScore = gameScore.ChildrenGames.Count(x => x.ScoreDiff < currentDiff) + gameScore.ChildrenGames.Sum(x => x.ChildrenCountWithLowerScore);
+                        gameScore.ChildrenCountWithNeutralScore = gameScore.ChildrenGames.Count(x => x.ScoreDiff == currentDiff) + gameScore.ChildrenGames.Sum(x => x.ChildrenCountWithNeutralScore);
                     }
                     else
                     {
@@ -117,6 +121,10 @@ namespace ChessLibrary
             public bool IWinWithCheckmate { get; set; }
             public List<GameScore>? ChildrenGames { get; set; }
             public int TotalChildren { get; set; } = 1;
+
+            public int ChildrenCountWithHigherScore { get; set; } = 0;
+            public int ChildrenCountWithLowerScore { get; set; } = 0;
+            public int ChildrenCountWithNeutralScore { get; set; } = 0;
 
             public int ChildrenMaxScoreDiff { get; set; }
             public int ChildrenMinScoreDiff { get; set; }

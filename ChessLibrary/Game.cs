@@ -39,11 +39,30 @@ namespace ChessLibrary
         {
             get
             {
-                return MoveLegalityEvaluator.IsKingInCheck(Board, PlayerToMove, Moves) && !MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves).Any();
+                return IsKingInCheck(PlayerToMove) && !MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves).Any();
+            }
+        }
+        public int GetScore(Colors color)
+        {
+            if (color == Colors.White)
+            {
+                if (_whiteScore == null)
+                {
+                    _whiteScore = GetScoreInternal(color);
+                }
+                return _whiteScore.Value;
+            }
+            else
+            {
+                if (_blackScore == null)
+                {
+                    _blackScore = GetScoreInternal(color);
+                }
+                return _blackScore.Value;
             }
         }
 
-        public int GetScore(Colors color)
+        private int GetScoreInternal(Colors color)
         {
             int score = 0;
             int highestPiece = 0;
@@ -53,34 +72,62 @@ namespace ChessLibrary
                 for (int rank = 1; rank <= 8; rank++)
                 {
                     var piece = Board.GetSquare(f, rank).Piece;
-                    if(piece != null && piece.Color == color)
+                    if (piece != null && piece.Color == color)
                     {
                         score += piece.Score;
 
-                        if((rank == 5 && f == Files.D) || 
-                           (rank == 4 && f == Files.D) ||
-                           (rank == 5 && f == Files.E) ||
-                           (rank == 4 && f == Files.E))
+                        if ((rank == 5 || rank == 4) && (f == Files.D || f == Files.E))
                         {
                             score += 2;
+                        }else if (((rank == 6 || rank == 3) && f >= Files.C && f <= Files.F) ||
+                                  ((f == Files.C || f == Files.F) && (rank == 5 || rank == 4)))
+                        {
+                            score += 1;
                         }
 
-                        if(piece.Score > highestPiece && piece.Type != PieceTypes.King)
+                        if (piece.Score > highestPiece && piece.Type != PieceTypes.King)
                         {
                             highestPiece = piece.Score;
                         }
                     }
                 }
             }
-            if(MoveLegalityEvaluator.IsKingInCheck(Board, opposingColor, Moves))
+            if (IsKingInCheck(opposingColor))
             {
                 score += highestPiece - 1;
             }
-            if (MoveLegalityEvaluator.IsKingInCheck(Board, color, Moves))
+            if (IsKingInCheck(color))
             {
                 score -= 8;
             }
             return score;
+        }
+
+        private bool? _isBlackKingInCheck = null;
+        private bool? _isWhiteKingInCheck = null;
+
+        private int? _blackScore = null;
+        private int? _whiteScore = null;
+
+
+        private bool IsKingInCheck(Colors color)
+        {
+            if (color == Colors.Black)
+            {
+                if (_isBlackKingInCheck == null)
+                {
+                    _isBlackKingInCheck = MoveLegalityEvaluator.IsKingInCheck(Board, color, Moves);
+                }
+                return _isBlackKingInCheck.Value;
+            }
+            else
+            {
+                if (_isWhiteKingInCheck == null)
+                {
+                    _isWhiteKingInCheck = MoveLegalityEvaluator.IsKingInCheck(Board, color, Moves);
+                }
+                return _isWhiteKingInCheck.Value;
+            }
         }
 
         public void ResetGame()
@@ -163,6 +210,11 @@ namespace ChessLibrary
                     }
                 }
 
+                _blackScore = null;
+                _whiteScore = null;
+
+                _isWhiteKingInCheck = null;
+                _isBlackKingInCheck = null;
                 return Board;
             }
             else
