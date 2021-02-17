@@ -8,7 +8,7 @@ namespace ChessLibrary
 {
     public class Engine
     {
-        const decimal MAX_DEPTH = 1.5M;
+        const decimal MAX_DEPTH = 2M;
         public static Move? GetBestMove(Game game, Colors playerColor, int currentDepth = 1)
         {
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
@@ -70,13 +70,10 @@ namespace ChessLibrary
                     var legalMoveSubset = legalMoves.ToList(); //.OrderBy(x => Guid.NewGuid()).Take((legalMoves.Count + 3) / 4).ToList();
                     foreach (var m in legalMoveSubset)
                     {
-                        var clonedGame = (Game)game.Clone();
-                        clonedGame.AddMove(m, false);
-                        var score = GetMoveScores(clonedGame, playerColor, opponentColor, currentDepth + 1, m, currentGame);
-                        //if(score.ScoreDiff >= gameScore.ScoreDiff - 8)
-                        //{
-                            gameScore.ChildrenGames.Add(score);
-                        //}
+                        game.AddMove(m, false);
+                        var score = GetMoveScores(game, playerColor, opponentColor, currentDepth + 1, m, currentGame);
+                        game.UndoLastMove();
+                        gameScore.ChildrenGames.Add(score);
                     }
                     if (gameScore.ChildrenGames.Any())
                     {

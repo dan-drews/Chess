@@ -19,6 +19,11 @@
         g.AddMove(move);
     }
 
+    void UndoMove()
+    {
+        g.UndoLastMove();
+    }
+
     void HandleSquareClick(SquareState s)
     {
         Console.WriteLine($"{s.Square.Rank}{s.Square.File}");
@@ -167,6 +172,7 @@
     </tr>
 </table>
 <button @onclick="GenerateMove">Generate Next Move</button>
+<button @onclick="UndoMove">Undo</button>
 <div>
     <h2>Moves</h2>
     @foreach(var m in g.Moves)
