@@ -35,13 +35,41 @@ namespace ChessLibrary
             }
         }
 
+        private List<Move>? _legalMoves;
+
+        public bool IsStalemate
+        {
+            get
+            {
+                if (_legalMoves == null)
+                {
+                    _legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                }
+                return !IsKingInCheck(PlayerToMove) && !GetAllLegalMoves().Any();
+            }
+        }
+
         public bool IsCheckmate
         {
             get
             {
-                return IsKingInCheck(PlayerToMove) && !MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves).Any();
+                if (_legalMoves == null)
+                {
+                    _legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                }
+                return IsKingInCheck(PlayerToMove) && !GetAllLegalMoves().Any();
             }
         }
+
+        public List<Move> GetAllLegalMoves()
+        {
+            if (_legalMoves == null)
+            {
+                _legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+            }
+            return _legalMoves;
+        }
+
         public int GetScore(Colors color)
         {
             if (color == Colors.White)
@@ -74,7 +102,7 @@ namespace ChessLibrary
                     var piece = Board.GetSquare(f, rank).Piece;
                     if (piece != null && piece.Color == color)
                     {
-                        score += piece.Score;
+                        score += piece.Score * 3;
 
                         if ((rank == 5 || rank == 4) && (f == Files.D || f == Files.E))
                         {
@@ -213,7 +241,7 @@ namespace ChessLibrary
 
                 _blackScore = null;
                 _whiteScore = null;
-
+                _legalMoves = null;
                 _isWhiteKingInCheck = null;
                 _isBlackKingInCheck = null;
                 return Board;
@@ -262,7 +290,7 @@ namespace ChessLibrary
 
             _blackScore = null;
             _whiteScore = null;
-
+            _legalMoves = null;
             _isWhiteKingInCheck = null;
             _isBlackKingInCheck = null;
             Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
