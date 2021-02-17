@@ -79,8 +79,9 @@ namespace ChessLibrary
                         if ((rank == 5 || rank == 4) && (f == Files.D || f == Files.E))
                         {
                             score += 2;
-                        }else if (((rank == 6 || rank == 3) && f >= Files.C && f <= Files.F) ||
-                                  ((f == Files.C || f == Files.F) && (rank == 5 || rank == 4)))
+                        }
+                        else if (((rank == 6 || rank == 3) && f >= Files.C && f <= Files.F) ||
+                                 ((f == Files.C || f == Files.F) && (rank == 5 || rank == 4)))
                         {
                             score += 1;
                         }
@@ -221,6 +222,52 @@ namespace ChessLibrary
             {
                 throw new Exception("Invalid Move");
             }
+        }
+
+        public Board UndoLastMove()
+        {
+            var move = Moves.Last();
+            var startingSquare = Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank);
+            if (startingSquare.Piece == null)
+            {
+                throw new Exception("No piece to move");
+            }
+            var initialPiece = move.Piece;
+            startingSquare.Piece = move.CapturedPiece;
+            Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = initialPiece;
+
+            if (initialPiece != null && initialPiece.Type == PieceTypes.King)
+            {
+                var rank = initialPiece.Color == Colors.Black ? 8 : 1;
+                if (move.StartingSquare.Rank == rank && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
+                {
+                    // Castling.
+                    if (move.DestinationSquare.File == Files.G)
+                    {
+                        var rookCurrentSquare = Board.GetSquare(Files.H, rank);
+                        var targetRookSquare = Board.GetSquare(Files.F, rank);
+                        rookCurrentSquare.Piece = targetRookSquare.Piece;
+                        targetRookSquare.Piece = null;
+                    }
+
+                    if (move.DestinationSquare.File == Files.C)
+                    {
+                        var rookCurrentSquare = Board.GetSquare(Files.A, rank);
+                        var targetRookSquare = Board.GetSquare(Files.D, rank);
+                        rookCurrentSquare.Piece = targetRookSquare.Piece;
+                        targetRookSquare.Piece = null;
+                    }
+                }
+            }
+
+            _blackScore = null;
+            _whiteScore = null;
+
+            _isWhiteKingInCheck = null;
+            _isBlackKingInCheck = null;
+            Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
+            return Board;
+
         }
 
         private void SetupBoard()

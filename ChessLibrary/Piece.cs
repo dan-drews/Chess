@@ -36,8 +36,10 @@ namespace ChessLibrary
                         case PieceTypes.King:
                             _score = 100;
                             break;
+                        default:
+                            _score = 0;
+                            break;
                     }
-                    _score = 0;
                 }
                 return _score.Value;
             }
