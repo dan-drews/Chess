@@ -1,4 +1,5 @@
 ﻿@using ChessLibrary
+@inject IJSRuntime JS;
 <h3>ChessBoard</h3>
 
 @code {
@@ -13,18 +14,35 @@
         g.ResetGame();
     }
 
-    void GenerateMove()
+    async Task GenerateMove()
     {
-        var move = Engine.GetBestMove(g, g.PlayerToMove);
-        g.AddMove(move);
+        try
+        {
+            var move = Engine.GetBestMove(g, g.PlayerToMove);
+            g.AddMove(move);
+            await JS.InvokeAsync<string>("PlaySound");
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeAsync<string>("alert", ex.Message);
+        }
     }
 
-    void UndoMove()
+    async Task UndoMove()
     {
-        g.UndoLastMove();
+        try
+        {
+            g.UndoLastMove();
+            await JS.InvokeAsync<string>("PlaySound");
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeAsync<string>("alert", ex.Message);
+        }
+
     }
 
-    void HandleSquareClick(SquareState s)
+    async Task HandleSquareClick(SquareState s)
     {
         Console.WriteLine($"{s.Square.Rank}{s.Square.File}");
         Console.WriteLine(s.Piece);
@@ -45,10 +63,19 @@
             {
                 if (TargetedSquares.Contains((s.Square.File, s.Square.Rank)))
                 {
-                    g.AddMove(new Move(selectedSquare.Piece, selectedSquare.Piece.Color, selectedSquare.Square, s.Square)
+                    try
                     {
-                        CapturedPiece = s.Piece
-                    });
+
+                        g.AddMove(new Move(selectedSquare.Piece, selectedSquare.Piece.Color, selectedSquare.Square, s.Square)
+                        {
+                            CapturedPiece = s.Piece
+                        });
+                        await JS.InvokeAsync<string>("PlaySound");
+                    }
+                    catch (Exception ex)
+                    {
+                        await JS.InvokeAsync<string>("alert", ex.Message);
+                    }
                 }
             }
             selectedSquare = null;
@@ -103,6 +130,8 @@
 
 }
 
+<h1>Score: @(g.GetScore(Colors.White) - g.GetScore(Colors.Black))</h1>
+<audio id="sound" src="/click.mp3" />
 <table style="border: 1px solid black;">
     @for (int i = 8; i >= 1; i--)
     {
@@ -175,7 +204,7 @@
 <button @onclick="UndoMove">Undo</button>
 <div>
     <h2>Moves</h2>
-    @foreach(var m in g.Moves)
+    @foreach (var m in g.Moves)
     {
         <p>@($"{m.StartingSquare.File}{m.StartingSquare.Rank} → {m.DestinationSquare.File}{m.DestinationSquare.Rank}")</p>
     }

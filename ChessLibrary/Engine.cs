@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MoreLinq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,102 +13,66 @@ namespace ChessLibrary
         public static Move? GetBestMove(Game game, Colors playerColor, int currentDepth = 1)
         {
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
-            if (currentDepth == 1)
-            {
-                var myCurrentScore = game.GetScore(playerColor);
-                var opponentCurrentScore = game.GetScore(opponentColor);
-            }
             var isCheckmate = game.IsCheckmate;
-            var gameScore = new GameScore()
-            {
-                MyScore = game.GetScore(playerColor),
-                OpponentScore = game.GetScore(opponentColor),
-                OpponentWinsWithCheckmate = isCheckmate && game.PlayerToMove == playerColor,
-                IWinWithCheckmate = isCheckmate && game.PlayerToMove == opponentColor
-            };
             if (!isCheckmate)
             {
-                gameScore.ChildrenGames = new List<GameScore>();
-                gameScore.ChildrenGames.Add(GetMoveScores(game, playerColor, opponentColor, currentDepth, null, game));
-                var bestGameAvg = gameScore.ChildrenGames[0].ChildrenGames!.Select(x => x.ChildrenCountWithLowerScore / (double)(x.ChildrenCountWithHigherScore + x.ChildrenCountWithLowerScore + x.ChildrenCountWithNeutralScore)).Min();
-                var bestGames = gameScore.ChildrenGames[0].ChildrenGames!.Where(x => x.ChildrenCountWithLowerScore / (double)(x.ChildrenCountWithHigherScore + x.ChildrenCountWithLowerScore + x.ChildrenCountWithNeutralScore) == bestGameAvg);
-                var gameAvg = bestGames.Max(x => x.ChildrenCountWithHigherScore);
-                var g = bestGames.First(x => x.ChildrenCountWithHigherScore == gameAvg);
-                return g.Move;
+                return GetMoveScores(game, playerColor, opponentColor, currentDepth, null).m;
             }
 
 
             return null;
         }
 
-        private static GameScore GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, Game currentGame)
+        private static (Move m, int score, int totalMoves) GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move)
         {
+
             var isCheckmate = game.IsCheckmate;
-            var gameScore = new GameScore()
+            var isStalemate = game.IsStalemate;
+            if (currentDepth > MAX_DEPTH * 2 || isCheckmate ||isStalemate)
             {
-                MyScore = game.GetScore(playerColor),
-                OpponentScore = game.GetScore(opponentColor),
-                OpponentWinsWithCheckmate = isCheckmate && game.PlayerToMove == playerColor,
-                IWinWithCheckmate = isCheckmate && game.PlayerToMove == opponentColor,
-                Move = move
-            };
-            if (gameScore.OpponentWinsWithCheckmate)
-            {
-                gameScore.OpponentScore += 1000;
+                if(move == null)
+                {
+                    throw new Exception("Error! Move is null");
+                }
+                if (game.IsStalemate)
+                {
+                    return (move, 0, 1);
+                }
+                if (isCheckmate)
+                {
+                    return move.Piece.Color == playerColor ? (move, 1000000000, 1) : (move, -1000000000, 1);
+                }
+
+                return (move, game.GetScore(playerColor) - game.GetScore(opponentColor), 1);
             }
 
-            if (gameScore.IWinWithCheckmate)
+            var legalMoves = game.GetAllLegalMoves();
+            var scores = new List<(Move m, int score, int totalMoves)>();
+            foreach(var m in legalMoves)
             {
-                gameScore.MyScore += 500;
+                game.AddMove(m, false);
+                scores.Add(GetMoveScores(game, playerColor, opponentColor, currentDepth + 1, m));
+                game.UndoLastMove();
             }
 
-            if (currentDepth <= MAX_DEPTH * 2 && !isCheckmate)
+            if (game.PlayerToMove == playerColor)
             {
-                gameScore.ChildrenGames = new List<GameScore>();
-                var legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(game.Board, game.PlayerToMove, game.Moves);
-                if (legalMoves.Any())
+                var bestMove = scores.MaxBy(x => x.score).MinBy(x=> x.totalMoves).OrderBy(x=> new Guid()).First();
+                if (move == null)
                 {
-                    var legalMoveSubset = legalMoves.ToList(); //.OrderBy(x => Guid.NewGuid()).Take((legalMoves.Count + 3) / 4).ToList();
-                    foreach (var m in legalMoveSubset)
-                    {
-                        game.AddMove(m, false);
-                        var score = GetMoveScores(game, playerColor, opponentColor, currentDepth + 1, m, currentGame);
-                        game.UndoLastMove();
-                        gameScore.ChildrenGames.Add(score);
-                    }
-                    if (gameScore.ChildrenGames.Any())
-                    {
-                        gameScore.ChildrenMinScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenMinScoreDiff).Min();
-                        gameScore.ChildrenMaxScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenMaxScoreDiff).Max();
-                        gameScore.TotalChildren = gameScore.ChildrenGames.Count();
-                        gameScore.ChildrenAvgScoreDiff = gameScore.ChildrenGames.Select(x => x.ChildrenAvgScoreDiff * x.TotalChildren).Average();
-                        int currentDiff = currentGame.GetScore(playerColor) - currentGame.GetScore(opponentColor);
-                        gameScore.ChildrenCountWithHigherScore = gameScore.ChildrenGames.Count(x => x.ScoreDiff > currentDiff) + gameScore.ChildrenGames.Sum(x=> x.ChildrenCountWithHigherScore);
-                        gameScore.ChildrenCountWithLowerScore = gameScore.ChildrenGames.Count(x => x.ScoreDiff < currentDiff) + gameScore.ChildrenGames.Sum(x => x.ChildrenCountWithLowerScore);
-                        gameScore.ChildrenCountWithNeutralScore = gameScore.ChildrenGames.Count(x => x.ScoreDiff == currentDiff) + gameScore.ChildrenGames.Sum(x => x.ChildrenCountWithNeutralScore);
-                    }
-                    else
-                    {
-                        gameScore.ChildrenAvgScoreDiff = gameScore.ScoreDiff;
-                        gameScore.ChildrenMaxScoreDiff = gameScore.ScoreDiff;
-                        gameScore.ChildrenMinScoreDiff = gameScore.ScoreDiff;
-                    }
+                    return bestMove;
                 }
-                else
-                {
-                    gameScore.ChildrenAvgScoreDiff = gameScore.ScoreDiff;
-                    gameScore.ChildrenMaxScoreDiff = gameScore.ScoreDiff;
-                    gameScore.ChildrenMinScoreDiff = gameScore.ScoreDiff;
-                }
+                return (move, bestMove.score, bestMove.totalMoves + 1);
             }
             else
             {
-                gameScore.ChildrenAvgScoreDiff = gameScore.ScoreDiff;
-                gameScore.ChildrenMaxScoreDiff = gameScore.ScoreDiff;
-                gameScore.ChildrenMinScoreDiff = gameScore.ScoreDiff;
+                var bestMove = scores.MinBy(x => x.score).OrderBy(x => new Guid()).First();
+                if (move == null)
+                {
+                    return bestMove;
+                }
+                return (move, bestMove.score, bestMove.totalMoves + 1);
             }
-
-            return gameScore;
         }
 
         private class GameScore
