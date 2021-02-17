@@ -75,33 +75,5 @@ namespace ChessLibrary
             }
         }
 
-        private class GameScore
-        {
-            public int MyScore { get; set; }
-            public int OpponentScore { get; set; }
-            public bool OpponentWinsWithCheckmate { get; set; }
-            public bool IWinWithCheckmate { get; set; }
-            public List<GameScore>? ChildrenGames { get; set; }
-            public int TotalChildren { get; set; } = 1;
-
-            public int ChildrenCountWithHigherScore { get; set; } = 0;
-            public int ChildrenCountWithLowerScore { get; set; } = 0;
-            public int ChildrenCountWithNeutralScore { get; set; } = 0;
-
-            public int ChildrenMaxScoreDiff { get; set; }
-            public int ChildrenMinScoreDiff { get; set; }
-            public double ChildrenAvgScoreDiff { get; set; }
-            public Move? Move { get; set; }
-
-            public int ScoreDiff
-            {
-                get
-                {
-                    return MyScore - OpponentScore;
-                }
-            }
-
-        }
-
     }
 }
