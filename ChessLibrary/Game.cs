@@ -102,7 +102,7 @@ namespace ChessLibrary
                     var piece = Board.GetSquare(f, rank).Piece;
                     if (piece != null && piece.Color == color)
                     {
-                        score += piece.Score * 3;
+                        score += piece.Score * 5;
 
                         if ((rank == 5 || rank == 4) && (f == Files.D || f == Files.E))
                         {
@@ -114,9 +114,9 @@ namespace ChessLibrary
                             score += 1;
                         }
 
-                        if (piece.Score > highestPiece && piece.Type != PieceTypes.King)
+                        if (piece.Score > highestPiece * 3 && piece.Type != PieceTypes.King)
                         {
-                            highestPiece = piece.Score;
+                            highestPiece = piece.Score * 3;
                         }
                     }
                 }
@@ -127,7 +127,7 @@ namespace ChessLibrary
             }
             if (IsKingInCheck(color))
             {
-                score -= 8;
+                score -= 15;
             }
             return score;
         }

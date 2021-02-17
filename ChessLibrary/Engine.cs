@@ -57,11 +57,15 @@ namespace ChessLibrary
                     var node = GetMoveScores(game, playerColor, opponentColor, currentDepth + 1, m, alpha, beta);
                     game.UndoLastMove();
                     value = value.Score >= node.Score ? value : new NodeInfo(m, node.Score, node.TotalMoves + 1, node.Alpha, node.Beta);
-                    alpha = Math.Max(alpha, value.Score);
+                    alpha = Math.Max(alpha, value.Score);                    
                     if (alpha >= beta)
                     {
                         break;
-                    }                
+                    }
+                    if (node.Score == 1000000000)
+                    {
+                        break;
+                    }
                 }
                 return value;
             }
@@ -76,6 +80,10 @@ namespace ChessLibrary
                     value = value.Score <= node.Score ? value : new NodeInfo(m, node.Score, node.TotalMoves + 1, node.Alpha, node.Beta);
                     beta = Math.Min(beta, value.Score);
                     if (alpha >= beta)
+                    {
+                        break;
+                    }
+                    if (node.Score == -1000000000)
                     {
                         break;
                     }
