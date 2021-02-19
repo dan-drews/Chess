@@ -40,7 +40,9 @@ namespace ChessLibrary
 
             var isCheckmate = game.IsCheckmate;
             var isStalemate = game.IsStalemate;
+
             if (currentDepth == 0 || isCheckmate ||isStalemate)
+
             {
                 if(move == null)
                 {

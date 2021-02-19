@@ -49,6 +49,20 @@ namespace ChessLibrary
             }
         }
 
+        private List<Move>? _legalMoves;
+
+        public bool IsStalemate
+        {
+            get
+            {
+                if (_legalMoves == null)
+                {
+                    _legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                }
+                return !IsKingInCheck(PlayerToMove) && !GetAllLegalMoves().Any();
+            }
+        }
+
         public bool IsCheckmate
         {
             get
@@ -280,6 +294,50 @@ namespace ChessLibrary
                             rookCurrentSquare.Piece = targetRookSquare.Piece;
                             targetRookSquare.Piece = null;
                         }
+                    }
+                }
+            }
+            _blackScore = null;
+            _whiteScore = null;
+            _legalMoves = null;
+            _isWhiteKingInCheck = null;
+            _isBlackKingInCheck = null;
+            Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
+            return Board;
+        }
+
+        public Board UndoLastMove()
+        {
+            var move = Moves.Last();
+            var startingSquare = Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank);
+            if (startingSquare.Piece == null)
+            {
+                throw new Exception("No piece to move");
+            }
+            var initialPiece = move.Piece;
+            startingSquare.Piece = move.CapturedPiece;
+            Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = initialPiece;
+
+            if (initialPiece != null && initialPiece.Type == PieceTypes.King)
+            {
+                var rank = initialPiece.Color == Colors.Black ? 8 : 1;
+                if (move.StartingSquare.Rank == rank && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
+                {
+                    // Castling.
+                    if (move.DestinationSquare.File == Files.G)
+                    {
+                        var rookCurrentSquare = Board.GetSquare(Files.H, rank);
+                        var targetRookSquare = Board.GetSquare(Files.F, rank);
+                        rookCurrentSquare.Piece = targetRookSquare.Piece;
+                        targetRookSquare.Piece = null;
+                    }
+
+                    if (move.DestinationSquare.File == Files.C)
+                    {
+                        var rookCurrentSquare = Board.GetSquare(Files.A, rank);
+                        var targetRookSquare = Board.GetSquare(Files.D, rank);
+                        rookCurrentSquare.Piece = targetRookSquare.Piece;
+                        targetRookSquare.Piece = null;
                     }
                 }
             }
