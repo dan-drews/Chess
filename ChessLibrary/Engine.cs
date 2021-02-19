@@ -1,6 +1,7 @@
 ﻿using MoreLinq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,26 +10,39 @@ namespace ChessLibrary
 {
     public class Engine
     {
-        const decimal MAX_DEPTH = 2M;
-        public static Move? GetBestMove(Game game, Colors playerColor, int currentDepth = 1)
+        const decimal MAX_DEPTH = 3M;
+        public static NodeInfo? GetBestMove(Game game, Colors playerColor)
         {
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
             var isCheckmate = game.IsCheckmate;
             if (!isCheckmate)
             {
-                return GetMoveScores(game, playerColor, opponentColor, currentDepth, null).m;
+                NodeInfo? result = null;
+                var sw = new Stopwatch();
+                int depthToSearch = 4;
+                while (sw.ElapsedMilliseconds < 1000)
+                {
+                    sw.Reset();
+                    sw.Start();
+                    result = GetMoveScores(game, playerColor, opponentColor, depthToSearch, null, int.MinValue, int.MaxValue);
+                    sw.Stop();
+                    depthToSearch++;
+                }
+                return result;
             }
 
 
             return null;
         }
 
-        private static (Move m, int score, int totalMoves) GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move)
+        private static NodeInfo GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, int alpha, int beta)
         {
 
             var isCheckmate = game.IsCheckmate;
             var isStalemate = game.IsStalemate;
-            if (currentDepth > MAX_DEPTH * 2 || isCheckmate ||isStalemate)
+
+            if (currentDepth == 0 || isCheckmate ||isStalemate)
+
             {
                 if(move == null)
                 {
@@ -36,42 +50,67 @@ namespace ChessLibrary
                 }
                 if (game.IsStalemate)
                 {
-                    return (move, 0, 1);
+                    return new NodeInfo(move, 0, 0, 0);
                 }
                 if (isCheckmate)
                 {
-                    return move.Piece.Color == playerColor ? (move, 1000000000, 1) : (move, -1000000000, 1);
+                    return move.Piece.Color == playerColor ? new NodeInfo(move, 1000000000 + currentDepth, 0, 0) : new NodeInfo(move, -1000000000 + currentDepth, 0, 0);
                 }
 
-                return (move, game.GetScore(playerColor) - game.GetScore(opponentColor), 1);
+                return new NodeInfo(move, game.GetScore(playerColor) - game.GetScore(opponentColor), 0, 0);
             }
 
-            var legalMoves = game.GetAllLegalMoves();
-            var scores = new List<(Move m, int score, int totalMoves)>();
-            foreach(var m in legalMoves)
-            {
-                game.AddMove(m, false);
-                scores.Add(GetMoveScores(game, playerColor, opponentColor, currentDepth + 1, m));
-                game.UndoLastMove();
-            }
-
+            var legalMoves = game.GetAllLegalMoves().OrderBy(x=> Guid.NewGuid()).ToList();
             if (game.PlayerToMove == playerColor)
             {
-                var bestMove = scores.MaxBy(x => x.score).MinBy(x=> x.totalMoves).OrderBy(x=> new Guid()).First();
-                if (move == null)
+                var value = new NodeInfo(move, int.MinValue, alpha, beta);
+                foreach(var m in legalMoves)
                 {
-                    return bestMove;
+
+                    game.AddMove(m, false);
+                    var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);
+                    game.UndoLastMove();
+                    value = value.Score >= node.Score ? value : new NodeInfo(m, node.Score, node.Alpha, node.Beta);
+                    alpha = Math.Max(alpha, value.Score);                    
+                    if (alpha >= beta)
+                    {
+                        break;
+                    }
                 }
-                return (move, bestMove.score, bestMove.totalMoves + 1);
+                return value;
             }
             else
             {
-                var bestMove = scores.MinBy(x => x.score).OrderBy(x => new Guid()).First();
-                if (move == null)
+                var value = new NodeInfo(move, int.MaxValue, alpha, beta);
+                foreach (var m in legalMoves)
                 {
-                    return bestMove;
+                    game.AddMove(m, false);
+                    var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);
+                    game.UndoLastMove();
+                    value = value.Score <= node.Score ? value : new NodeInfo(m, node.Score, node.Alpha, node.Beta);
+                    beta = Math.Min(beta, value.Score);
+                    if (alpha >= beta)
+                    {
+                        break;
+                    }
                 }
-                return (move, bestMove.score, bestMove.totalMoves + 1);
+                return value;
+            }
+        }
+
+        public class NodeInfo
+        {
+            public Move? Move { get; set; }
+            public int Score { get; set; } 
+            public int Alpha { get; set; }
+            public int Beta { get; set; }
+
+            public NodeInfo(Move? move, int score, int alpha, int beta)
+            {
+                Move = move;
+                Score = score;
+                Alpha = alpha;
+                Beta = beta;
             }
         }
 

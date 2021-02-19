@@ -48,5 +48,63 @@ namespace ChessLibrary
             }
             return newBoard;
         }
+
+        public void MovePiece(Move move)
+        {
+            var initialPiece = GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece;
+            GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = null;
+
+            if (initialPiece != null && initialPiece.Type == PieceTypes.Pawn)
+            {
+                var startingRank = initialPiece.Color == Colors.Black ? 4 : 5;
+                if (move.StartingSquare.Rank == startingRank && move.DestinationSquare.File != move.StartingSquare.File)
+                {
+                    // Pawn capture... but is it en passant?
+                    var destination = GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank);
+                    if (destination.Piece == null)
+                    {
+                        // Yup. It's an en passant.
+                        destination.Piece = initialPiece;
+                        var capturedPawnSquare = GetSquare(move.DestinationSquare.File, move.StartingSquare.Rank);
+                        capturedPawnSquare.Piece = null;
+                        return;
+                    }
+                }
+            }
+
+            if (move.PromotedPiece == null)
+            {
+                GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = initialPiece;
+            }
+            else
+            {
+                GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = move.PromotedPiece;
+            }
+
+            if (initialPiece != null && initialPiece.Type == PieceTypes.King)
+            {
+                var rank = initialPiece.Color == Colors.Black ? 8 : 1;
+                if (move.StartingSquare.Rank == rank && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
+                {
+                    // Castling.
+                    if (move.DestinationSquare.File == Files.G)
+                    {
+                        var rookCurrentSquare = GetSquare(Files.H, rank);
+                        var targetRookSquare = GetSquare(Files.F, rank);
+                        targetRookSquare.Piece = rookCurrentSquare.Piece;
+                        rookCurrentSquare.Piece = null;
+                    }
+
+                    if (move.DestinationSquare.File == Files.C)
+                    {
+                        var rookCurrentSquare = GetSquare(Files.A, rank);
+                        var targetRookSquare = GetSquare(Files.D, rank);
+                        targetRookSquare.Piece = rookCurrentSquare.Piece;
+                        rookCurrentSquare.Piece = null;
+                    }
+                }
+            }
+        }
+
     }
 }

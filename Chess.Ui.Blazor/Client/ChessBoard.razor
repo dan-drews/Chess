@@ -16,7 +16,12 @@
     void GenerateMove()
     {
         var move = Engine.GetBestMove(g, g.PlayerToMove);
-        g.AddMove(move);
+        g.AddMove(move.Move);
+    }
+
+    void UndoMove()
+    {
+        g.UndoLastMove();
     }
 
     void UndoMove()

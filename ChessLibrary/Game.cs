@@ -31,7 +31,21 @@ namespace ChessLibrary
         {
             get
             {
-                return IsCheckmate;
+                return IsCheckmate || IsStalemate;
+            }
+        }
+
+        private List<Move>? _legalMoves;
+
+        public bool IsStalemate
+        {
+            get
+            {
+                if (_legalMoves == null)
+                {
+                    _legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                }
+                return !IsKingInCheck(PlayerToMove) && !GetAllLegalMoves().Any();
             }
         }
 
@@ -102,7 +116,7 @@ namespace ChessLibrary
                     var piece = Board.GetSquare(f, rank).Piece;
                     if (piece != null && piece.Color == color)
                     {
-                        score += piece.Score * 3;
+                        score += piece.Score * 5;
 
                         if ((rank == 5 || rank == 4) && (f == Files.D || f == Files.E))
                         {
@@ -114,9 +128,9 @@ namespace ChessLibrary
                             score += 1;
                         }
 
-                        if (piece.Score > highestPiece && piece.Type != PieceTypes.King)
+                        if (piece.Score > highestPiece * 3 && piece.Type != PieceTypes.King)
                         {
-                            highestPiece = piece.Score;
+                            highestPiece = piece.Score * 3;
                         }
                     }
                 }
@@ -127,7 +141,7 @@ namespace ChessLibrary
             }
             if (IsKingInCheck(color))
             {
-                score -= 8;
+                score -= 15;
             }
             return score;
         }
@@ -204,40 +218,7 @@ namespace ChessLibrary
                 {
                     Moves.Add(move);
                 }
-                var initialPiece = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece;
-                Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = null;
-                if (move.PromotedPiece == null)
-                {
-                    Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = initialPiece;
-                }
-                else
-                {
-                    Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = move.PromotedPiece;
-                }
-
-                if (initialPiece != null && initialPiece.Type == PieceTypes.King)
-                {
-                    var rank = initialPiece.Color == Colors.Black ? 8 : 1;
-                    if (move.StartingSquare.Rank == rank && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
-                    {
-                        // Castling.
-                        if (move.DestinationSquare.File == Files.G)
-                        {
-                            var rookCurrentSquare = Board.GetSquare(Files.H, rank);
-                            var targetRookSquare = Board.GetSquare(Files.F, rank);
-                            targetRookSquare.Piece = rookCurrentSquare.Piece;
-                            rookCurrentSquare.Piece = null;
-                        }
-
-                        if (move.DestinationSquare.File == Files.C)
-                        {
-                            var rookCurrentSquare = Board.GetSquare(Files.A, rank);
-                            var targetRookSquare = Board.GetSquare(Files.D, rank);
-                            targetRookSquare.Piece = rookCurrentSquare.Piece;
-                            rookCurrentSquare.Piece = null;
-                        }
-                    }
-                }
+                Board.MovePiece(move);
 
                 _blackScore = null;
                 _whiteScore = null;
@@ -250,6 +231,79 @@ namespace ChessLibrary
             {
                 throw new Exception("Invalid Move");
             }
+        }
+
+        public Board UndoLastMove()
+        {
+            var move = Moves.Last();
+            var startingSquare = Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank);
+            if (startingSquare.Piece == null)
+            {
+                throw new Exception("No piece to move");
+            }
+            var initialPiece = move.Piece;
+            bool hasPerformedMove = false;
+            if (initialPiece != null && initialPiece.Type == PieceTypes.Pawn)
+            {
+                var startingRank = initialPiece.Color == Colors.Black ? 4 : 5;
+                var moveDirection = initialPiece.Color == Colors.Black ? -1 : 1;
+                if (move.StartingSquare.Rank == startingRank && move.DestinationSquare.File != move.StartingSquare.File)
+                {
+                    // Pawn capture... but is it en passant?
+                    if(move.DestinationSquare.Rank == startingRank + moveDirection && Math.Abs(move.DestinationSquare.File - move.StartingSquare.File) == 1)
+                    {
+                        // Moved diagonally, but still, was it an en passant?
+                        var moveBeforeLast = Moves.ElementAt(Moves.Count - 2);
+                        if (moveBeforeLast.Piece.Type == PieceTypes.Pawn 
+                            && moveBeforeLast.StartingSquare.Rank == startingRank + (moveDirection * 2) 
+                            && moveBeforeLast.DestinationSquare.Rank == startingRank
+                            && moveBeforeLast.DestinationSquare.File == move.DestinationSquare.File)
+                        {
+                            // Yup, it was en passant.
+                            Board.GetSquare(moveBeforeLast.DestinationSquare.File, moveBeforeLast.DestinationSquare.Rank).Piece = moveBeforeLast.Piece;
+                            Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = initialPiece;
+                            Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = null;
+                            hasPerformedMove = true;
+                        }
+                    }
+                }
+            }
+            if (!hasPerformedMove)
+            {
+                startingSquare.Piece = move.CapturedPiece;
+                Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = initialPiece;
+
+                if (initialPiece != null && initialPiece.Type == PieceTypes.King)
+                {
+                    var rank = initialPiece.Color == Colors.Black ? 8 : 1;
+                    if (move.StartingSquare.Rank == rank && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
+                    {
+                        // Castling.
+                        if (move.DestinationSquare.File == Files.G)
+                        {
+                            var rookCurrentSquare = Board.GetSquare(Files.H, rank);
+                            var targetRookSquare = Board.GetSquare(Files.F, rank);
+                            rookCurrentSquare.Piece = targetRookSquare.Piece;
+                            targetRookSquare.Piece = null;
+                        }
+
+                        if (move.DestinationSquare.File == Files.C)
+                        {
+                            var rookCurrentSquare = Board.GetSquare(Files.A, rank);
+                            var targetRookSquare = Board.GetSquare(Files.D, rank);
+                            rookCurrentSquare.Piece = targetRookSquare.Piece;
+                            targetRookSquare.Piece = null;
+                        }
+                    }
+                }
+            }
+            _blackScore = null;
+            _whiteScore = null;
+            _legalMoves = null;
+            _isWhiteKingInCheck = null;
+            _isBlackKingInCheck = null;
+            Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
+            return Board;
         }
 
         public Board UndoLastMove()
