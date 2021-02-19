@@ -1,6 +1,7 @@
 ﻿using MoreLinq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,14 +10,25 @@ namespace ChessLibrary
 {
     public class Engine
     {
-        const decimal MAX_DEPTH = 2M;
-        public static Move? GetBestMove(Game game, Colors playerColor, int currentDepth = 1)
+        const decimal MAX_DEPTH = 3M;
+        public static NodeInfo? GetBestMove(Game game, Colors playerColor)
         {
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
             var isCheckmate = game.IsCheckmate;
             if (!isCheckmate)
             {
-                return GetMoveScores(game, playerColor, opponentColor, currentDepth, null, int.MinValue, int.MaxValue).Move;
+                NodeInfo? result = null;
+                var sw = new Stopwatch();
+                int depthToSearch = 4;
+                while (sw.ElapsedMilliseconds < 1000)
+                {
+                    sw.Reset();
+                    sw.Start();
+                    result = GetMoveScores(game, playerColor, opponentColor, depthToSearch, null, int.MinValue, int.MaxValue);
+                    sw.Stop();
+                    depthToSearch++;
+                }
+                return result;
             }
 
 
@@ -28,7 +40,7 @@ namespace ChessLibrary
 
             var isCheckmate = game.IsCheckmate;
             var isStalemate = game.IsStalemate;
-            if (currentDepth > MAX_DEPTH * 2 || isCheckmate ||isStalemate)
+            if (currentDepth == 0 || isCheckmate ||isStalemate)
             {
                 if(move == null)
                 {
@@ -36,33 +48,29 @@ namespace ChessLibrary
                 }
                 if (game.IsStalemate)
                 {
-                    return new NodeInfo(move, 0, 1, 0, 0);
+                    return new NodeInfo(move, 0, 0, 0);
                 }
                 if (isCheckmate)
                 {
-                    return move.Piece.Color == playerColor ? new NodeInfo(move, 1000000000, 1, 0, 0) : new NodeInfo(move, -1000000000, 1, 0, 0);
+                    return move.Piece.Color == playerColor ? new NodeInfo(move, 1000000000 + currentDepth, 0, 0) : new NodeInfo(move, -1000000000 + currentDepth, 0, 0);
                 }
 
-                return new NodeInfo(move, game.GetScore(playerColor) - game.GetScore(opponentColor), 1, 0, 0);
+                return new NodeInfo(move, game.GetScore(playerColor) - game.GetScore(opponentColor), 0, 0);
             }
 
-            var legalMoves = game.GetAllLegalMoves();
+            var legalMoves = game.GetAllLegalMoves().OrderBy(x=> Guid.NewGuid()).ToList();
             if (game.PlayerToMove == playerColor)
             {
-                var value = new NodeInfo(move, int.MinValue, 0, alpha, beta);
+                var value = new NodeInfo(move, int.MinValue, alpha, beta);
                 foreach(var m in legalMoves)
                 {
 
                     game.AddMove(m, false);
-                    var node = GetMoveScores(game, playerColor, opponentColor, currentDepth + 1, m, alpha, beta);
+                    var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);
                     game.UndoLastMove();
-                    value = value.Score >= node.Score ? value : new NodeInfo(m, node.Score, node.TotalMoves + 1, node.Alpha, node.Beta);
+                    value = value.Score >= node.Score ? value : new NodeInfo(m, node.Score, node.Alpha, node.Beta);
                     alpha = Math.Max(alpha, value.Score);                    
                     if (alpha >= beta)
-                    {
-                        break;
-                    }
-                    if (node.Score == 1000000000)
                     {
                         break;
                     }
@@ -71,19 +79,15 @@ namespace ChessLibrary
             }
             else
             {
-                var value = new NodeInfo(move, int.MaxValue, 0, alpha, beta);
+                var value = new NodeInfo(move, int.MaxValue, alpha, beta);
                 foreach (var m in legalMoves)
                 {
                     game.AddMove(m, false);
-                    var node = GetMoveScores(game, playerColor, opponentColor, currentDepth + 1, m, alpha, beta);
+                    var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);
                     game.UndoLastMove();
-                    value = value.Score <= node.Score ? value : new NodeInfo(m, node.Score, node.TotalMoves + 1, node.Alpha, node.Beta);
+                    value = value.Score <= node.Score ? value : new NodeInfo(m, node.Score, node.Alpha, node.Beta);
                     beta = Math.Min(beta, value.Score);
                     if (alpha >= beta)
-                    {
-                        break;
-                    }
-                    if (node.Score == -1000000000)
                     {
                         break;
                     }
@@ -96,15 +100,13 @@ namespace ChessLibrary
         {
             public Move? Move { get; set; }
             public int Score { get; set; } 
-            public int TotalMoves { get; set; }
             public int Alpha { get; set; }
             public int Beta { get; set; }
 
-            public NodeInfo(Move? move, int score, int totalMoves, int alpha, int beta)
+            public NodeInfo(Move? move, int score, int alpha, int beta)
             {
                 Move = move;
                 Score = score;
-                TotalMoves = totalMoves;
                 Alpha = alpha;
                 Beta = beta;
             }

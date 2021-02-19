@@ -43,7 +43,7 @@ namespace ChessLibrary
             switch (piece.Type)
             {
                 case PieceTypes.Pawn:
-                    potentialMoves = GetValidPawnMoves(b, squareState, piece, color, square, pawnDirection);
+                    potentialMoves = GetValidPawnMoves(b, squareState, piece, color, square, pawnDirection, pastMoves.Any() ? pastMoves.Last() : null);
                     break;
                 case PieceTypes.Knight:
                     potentialMoves = GetValidKnightMoves(b, piece, color, square);
@@ -76,33 +76,7 @@ namespace ChessLibrary
             {
 
                 var tempBoard = (Board)b.Clone();
-                var initialPiece = tempBoard.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece;
-                tempBoard.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = null;
-                tempBoard.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = initialPiece;
-
-                if(initialPiece != null && initialPiece.Type == PieceTypes.King)
-                {
-                    var rank = color == Colors.Black ? 8 : 1;
-                    if(move.StartingSquare.Rank == rank && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
-                    {
-                        // Castling.
-                        if(move.DestinationSquare.File == Files.G)
-                        {
-                            var rookCurrentSquare = tempBoard.GetSquare(Files.H, rank);
-                            var targetRookSquare = tempBoard.GetSquare(Files.F, rank);
-                            targetRookSquare.Piece = rookCurrentSquare.Piece;
-                            rookCurrentSquare.Piece = null;
-                        }
-
-                        if (move.DestinationSquare.File == Files.C)
-                        {
-                            var rookCurrentSquare = tempBoard.GetSquare(Files.A, rank);
-                            var targetRookSquare = tempBoard.GetSquare(Files.D, rank);
-                            targetRookSquare.Piece = rookCurrentSquare.Piece;
-                            rookCurrentSquare.Piece = null;
-                        }
-                    }
-                }
+                tempBoard.MovePiece(move);
 
                 // find the king after the move.
                 SquareState kingSquareState = GetKingSquare(tempBoard, color);
@@ -451,7 +425,7 @@ namespace ChessLibrary
             return potentialMoves;
         }
 
-        private static List<Move> GetValidPawnMoves(Board b, SquareState squareState, Piece piece, Colors color, Square square, int pawnDirection)
+        private static List<Move> GetValidPawnMoves(Board b, SquareState squareState, Piece piece, Colors color, Square square, int pawnDirection, Move? mostRecentMove)
         {
             List<Move> potentialMoves = new List<Move>();
             // Pawn can move 1 move forward if:
@@ -507,6 +481,22 @@ namespace ChessLibrary
                     }
                 }
 
+                // En Passant
+                var startingRank = color == Colors.Black ? 4 : 5;
+                var moveDirection = color == Colors.Black ? -1 : 1;
+                if(mostRecentMove != null 
+                    && square.Rank == startingRank 
+                    && mostRecentMove.Piece.Type == PieceTypes.Pawn 
+                    && mostRecentMove.DestinationSquare.Rank == startingRank
+                    && mostRecentMove.StartingSquare.Rank == startingRank + (moveDirection * 2) //Started in the appropriate starting rank.
+                    && Math.Abs(mostRecentMove.DestinationSquare.File - square.File) == 1)
+                {
+                    potentialMoves.Add(new Move(piece, color, square, b.GetSquare(mostRecentMove.DestinationSquare.File, startingRank + moveDirection).Square)
+                    {
+                        CapturedPiece = mostRecentMove.Piece                        
+                    });
+                }
+
                 var result = new List<Move>();
                 foreach (var move in potentialMoves)
                 {
@@ -542,8 +532,6 @@ namespace ChessLibrary
                 }
                 return result;
             }
-
-            // TODO - En Passant
 
 
             return potentialMoves;

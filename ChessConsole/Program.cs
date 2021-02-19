@@ -23,7 +23,7 @@ namespace ChessConsole
                     {
                         if (move.ToLower() == "analyze")
                         {
-                            var bestMove = Engine.GetBestMove(g, g.PlayerToMove);
+                            var bestMove = Engine.GetBestMove(g, g.PlayerToMove).Move;
                             var promotion = string.Empty;
                             if(bestMove.PromotedPiece != null)
                             {
