@@ -9,8 +9,14 @@ namespace ChessConsole
     {
         static void Main(string[] args)
         {
-            var g = new Game();
+            var g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
             g.ResetGame();
+            int c = 0;
+            for(int i = 0; i < 100; i++)
+            {
+                Engine.GetBestMove(g, Colors.White);
+                c++;
+            }
 
             RenderBoard(g);
 
@@ -23,7 +29,7 @@ namespace ChessConsole
                     {
                         if (move.ToLower() == "analyze")
                         {
-                            var bestMove = Engine.GetBestMove(g, g.PlayerToMove).Move;
+                            var bestMove = Engine.GetBestMove(g, g.PlayerToMove).node.Move;
                             var promotion = string.Empty;
                             if(bestMove.PromotedPiece != null)
                             {
@@ -75,7 +81,7 @@ namespace ChessConsole
             Console.WriteLine("GAME OVER");
         }
 
-        static SquareState ParseSquare(Board b, string sq)
+        static SquareState ParseSquare(IBoard b, string sq)
         {
             char fileStr = sq.ToUpper().ToCharArray()[0];
             Files f;

@@ -4,11 +4,11 @@ using System.Text;
 
 namespace ChessLibrary
 {
-    public class Board : ICloneable
+    public class NaiveBoard : ICloneable, IBoard
     {
         private SquareState[][] _squares;
 
-        public Board(bool setup = true)
+        public NaiveBoard(bool setup = true)
         {
             _squares = new SquareState[8][];
 
@@ -32,12 +32,51 @@ namespace ChessLibrary
 
         public SquareState GetSquare(Files file, int rank)
         {
-            return _squares[(int)file - 1][ rank - 1];
+            return _squares[(int)file - 1][rank - 1];
+        }
+
+        public void SetupBoard()
+        {
+            // White Pawns
+            for (Files f = Files.A; f <= Files.H; f++)
+            {
+                GetSquare(f, 2).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Pawn };
+            }
+
+            // Black Pawns
+            for (Files f = Files.A; f <= Files.H; f++)
+            {
+                GetSquare(f, 7).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Pawn };
+            }
+
+            GetSquare(Files.A, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook };
+            GetSquare(Files.H, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook };
+
+            GetSquare(Files.B, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Knight };
+            GetSquare(Files.G, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Knight };
+
+            GetSquare(Files.C, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Bishop };
+            GetSquare(Files.F, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Bishop };
+
+            GetSquare(Files.E, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.King };
+            GetSquare(Files.D, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Queen };
+
+            GetSquare(Files.A, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Rook };
+            GetSquare(Files.H, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Rook };
+
+            GetSquare(Files.B, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Knight };
+            GetSquare(Files.G, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Knight };
+
+            GetSquare(Files.C, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop };
+            GetSquare(Files.F, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop };
+
+            GetSquare(Files.E, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King };
+            GetSquare(Files.D, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Queen };
         }
 
         public object Clone()
         {
-            var newBoard = new Board(true);
+            var newBoard = new NaiveBoard(true);
             for (Files file = Files.A; file <= Files.H; file++)
             {
                 // Counting from 1 to 8 rather than 0 to 7 here to match the board labels
@@ -106,5 +145,14 @@ namespace ChessLibrary
             }
         }
 
+        public void SetPiece(Files f, int rank, PieceTypes type, Colors color)
+        {
+            GetSquare(f, rank).Piece = new Piece() { Type = type, Color = color };
+        }
+
+        public void ClearPiece(Files f, int rank)
+        {
+            GetSquare(f, rank).Piece = null;
+        }
     }
 }

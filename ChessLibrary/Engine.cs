@@ -11,7 +11,7 @@ namespace ChessLibrary
     public class Engine
     {
         const decimal MAX_DEPTH = 3M;
-        public static NodeInfo? GetBestMove(Game game, Colors playerColor)
+        public static (NodeInfo? node, int depth) GetBestMove(Game game, Colors playerColor)
         {
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
             var isCheckmate = game.IsCheckmate;
@@ -19,20 +19,22 @@ namespace ChessLibrary
             {
                 NodeInfo? result = null;
                 var sw = new Stopwatch();
-                int depthToSearch = 4;
-                while (sw.ElapsedMilliseconds < 1000)
+                int depthToSearch = 3;
+                bool checkmate = false;
+                while (sw.ElapsedMilliseconds < 1000 && !checkmate)
                 {
+                    depthToSearch++;
                     sw.Reset();
                     sw.Start();
                     result = GetMoveScores(game, playerColor, opponentColor, depthToSearch, null, int.MinValue, int.MaxValue);
+                    checkmate = result.Score > 10000000;
                     sw.Stop();
-                    depthToSearch++;
                 }
-                return result;
+                return (result, depthToSearch);
             }
 
 
-            return null;
+            return (null, 3);
         }
 
         private static NodeInfo GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, int alpha, int beta)

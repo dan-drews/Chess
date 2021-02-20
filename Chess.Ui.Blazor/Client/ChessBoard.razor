@@ -9,7 +9,7 @@
 
     protected override void OnInitialized()
     {
-        g = new Game();
+        g = new Game(ChessLibrary.Enums.BoardType.Naive);
         g.ResetGame();
     }
 
@@ -33,7 +33,7 @@
         {
             TargetedSquares.Clear();
             selectedSquare = s;
-            var moves = MoveLegalityEvaluator.GetAllLegalMoves(g.Board, s, g.Moves, false);
+            var moves = g.Evaluator.GetAllLegalMoves(g.Board, s, g.Moves, false);
             foreach (var m in moves)
             {
                 TargetedSquares.Add((m.DestinationSquare.File, m.DestinationSquare.Rank));

@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessConsole", "ChessConsol
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Tests", "Chess.Tests\Chess.Tests.csproj", "{AEC6836F-70C8-49ED-9909-1479CE314F0D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Ui.Blazor.Client", "Chess.Ui.Blazor\Client\Chess.Ui.Blazor.Client.csproj", "{A1C5F88E-F888-42AA-A7A4-190841E1BCC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Ui.ServerBlazor", "Chess.Ui.ServerBlazor\Chess.Ui.ServerBlazor.csproj", "{D5979BD3-A214-454F-BDEE-4048553F6B93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Ui.ServerBlazor", "Chess.Ui.ServerBlazor\Chess.Ui.ServerBlazor.csproj", "{D5979BD3-A214-454F-BDEE-4048553F6B93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Benchmarks", "Chess.Benchmarks\Chess.Benchmarks.csproj", "{7B03970D-21F6-4887-AD4F-CB31B250CCB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,14 +37,14 @@ Global
 		{AEC6836F-70C8-49ED-9909-1479CE314F0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEC6836F-70C8-49ED-9909-1479CE314F0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEC6836F-70C8-49ED-9909-1479CE314F0D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A1C5F88E-F888-42AA-A7A4-190841E1BCC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1C5F88E-F888-42AA-A7A4-190841E1BCC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1C5F88E-F888-42AA-A7A4-190841E1BCC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1C5F88E-F888-42AA-A7A4-190841E1BCC6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D5979BD3-A214-454F-BDEE-4048553F6B93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D5979BD3-A214-454F-BDEE-4048553F6B93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5979BD3-A214-454F-BDEE-4048553F6B93}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5979BD3-A214-454F-BDEE-4048553F6B93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B03970D-21F6-4887-AD4F-CB31B250CCB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B03970D-21F6-4887-AD4F-CB31B250CCB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B03970D-21F6-4887-AD4F-CB31B250CCB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B03970D-21F6-4887-AD4F-CB31B250CCB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

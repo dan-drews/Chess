@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ChessLibrary.Enums;
+using ChessLibrary.MoveLegaility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,12 +8,38 @@ namespace ChessLibrary
 {
     public class Game : ICloneable
     {
+
+        public IMoveLegality Evaluator { get; private set; }
+        public IBoard Board { get; private set; }
+
+        private Game(IMoveLegality evaluator, IBoard board)
+        {
+            Evaluator = evaluator;
+            Board = board;
+        }
+
+        public Game(BoardType boardType)
+        {
+            switch (boardType)
+            {
+                case BoardType.BitBoard:
+                    Board = new BitBoard();
+                    Evaluator = new BitBoardLegality();
+                    break;
+                case BoardType.Naive:
+                    Board = new NaiveBoard();
+                    Evaluator = new NaiveMoveLegality();
+                    break;
+                default:
+                    throw new Exception("Board Type Not Supported");
+            }
+        }
+
         public object Clone()
         {
-            return new Game()
+            return new Game(Evaluator, (IBoard)Board.Clone())
             {
-                Board = (Board)Board.Clone(),
-                Moves = Moves.Select(x => (Move)x.Clone()).ToList(),
+                Moves = Moves.Select(x => (Move)x.Clone()).ToList()
             };
         }
 
@@ -25,7 +53,6 @@ namespace ChessLibrary
 
         public List<Move> Moves { get; private set; } = new List<Move>();
 
-        public Board Board { get; private set; } = new Board();
 
         public bool IsGameOver
         {
@@ -43,9 +70,9 @@ namespace ChessLibrary
             {
                 if (_legalMoves == null)
                 {
-                    _legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                    _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
                 }
-                return !IsKingInCheck(PlayerToMove) && !GetAllLegalMoves().Any();
+                return !GetAllLegalMoves().Any() && !IsKingInCheck(PlayerToMove);
             }
         }
 
@@ -55,9 +82,9 @@ namespace ChessLibrary
             {
                 if (_legalMoves == null)
                 {
-                    _legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                    _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
                 }
-                return IsKingInCheck(PlayerToMove) && !GetAllLegalMoves().Any();
+                return !GetAllLegalMoves().Any() && IsKingInCheck(PlayerToMove);
             }
         }
 
@@ -65,7 +92,7 @@ namespace ChessLibrary
         {
             if (_legalMoves == null)
             {
-                _legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
             }
             return _legalMoves;
         }
@@ -145,7 +172,7 @@ namespace ChessLibrary
             {
                 if (_isBlackKingInCheck == null)
                 {
-                    _isBlackKingInCheck = MoveLegalityEvaluator.IsKingInCheck(Board, color, Moves);
+                    _isBlackKingInCheck = Evaluator.IsKingInCheck(Board, color, Moves);
                 }
                 return _isBlackKingInCheck.Value;
             }
@@ -153,7 +180,7 @@ namespace ChessLibrary
             {
                 if (_isWhiteKingInCheck == null)
                 {
-                    _isWhiteKingInCheck = MoveLegalityEvaluator.IsKingInCheck(Board, color, Moves);
+                    _isWhiteKingInCheck = Evaluator.IsKingInCheck(Board, color, Moves);
                 }
                 return _isWhiteKingInCheck.Value;
             }
@@ -168,13 +195,13 @@ namespace ChessLibrary
             {
                 for (int rank = 1; rank <= 8; rank++)
                 {
-                    Board.GetSquare(f, rank).Piece = null;
+                    Board.ClearPiece(f, rank);
                 }
             }
             SetupBoard();
         }
 
-        public Board AddMove(Move move, bool validate = true)
+        public IBoard AddMove(Move move, bool validate = true)
         {
             var startingSquare = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank);
             if (startingSquare.Piece == null)
@@ -188,7 +215,7 @@ namespace ChessLibrary
             List<Move>? legalMoves = null;
             if (validate)
             {
-                legalMoves = MoveLegalityEvaluator.GetAllLegalMoves(Board, startingSquare, Moves);
+                legalMoves = Evaluator.GetAllLegalMoves(Board, startingSquare, Moves);
                 if (legalMoves == null)
                 {
                     throw new Exception("Invalid move");
@@ -219,7 +246,7 @@ namespace ChessLibrary
             }
         }
 
-        public Board UndoLastMove()
+        public IBoard UndoLastMove()
         {
             var move = Moves.Last();
             var startingSquare = Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank);
@@ -246,9 +273,9 @@ namespace ChessLibrary
                             && moveBeforeLast.DestinationSquare.File == move.DestinationSquare.File)
                         {
                             // Yup, it was en passant.
-                            Board.GetSquare(moveBeforeLast.DestinationSquare.File, moveBeforeLast.DestinationSquare.Rank).Piece = moveBeforeLast.Piece;
-                            Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = initialPiece;
-                            Board.GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece = null;
+                            Board.SetPiece(moveBeforeLast.DestinationSquare.File, moveBeforeLast.DestinationSquare.Rank, moveBeforeLast.Piece.Type, moveBeforeLast.Piece.Color);
+                            Board.SetPiece(move.StartingSquare.File, move.StartingSquare.Rank, initialPiece.Type, initialPiece.Color);
+                            Board.ClearPiece(move.DestinationSquare.File, move.DestinationSquare.Rank);
                             hasPerformedMove = true;
                         }
                     }
@@ -257,7 +284,15 @@ namespace ChessLibrary
             if (!hasPerformedMove)
             {
                 startingSquare.Piece = move.CapturedPiece;
-                Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece = initialPiece;
+                if (move.CapturedPiece != null)
+                {
+                    Board.SetPiece(startingSquare.Square.File, startingSquare.Square.Rank, move.CapturedPiece.Type, move.CapturedPiece.Color);
+                }
+                else
+                {
+                    Board.ClearPiece(startingSquare.Square.File, startingSquare.Square.Rank);
+                }
+                Board.SetPiece(move.StartingSquare.File, move.StartingSquare.Rank, initialPiece!.Type, initialPiece.Color);
 
                 if (initialPiece != null && initialPiece.Type == PieceTypes.King)
                 {
@@ -294,41 +329,7 @@ namespace ChessLibrary
 
         private void SetupBoard()
         {
-            // White Pawns
-            for (Files f = Files.A; f <= Files.H; f++)
-            {
-                Board.GetSquare(f, 2).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Pawn };
-            }
-
-            // Black Pawns
-            for (Files f = Files.A; f <= Files.H; f++)
-            {
-                Board.GetSquare(f, 7).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Pawn };
-            }
-
-            Board.GetSquare(Files.A, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook };
-            Board.GetSquare(Files.H, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook };
-
-            Board.GetSquare(Files.B, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Knight };
-            Board.GetSquare(Files.G, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Knight };
-
-            Board.GetSquare(Files.C, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Bishop };
-            Board.GetSquare(Files.F, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Bishop };
-
-            Board.GetSquare(Files.E, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.King };
-            Board.GetSquare(Files.D, 1).Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Queen };
-
-            Board.GetSquare(Files.A, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Rook };
-            Board.GetSquare(Files.H, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Rook };
-
-            Board.GetSquare(Files.B, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Knight };
-            Board.GetSquare(Files.G, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Knight };
-
-            Board.GetSquare(Files.C, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop };
-            Board.GetSquare(Files.F, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop };
-
-            Board.GetSquare(Files.E, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King };
-            Board.GetSquare(Files.D, 8).Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Queen };
+            Board.SetupBoard();
         }
     }
 }
