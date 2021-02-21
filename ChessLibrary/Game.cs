@@ -302,18 +302,14 @@ namespace ChessLibrary
                         // Castling.
                         if (move.DestinationSquare.File == Files.G)
                         {
-                            var rookCurrentSquare = Board.GetSquare(Files.H, rank);
-                            var targetRookSquare = Board.GetSquare(Files.F, rank);
-                            rookCurrentSquare.Piece = targetRookSquare.Piece;
-                            targetRookSquare.Piece = null;
+                            Board.SetPiece(Files.H, rank, PieceTypes.Rook, initialPiece.Color);
+                            Board.ClearPiece(Files.F, rank);
                         }
 
                         if (move.DestinationSquare.File == Files.C)
                         {
-                            var rookCurrentSquare = Board.GetSquare(Files.A, rank);
-                            var targetRookSquare = Board.GetSquare(Files.D, rank);
-                            rookCurrentSquare.Piece = targetRookSquare.Piece;
-                            targetRookSquare.Piece = null;
+                            Board.SetPiece(Files.A, rank, PieceTypes.Rook, initialPiece.Color);
+                            Board.ClearPiece(Files.D, rank);
                         }
                     }
                 }

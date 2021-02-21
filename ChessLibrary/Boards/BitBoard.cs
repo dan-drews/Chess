@@ -216,6 +216,25 @@ namespace ChessLibrary
                 ClearPiece(move.DestinationSquare.File, move.StartingSquare.Rank);
             }
 
+            // Castle
+            if(move.Piece.Type == PieceTypes.King && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
+            {
+                if(move.DestinationSquare.File == Files.G)
+                {
+                    // Short Castle
+                    var rook = GetSquare(Files.H, move.DestinationSquare.Rank).Piece!;
+                    ClearPiece(Files.H, move.DestinationSquare.Rank);
+                    SetPiece(Files.F, move.DestinationSquare.Rank, rook.Type, rook.Color);
+                }
+                else
+                {
+                    // Long Castle
+                    var rook = GetSquare(Files.A, move.DestinationSquare.Rank).Piece!;
+                    ClearPiece(Files.A, move.DestinationSquare.Rank);
+                    SetPiece(Files.D, move.DestinationSquare.Rank, rook.Type, rook.Color);
+                }
+            }
+
             ClearPiece(move.StartingSquare.File, move.StartingSquare.Rank);
             var newPiece = move.PromotedPiece ?? move.Piece;
             SetPiece(move.DestinationSquare.File, move.DestinationSquare.Rank, newPiece.Type, newPiece.Color);
@@ -340,7 +359,7 @@ namespace ChessLibrary
             result.AddRange(ValidRookMoves(color));
             result.AddRange(ValidBishopMoves(color));
             result.AddRange(ValidQueenMoves(color));
-            result.AddRange(ValidKingMoves(color));
+            result.AddRange(ValidKingMoves(color, previousMoves));
 
             return result.Where(x => !ResultsInOwnCheck(x, color)).ToList();
         }
@@ -473,7 +492,7 @@ namespace ChessLibrary
             return result;
         }
 
-        private List<Move> ValidKingMoves(Colors color)
+        private List<Move> ValidKingMoves(Colors color, List<Move> moves)
         {
             var result = new List<Move>();
             ulong currentKing = color == Colors.Black ? _blackKing : _whiteKing;
@@ -510,6 +529,74 @@ namespace ChessLibrary
                 possibility &= ~j;
                 j = possibility & ~(possibility - 1);
             }
+
+            var startingKing = color == Colors.Black ? Starting_Black_King : Starting_White_King;
+            var startingRooks = color == Colors.Black ? Starting_Black_Rooks : Starting_White_Rooks;
+            var currentRooks = color == Colors.Black ? _blackRooks : _whiteRooks;
+            if(startingKing == currentKing && (startingRooks & currentRooks) != 0)
+            {
+                var canShortCastle = true;
+                var canLongCastle = true;
+                // King and at least one rook is in starting position
+                foreach (var m in moves.Where(x=> x.Piece.Color == color && (x.Piece.Type == PieceTypes.Rook || x.Piece.Type == PieceTypes.King)))
+                {
+
+                    if(m.Piece.Type == PieceTypes.King)
+                    {
+                        canLongCastle = false;
+                        canShortCastle = false;
+                        break;
+                    }
+                    if(m.Piece.Type == PieceTypes.Rook && (m.StartingSquare.File == Files.A || m.StartingSquare.File == Files.H))
+                    {
+                        if(m.StartingSquare.File == Files.A)
+                        {
+                            canLongCastle = false;
+                        }
+                        else
+                        {
+                            canShortCastle = false;
+                        }
+                    }
+                }
+
+                if(canShortCastle || canLongCastle)
+                {
+                    var dangerous = Unsafe(color);
+                    if ((dangerous & currentKing) != 0)
+                    {
+                        canShortCastle = false;
+                        canLongCastle = false;
+                    }
+
+                    const ulong whiteLongCastleSquares = 0x38;
+                    const ulong whiteShortCastleSquares = 0X0E;
+
+                    const ulong blackLongCastleSquares = 0x3800000000000000;
+                    const ulong blackShortCastleSquares = 0x0E00000000000000;
+
+                    if (canShortCastle)
+                    {
+                        var shortCastleSquares = color == Colors.White ? whiteShortCastleSquares : blackShortCastleSquares;
+                        if((shortCastleSquares & dangerous) == 0 && (shortCastleSquares & OccupiedSquares & ~currentKing) == 0)
+                        {
+                            result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, GetSquare(Files.G, startingSquare.Square.Rank).Square));
+                        }
+                    }
+
+                    if (canLongCastle)
+                    {
+                        var shortCastleSquares = color == Colors.White ? whiteLongCastleSquares : blackLongCastleSquares;
+                        if ((shortCastleSquares & dangerous) == 0 && (shortCastleSquares & OccupiedSquares & ~currentKing) == 0)
+                        {
+                            result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, GetSquare(Files.C, startingSquare.Square.Rank).Square));
+                        }
+                    }
+
+                }
+
+            }
+
             return result;
         }
 

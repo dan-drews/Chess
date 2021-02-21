@@ -13,7 +13,7 @@ namespace Chess.Tests
 
         [TestMethod]
         public void GetValidMoves_ForAllWhiteStartingPieces_Provides20Moves()
-        {   
+        {
             Game.ResetGame();
             Game.Board.ClearPiece(Files.A, 8);
             int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, new System.Collections.Generic.List<Move>()).Count;
@@ -24,13 +24,31 @@ namespace Chess.Tests
         public void GetValidMoves_ForAllWhiteStartingPieces_InLoop_Provides20Moves()
         {
             int count = 0;
-            for(int i = 0; i < 1_000_000; i++)
+            for (int i = 0; i < 1_000_000; i++)
             {
                 Game.ResetGame();
-                Game.Board.ClearPiece(Files.A, 8);
                 count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, new System.Collections.Generic.List<Move>()).Count;
             }
             Assert.AreEqual(20, count);
+        }
+
+        [TestMethod]
+        public void GetValidMoves_Allows_Castling()
+        {
+            Game.ResetGame();
+            Game.Board.ClearPiece(Files.F, 1);
+            Game.Board.ClearPiece(Files.G, 1);
+            Game.Board.ClearPiece(Files.B, 1);
+            Game.Board.ClearPiece(Files.C, 1);
+            Game.Board.ClearPiece(Files.D, 1);
+
+            var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, new List<Move>());
+            Assert.IsTrue(moves.Any(x => x.Piece.Type == PieceTypes.King && x.DestinationSquare.File == Files.G && x.DestinationSquare.Rank == 1));
+            Assert.IsTrue(moves.Any(x => x.Piece.Type == PieceTypes.King && x.DestinationSquare.File == Files.C && x.DestinationSquare.Rank == 1));
+            Game.AddMove(moves.First(x => x.Piece.Type == PieceTypes.King && x.DestinationSquare.File == Files.G && x.DestinationSquare.Rank == 1));
+            Assert.IsTrue(Game.Board.GetSquare(Files.G, 1).Piece.Type == PieceTypes.King);
+            Assert.IsTrue(Game.Board.GetSquare(Files.F, 1).Piece.Type == PieceTypes.Rook);
+
         }
 
         [TestMethod]
@@ -109,10 +127,10 @@ namespace Chess.Tests
         public void GetValidMoves_ForRookWithBlockedSpace_Provides10Moves()
         {
 
-            Game.Board.SetPiece(Files.B, 5, PieceTypes.Rook, Colors.White );
-            Game.Board.SetPiece(Files.B, 4, PieceTypes.Pawn, Colors.White );
-            Game.Board.SetPiece(Files.H, 1, PieceTypes.King, Colors.White );
-            Game.Board.SetPiece(Files.H, 8, PieceTypes.King, Colors.Black );
+            Game.Board.SetPiece(Files.B, 5, PieceTypes.Rook, Colors.White);
+            Game.Board.SetPiece(Files.B, 4, PieceTypes.Pawn, Colors.White);
+            Game.Board.SetPiece(Files.H, 1, PieceTypes.King, Colors.White);
+            Game.Board.SetPiece(Files.H, 8, PieceTypes.King, Colors.Black);
 
 
             var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.B, 5), Game.Moves);

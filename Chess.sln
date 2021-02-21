@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Tests", "Chess.Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Ui.ServerBlazor", "Chess.Ui.ServerBlazor\Chess.Ui.ServerBlazor.csproj", "{D5979BD3-A214-454F-BDEE-4048553F6B93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Benchmarks", "Chess.Benchmarks\Chess.Benchmarks.csproj", "{7B03970D-21F6-4887-AD4F-CB31B250CCB0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Benchmarks", "Chess.Benchmarks\Chess.Benchmarks.csproj", "{7B03970D-21F6-4887-AD4F-CB31B250CCB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -164,8 +164,11 @@
 <h1>Score: @(g.GetScore(Colors.White) - g.GetScore(Colors.Black))</h1>
 @if (node != null)
 {
-    <h1>Analysis Score: @node.Score</h1>
-    <h1>Analysis Depth: @depth</h1>
+<h4>Analysis Score: @node.Score</h4>
+<h4>Analysis Depth: @depth</h4>
+<h4>Nodes Evaluated: @Engine.nodesEvaluated</h4>
+<h4>Time: @Engine.miliseconds</h4>
+<h4>Skips: @Engine.skips</h4>
 }
 <audio id="sound" src="/click.mp3" />
 <table style="border: 1px solid black;">
