@@ -63,7 +63,7 @@ namespace ChessLibrary
                 }
                 if (isCheckmate)
                 {
-                    return move.Piece.Color == playerColor ? new NodeInfo(move, 1000000000 + currentDepth, 0, 0) : new NodeInfo(move, -1000000000 + currentDepth, 0, 0);
+                    return move.Piece.Color == playerColor ? new NodeInfo(move, 1000000000 + currentDepth, 0, 0) : new NodeInfo(move, -1000000000 - currentDepth, 0, 0);
                 }
 
                 return new NodeInfo(move, game.GetScore(playerColor) - game.GetScore(opponentColor), 0, 0);

@@ -291,7 +291,7 @@ namespace ChessLibrary
                     possibilities = KnightSpan >> (KnightRangeBaseSquare - location);
                 }
 
-                if (location % 8 > 4)
+                if (location % 8 >= 4)
                 {
                     possibilities &= ~(FileG | FileH);
                 }
@@ -339,7 +339,7 @@ namespace ChessLibrary
             {
                 possibilities = KingSpan >> (KingRangeBaseSquare - kingLocation);
             }
-            if (kingLocation % 8 > 4)
+            if (kingLocation % 8 >= 4)
             {
                 possibilities &= ~(FileG | FileH);
             }
@@ -508,7 +508,7 @@ namespace ChessLibrary
             {
                 possibility = KingSpan >> (KingRangeBaseSquare - location);
             }
-            if (location % 8 > 4)
+            if (location % 8 >= 4)
             {
                 possibility &= ~(FileG | FileH) & notMyPieces;
             }
@@ -618,7 +618,7 @@ namespace ChessLibrary
                 {
                     possibility = KnightSpan >> (KnightRangeBaseSquare - location);
                 }
-                if (location % 8 > 4)
+                if (location % 8 >= 4)
                 {
                     possibility &= ~(FileG | FileH) & notMyPieces;
                 }
