@@ -537,6 +537,7 @@ namespace ChessLibrary
             {
                 var canShortCastle = true;
                 var canLongCastle = true;
+
                 // King and at least one rook is in starting position
                 foreach (var m in moves.Where(x=> x.Piece.Color == color && (x.Piece.Type == PieceTypes.Rook || x.Piece.Type == PieceTypes.King)))
                 {
@@ -578,7 +579,7 @@ namespace ChessLibrary
                     if (canShortCastle)
                     {
                         var shortCastleSquares = color == Colors.White ? whiteShortCastleSquares : blackShortCastleSquares;
-                        if((shortCastleSquares & dangerous) == 0 && (shortCastleSquares & OccupiedSquares & ~currentKing) == 0)
+                        if((shortCastleSquares & dangerous) == 0 && (shortCastleSquares & OccupiedSquares & ~currentKing) == 0 && (shortCastleSquares & currentRooks) != 0)
                         {
                             result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, GetSquare(Files.G, startingSquare.Square.Rank).Square));
                         }
@@ -587,7 +588,7 @@ namespace ChessLibrary
                     if (canLongCastle)
                     {
                         var shortCastleSquares = color == Colors.White ? whiteLongCastleSquares : blackLongCastleSquares;
-                        if ((shortCastleSquares & dangerous) == 0 && (shortCastleSquares & OccupiedSquares & ~currentKing) == 0)
+                        if ((shortCastleSquares & dangerous) == 0 && (shortCastleSquares & OccupiedSquares & ~currentKing) == 0 && (shortCastleSquares & currentRooks) != 0)
                         {
                             result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, GetSquare(Files.C, startingSquare.Square.Rank).Square));
                         }
