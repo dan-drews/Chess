@@ -570,16 +570,21 @@ namespace ChessLibrary
                         canLongCastle = false;
                     }
 
-                    const ulong whiteLongCastleSquares = 0x38;
+                    const ulong whiteLongCastleSquares = 0x78;
                     const ulong whiteShortCastleSquares = 0X0E;
+                    const ulong whiteLongCastleStartSquare = 0x80;
+                    const ulong whiteShortCastleStartSquares = 0X01;
 
-                    const ulong blackLongCastleSquares = 0x3800000000000000;
+                    const ulong blackLongCastleSquares = 0x7800000000000000;
                     const ulong blackShortCastleSquares = 0x0E00000000000000;
+                    const ulong blackLongCastleStartSquare = 0x8000000000000000;
+                    const ulong blackShortCastleStartSquares = 0x0100000000000000;
 
                     if (canShortCastle)
                     {
-                        var shortCastleSquares = color == Colors.White ? whiteShortCastleSquares : blackShortCastleSquares;
-                        if((shortCastleSquares & dangerous) == 0 && (shortCastleSquares & OccupiedSquares & ~currentKing) == 0 && (shortCastleSquares & currentRooks) != 0)
+                        var castleSquares = color == Colors.White ? whiteShortCastleSquares : blackShortCastleSquares;
+                        var castleStartSquare = color == Colors.White ? whiteShortCastleStartSquares : blackShortCastleStartSquares;
+                        if((castleSquares & dangerous) == 0 && (castleSquares & OccupiedSquares & ~currentKing) == 0 && (castleStartSquare & currentRooks) != 0)
                         {
                             result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, GetSquare(Files.G, startingSquare.Square.Rank).Square));
                         }
@@ -587,8 +592,9 @@ namespace ChessLibrary
 
                     if (canLongCastle)
                     {
-                        var shortCastleSquares = color == Colors.White ? whiteLongCastleSquares : blackLongCastleSquares;
-                        if ((shortCastleSquares & dangerous) == 0 && (shortCastleSquares & OccupiedSquares & ~currentKing) == 0 && (shortCastleSquares & currentRooks) != 0)
+                        var castleSquares = color == Colors.White ? whiteLongCastleSquares : blackLongCastleSquares;
+                        var castleStartSquare = color == Colors.White ? whiteLongCastleStartSquare : blackLongCastleStartSquare;
+                        if ((castleSquares & dangerous) == 0 && (castleSquares & OccupiedSquares & ~currentKing) == 0 && (castleStartSquare & currentRooks) != 0)
                         {
                             result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, GetSquare(Files.C, startingSquare.Square.Rank).Square));
                         }
