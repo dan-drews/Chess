@@ -12,6 +12,14 @@ namespace ChessLibrary
         public IMoveLegality Evaluator { get; private set; }
         public IBoard Board { get; private set; }
 
+        public bool WhiteCanLongCastle { get; set; } = true;
+        public bool BlackCanLongCastle { get; set; } = true;
+        public bool WhiteCanShortCastle { get; set; } = true;
+        public bool BlackCanShortCastle { get; set; } = true;
+        public Files? EnPassantFile { get; set; } = null;
+
+        public Colors StartingColor { get; set; } = Colors.White;
+
         private Game(IMoveLegality evaluator, IBoard board)
         {
             Evaluator = evaluator;
@@ -39,7 +47,13 @@ namespace ChessLibrary
         {
             return new Game(Evaluator, (IBoard)Board.Clone())
             {
-                Moves = Moves.Select(x => (Move)x.Clone()).ToList()
+                Moves = Moves.Select(x => (Move)x.Clone()).ToList(),
+                WhiteCanLongCastle = WhiteCanLongCastle,
+                WhiteCanShortCastle = WhiteCanShortCastle,
+                BlackCanLongCastle = BlackCanLongCastle,
+                BlackCanShortCastle = BlackCanShortCastle,
+                StartingColor = StartingColor,
+                EnPassantFile = EnPassantFile                
             };
         }
 
@@ -47,7 +61,11 @@ namespace ChessLibrary
         {
             get
             {
-                return Moves.Count % 2 == 0 ? Colors.White : Colors.Black;
+                if(StartingColor == Colors.White)
+                {
+                    return Moves.Count % 2 == 0 ? Colors.White : Colors.Black;
+                }
+                return Moves.Count % 2 == 1 ? Colors.White : Colors.Black;
             }
         }
 
@@ -141,9 +159,9 @@ namespace ChessLibrary
                             score += 1;
                         }
 
-                        if (piece.Score > highestPiece * 3 && piece.Type != PieceTypes.King)
+                        if (piece.Score > highestPiece * 2 && piece.Type != PieceTypes.King)
                         {
-                            highestPiece = piece.Score * 3;
+                            highestPiece = piece.Score * 2;
                         }
                     }
                 }
