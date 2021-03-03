@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace ChessLibrary
 {
-    public static class MoveLegalityEvaluator
+    public class NaiveMoveLegality : IMoveLegality
     {
 
-        public static List<Move> GetAllLegalMoves(Board b, Colors color, List<Move> pastMoves)
+        public List<Move> GetAllLegalMoves(IBoard b, Colors color, List<Move> pastMoves)
         {
             var result = new List<Move>();
             for (Files file = Files.A; file <= Files.H; file++)
@@ -26,7 +26,7 @@ namespace ChessLibrary
             return result;
         }
 
-        public static List<Move>? GetAllLegalMoves(Board b, SquareState squareState, List<Move> pastMoves, bool ignoreCheck = false)
+        public List<Move>? GetAllLegalMoves(IBoard b, SquareState squareState, List<Move> pastMoves, bool ignoreCheck = false)
         {
             if (squareState.Piece == null)
             {
@@ -75,7 +75,7 @@ namespace ChessLibrary
             foreach (var move in potentialMoves)
             {
 
-                var tempBoard = (Board)b.Clone();
+                var tempBoard = (IBoard)b.Clone();
                 tempBoard.MovePiece(move);
 
                 // find the king after the move.
@@ -92,13 +92,13 @@ namespace ChessLibrary
             return result;
         }
 
-        public static bool IsKingInCheck(Board b, Colors color, List<Move> pastMoves)
+        public bool IsKingInCheck(IBoard b, Colors color, List<Move> pastMoves)
         {
             SquareState kingSquareState = GetKingSquare(b, color);
             return KingIsInCheck(color, b, kingSquareState, pastMoves);
         }
 
-        private static List<Move> GetValidStraightLineMovves(Board b, Piece piece, Colors color, Square square)
+        private List<Move> GetValidStraightLineMovves(IBoard b, Piece piece, Colors color, Square square)
         {
             var result = new List<Move>();
 
@@ -165,7 +165,7 @@ namespace ChessLibrary
             return result;
         }
 
-        private static List<Move> GetValidDiagonalMoves(Board b, Piece piece, Colors color, Square square)
+        private List<Move> GetValidDiagonalMoves(IBoard b, Piece piece, Colors color, Square square)
         {
             var result = new List<Move>();
             int rank = square.Rank;
@@ -224,7 +224,7 @@ namespace ChessLibrary
             return result;
         }
 
-        private static bool AddMoveOrBreak(Piece piece, Colors color, Square square, List<Move> result, SquareState targetSquare)
+        private bool AddMoveOrBreak(Piece piece, Colors color, Square square, List<Move> result, SquareState targetSquare)
         {
             if (targetSquare.Piece != null)
             {
@@ -241,18 +241,18 @@ namespace ChessLibrary
             return false;
         }
 
-        private static List<Move> GetValidRookMoves(Board b, Piece piece, Colors color, Square square)
+        private List<Move> GetValidRookMoves(IBoard b, Piece piece, Colors color, Square square)
         {
             return GetValidStraightLineMovves(b, piece, color, square);
         }
 
 
-        private static List<Move> GetValidBishopMoves(Board b, Piece piece, Colors color, Square square)
+        private List<Move> GetValidBishopMoves(IBoard b, Piece piece, Colors color, Square square)
         {
             return GetValidDiagonalMoves(b, piece, color, square);
         }
 
-        private static List<Move> GetValidKingMoves(Board b, Piece piece, Colors color, Square square, List<Move> pastMoves)
+        private List<Move> GetValidKingMoves(IBoard b, Piece piece, Colors color, Square square, List<Move> pastMoves)
         {
             List<Move> potentialMoves = new List<Move>();
             var targets = new (Files file, int rank)[]
@@ -282,9 +282,9 @@ namespace ChessLibrary
                     {
                         var canCastle = true;
                         // See if king or that rook have moved.
-                        foreach(var m in pastMoves)
+                        foreach (var m in pastMoves)
                         {
-                            if((m.Piece.Color == piece.Color && m.Piece.Type == PieceTypes.King) || m.Piece == leftRookSquare.Piece)
+                            if ((m.Piece.Color == piece.Color && m.Piece.Type == PieceTypes.King) || m.Piece == leftRookSquare.Piece)
                             {
                                 canCastle = false;
                                 break;
@@ -293,9 +293,9 @@ namespace ChessLibrary
 
                         if (canCastle)
                         {
-                            for(Files f = square.File - 1; f > Files.A; f--)
+                            for (Files f = square.File - 1; f > Files.A; f--)
                             {
-                                if(b.GetSquare(f, rank).Piece != null)
+                                if (b.GetSquare(f, rank).Piece != null)
                                 {
                                     canCastle = false;
                                     break;
@@ -384,12 +384,12 @@ namespace ChessLibrary
             return potentialMoves;
         }
 
-        private static List<Move> GetValidQueenMoves(Board b, Piece piece, Colors color, Square square)
+        private List<Move> GetValidQueenMoves(IBoard b, Piece piece, Colors color, Square square)
         {
             return GetValidStraightLineMovves(b, piece, color, square).Concat(GetValidDiagonalMoves(b, piece, color, square)).ToList();
         }
 
-        private static List<Move> GetValidKnightMoves(Board b, Piece piece, Colors color, Square square)
+        private List<Move> GetValidKnightMoves(IBoard b, Piece piece, Colors color, Square square)
         {
             List<Move> potentialMoves = new List<Move>();
             var targets = new (Files file, int rank)[]
@@ -425,7 +425,7 @@ namespace ChessLibrary
             return potentialMoves;
         }
 
-        private static List<Move> GetValidPawnMoves(Board b, SquareState squareState, Piece piece, Colors color, Square square, int pawnDirection, Move? mostRecentMove)
+        private List<Move> GetValidPawnMoves(IBoard b, SquareState squareState, Piece piece, Colors color, Square square, int pawnDirection, Move? mostRecentMove)
         {
             List<Move> potentialMoves = new List<Move>();
             // Pawn can move 1 move forward if:
@@ -484,16 +484,16 @@ namespace ChessLibrary
                 // En Passant
                 var startingRank = color == Colors.Black ? 4 : 5;
                 var moveDirection = color == Colors.Black ? -1 : 1;
-                if(mostRecentMove != null 
-                    && square.Rank == startingRank 
-                    && mostRecentMove.Piece.Type == PieceTypes.Pawn 
+                if (mostRecentMove != null
+                    && square.Rank == startingRank
+                    && mostRecentMove.Piece.Type == PieceTypes.Pawn
                     && mostRecentMove.DestinationSquare.Rank == startingRank
                     && mostRecentMove.StartingSquare.Rank == startingRank + (moveDirection * 2) //Started in the appropriate starting rank.
                     && Math.Abs(mostRecentMove.DestinationSquare.File - square.File) == 1)
                 {
                     potentialMoves.Add(new Move(piece, color, square, b.GetSquare(mostRecentMove.DestinationSquare.File, startingRank + moveDirection).Square)
                     {
-                        CapturedPiece = mostRecentMove.Piece                        
+                        CapturedPiece = mostRecentMove.Piece
                     });
                 }
 
@@ -537,7 +537,7 @@ namespace ChessLibrary
             return potentialMoves;
         }
 
-        private static bool IsSquareUnderAttack(Colors attackingColor, Board board, SquareState square, List<Move> pastMoves)
+        private bool IsSquareUnderAttack(Colors attackingColor, IBoard board, SquareState square, List<Move> pastMoves)
         {
             for (Files file = Files.A; file <= Files.H; file++)
             {
@@ -556,13 +556,13 @@ namespace ChessLibrary
             return false;
         }
 
-        private static bool KingIsInCheck(Colors color, Board tempBoard, SquareState kingSquareState, List<Move> pastMoves)
+        private bool KingIsInCheck(Colors color, IBoard tempBoard, SquareState kingSquareState, List<Move> pastMoves)
         {
             var attackingColor = color == Colors.White ? Colors.Black : Colors.White;
             return IsSquareUnderAttack(attackingColor, tempBoard, kingSquareState, pastMoves);
         }
 
-        private static bool IsPieceAttackingSquare(Board board, SquareState attacker, SquareState target, List<Move> pastMoves)
+        private bool IsPieceAttackingSquare(IBoard board, SquareState attacker, SquareState target, List<Move> pastMoves)
         {
             var piece = attacker.Piece;
             List<Move>? moves;
@@ -614,7 +614,7 @@ namespace ChessLibrary
             return moves != null && moves.Any(move => move.DestinationSquare.Rank == target.Square.Rank && move.DestinationSquare.File == target.Square.File);
         }
 
-        private static SquareState GetKingSquare(Board b, Colors color)
+        private SquareState GetKingSquare(IBoard b, Colors color)
         {
             for (Files file = Files.A; file <= Files.H; file++)
             {

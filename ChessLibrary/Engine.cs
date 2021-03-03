@@ -11,28 +11,37 @@ namespace ChessLibrary
     public class Engine
     {
         const decimal MAX_DEPTH = 3M;
-        public static NodeInfo? GetBestMove(Game game, Colors playerColor)
+        public static int nodesEvaluated = 0;
+        public static long miliseconds = 0;
+        public static int skips = 0;
+        public static (NodeInfo? node, int depth) GetBestMove(Game game, Colors playerColor)
         {
+            nodesEvaluated = 0;
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
             var isCheckmate = game.IsCheckmate;
             if (!isCheckmate)
             {
                 NodeInfo? result = null;
                 var sw = new Stopwatch();
-                int depthToSearch = 4;
-                while (sw.ElapsedMilliseconds < 1000)
+                int depthToSearch = 3;
+                bool checkmate = false;
+                while (sw.ElapsedMilliseconds < 1000 && !checkmate)
                 {
+                    nodesEvaluated = 0;
+                    skips = 0;
+                    depthToSearch++;
                     sw.Reset();
                     sw.Start();
                     result = GetMoveScores(game, playerColor, opponentColor, depthToSearch, null, int.MinValue, int.MaxValue);
+                    checkmate = result.Score > 10000000;
+                    miliseconds = sw.ElapsedMilliseconds;
                     sw.Stop();
-                    depthToSearch++;
                 }
-                return result;
+                return (result, depthToSearch);
             }
 
 
-            return null;
+            return (null, 3);
         }
 
         private static NodeInfo GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, int alpha, int beta)
@@ -42,8 +51,8 @@ namespace ChessLibrary
             var isStalemate = game.IsStalemate;
 
             if (currentDepth == 0 || isCheckmate ||isStalemate)
-
             {
+                nodesEvaluated++;
                 if(move == null)
                 {
                     throw new Exception("Error! Move is null");
@@ -74,6 +83,7 @@ namespace ChessLibrary
                     alpha = Math.Max(alpha, value.Score);                    
                     if (alpha >= beta)
                     {
+                        skips++;
                         break;
                     }
                 }
@@ -91,6 +101,7 @@ namespace ChessLibrary
                     beta = Math.Min(beta, value.Score);
                     if (alpha >= beta)
                     {
+                        skips++;
                         break;
                     }
                 }

@@ -21,17 +21,17 @@ namespace ChessLibrary
                     switch (Type)
                     {
                         case PieceTypes.Pawn:
-                            _score = 1;
+                            _score = 2;
                             break;
                         case PieceTypes.Knight:
                         case PieceTypes.Bishop:
-                            _score = 3;
+                            _score = 8;
                             break;
                         case PieceTypes.Rook:
-                            _score = 5;
+                            _score = 13;
                             break;
                         case PieceTypes.Queen:
-                            _score = 9;
+                            _score = 21;
                             break;
                         case PieceTypes.King:
                             _score = 100;
