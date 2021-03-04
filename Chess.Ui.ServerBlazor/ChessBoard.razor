@@ -138,7 +138,7 @@
         {
             string promptPieceName = null;
             promptPieceName = await JS.InvokeAsync<string>("prompt", "What kind of piece would you like? B,Q,R,N,P,K,b,q,r,n,p,k");
-            while (!new string[] { "b", "q", "r", "n", "p", "k" }.Contains(promptPieceName.ToLower()))
+            while (promptPieceName == null || !new string[] { "b", "q", "r", "n", "p", "k" }.Contains(promptPieceName.ToLower()))
             {
                 promptPieceName = await JS.InvokeAsync<string>("prompt", "What kind of piece would you like? B,Q,R,N,P,K,b,q,r,n,p,k");
             }
@@ -214,7 +214,7 @@
                     {
                         // promotion......
                         promotedPieceName = await JS.InvokeAsync<string>("prompt", "What kind of piece would you like? B,Q,R,N");
-                        while (!new string[] { "b", "q", "r", "n" }.Contains(promotedPieceName.ToLower()))
+                        while (promotedPieceName == null || !new string[] { "b", "q", "r", "n" }.Contains(promotedPieceName.ToLower()))
                         {
                             promotedPieceName = await JS.InvokeAsync<string>("prompt", "What kind of piece would you like? B,Q,R,N");
                         }
@@ -287,68 +287,68 @@
 <h1>Score: @(g.GetScore(Colors.White) - g.GetScore(Colors.Black))</h1>
 @if (node != null)
 {
-    <h4>Analysis Score: @node.Score</h4>
-    <h4>Analysis Depth: @depth</h4>
-    <h4>Nodes Evaluated: @Engine.nodesEvaluated</h4>
-    <h4>Time: @Engine.miliseconds</h4>
-    <h4>Skips: @Engine.skips</h4>
+<h4>Analysis Score: @node.Score</h4>
+<h4>Analysis Depth: @depth</h4>
+<h4>Nodes Evaluated: @Engine.nodesEvaluated</h4>
+<h4>Time: @Engine.miliseconds</h4>
+<h4>Skips: @Engine.skips</h4>
 }
 <audio id="sound" src="/click.mp3" />
 <table style="border: 1px solid black;">
     @for (int i = 8; i >= 1; i--)
     {
-        <tr>
-            <td>@i</td>
-            @for (Files f = Files.A; f <= Files.H; f++)
+    <tr>
+        <td>@i</td>
+        @for (Files f = Files.A; f <= Files.H; f++)
             {
                 SquareState state = g.Board.GetSquare(f, i);
-                <td style="height: 100px; width: 100px; background-color: @(GetSquareColor(state.Square)); color:@(state.Piece?.Color == Colors.White ? "white" : "black"); stroke: @(state.Piece?.Color == Colors.White ? "black" : "white"); stroke-width: 20; font-size: 50px; text-align: center" @onclick="() => HandleSquareClick(state)">
-                    @if (state.Piece != null)
+        <td style="height: 100px; width: 100px; background-color: @(GetSquareColor(state.Square)); color:@(state.Piece?.Color == Colors.White ? "white" : "black"); stroke: @(state.Piece?.Color == Colors.White ? "black" : "white"); stroke-width: 20; font-size: 50px; text-align: center" @onclick="() => HandleSquareClick(state)">
+            @if (state.Piece != null)
                     {
                         if (state.Piece.Type == PieceTypes.Pawn)
                         {
-                            <span>
-                                <i class="fas fa-chess-pawn"></i>
-                            </span>
+            <span>
+                <i class="fas fa-chess-pawn"></i>
+            </span>
                         }
                         else if (state.Piece.Type == PieceTypes.Rook)
                         {
-                            <span>
-                                <i class="fas fa-chess-rook"></i>
-                            </span>
+            <span>
+                <i class="fas fa-chess-rook"></i>
+            </span>
                         }
                         else if (state.Piece.Type == PieceTypes.Knight)
                         {
-                            <span>
-                                <i class="fas fa-chess-knight"></i>
-                            </span>
+            <span>
+                <i class="fas fa-chess-knight"></i>
+            </span>
                         }
                         else if (state.Piece.Type == PieceTypes.Bishop)
                         {
-                            <span>
-                                <i class="fas fa-chess-bishop"></i>
-                            </span>
+            <span>
+                <i class="fas fa-chess-bishop"></i>
+            </span>
                         }
                         else if (state.Piece.Type == PieceTypes.Queen)
                         {
-                            <span>
-                                <i class="fas fa-chess-queen"></i>
-                            </span>
+            <span>
+                <i class="fas fa-chess-queen"></i>
+            </span>
                         }
                         else if (state.Piece.Type == PieceTypes.King)
                         {
-                            <span>
-                                <i class="fas fa-chess-king"></i>
-                            </span>
+            <span>
+                <i class="fas fa-chess-king"></i>
+            </span>
                         }
                     }
-                    @if (TargetedSquares.Any(x => x.f == f && x.rank == i))
+            @if (TargetedSquares.Any(x => x.f == f && x.rank == i))
                     {
-                        <span style="color:white">X</span>
+            <span style="color:white">X</span>
                     }
-                </td>
+        </td>
             }
-        </tr>
+    </tr>
     }
     <tr>
         <td style="text-align: center"></td>
@@ -362,6 +362,7 @@
         <td style="text-align: center">H</td>
     </tr>
 </table>
+@if(!isCustomizing){
 <button @onclick="GenerateMove">Generate Next Move</button>
 <button @onclick="UndoMove">Undo</button>
 <br />
@@ -370,16 +371,14 @@
 <br />
 <br />
 <br />
-<br />
-<br />
-<br />
 <button @onclick="Load">Load</button>
 <button @onclick="Reset">Reset</button>
+}
 <button @onclick="Customize">Customize</button>
 <div>
     <h2>Moves</h2>
     @foreach (var m in g.Moves)
     {
-        <p>@($"{m.StartingSquare.File}{m.StartingSquare.Rank} → {m.DestinationSquare.File}{m.DestinationSquare.Rank}")</p>
+    <p>@($"{m.StartingSquare.File}{m.StartingSquare.Rank} → {m.DestinationSquare.File}{m.DestinationSquare.Rank}")</p>
     }
 </div>
