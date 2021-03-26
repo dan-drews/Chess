@@ -11,13 +11,6 @@ namespace ChessConsole
         {
             var g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
             g.ResetGame();
-            int c = 0;
-            for(int i = 0; i < 100; i++)
-            {
-                Engine.GetBestMove(g, Colors.White);
-                c++;
-            }
-
             RenderBoard(g);
 
             while (!g.IsGameOver)
