@@ -8,6 +8,10 @@
     List<(Files f, int rank)> TargetedSquares = new List<(Files f, int rank)>();
     SquareState selectedSquare;
     Engine.NodeInfo node;
+
+    Engine whiteEngine;
+    Engine blackEngine;
+
     int depth;
 
     bool isCustomizing = false;
@@ -16,12 +20,34 @@
     {
         if (g == null)
         {
+            var whiteConfig = new ScorerConfiguration()
+            {
+
+            };
+            var blackConfig = new ScorerConfiguration()
+            {
+                SelfInCheckScore = 0,
+                BishopValue = 100,
+                KnightValue = 101,
+                OpponentInCheckScore = 0,
+                CenterSquareValue = 30,
+                CenterBorderValue = 10,
+                PawnValue = 40,
+                KingValue = 99999,
+                MaxTimeMilliseconds = 1000,
+                QueenValue = 900,
+                RookValue = 300,
+                StartingDepth = 3
+            };
+            whiteEngine = new Engine(whiteConfig);
+            blackEngine = new Engine(blackConfig);
+
             g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
             g.ResetGame();
         }
     }
 
-    async Task Load()
+    void Load()
     {
         var lines = System.IO.File.ReadAllLines("GameSave.txt");
         foreach (var line in lines)
@@ -86,10 +112,32 @@
     async Task GenerateMove()
     {
         try
-        {
-            (node, depth) = Engine.GetBestMove(g, g.PlayerToMove);
+        {            
+            var engine = g.PlayerToMove == Colors.White ? whiteEngine : blackEngine;
+            (node, depth) = engine.GetBestMove(g, g.PlayerToMove);
             g.AddMove(node.Move);
             await JS.InvokeAsync<string>("PlaySound");
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeAsync<string>("alert", ex.Message);
+        }
+
+        if (g.IsGameOver)
+        {
+            await JS.InvokeAsync<string>("alert", "Game Over!");
+        }
+    }
+
+    async Task PlayUntilEndOfGame()
+    {
+        try
+        {
+            while (!g.IsGameOver)
+            {
+                await GenerateMove();
+                StateHasChanged();
+            }
         }
         catch (Exception ex)
         {
@@ -284,7 +332,6 @@
     }
 }
 
-<h1>Score: @(g.GetScore(Colors.White) - g.GetScore(Colors.Black))</h1>
 @if (node != null)
 {
 <h4>Analysis Score: @node.Score</h4>
@@ -363,6 +410,7 @@
     </tr>
 </table>
 @if(!isCustomizing){
+<button @onclick="PlayUntilEndOfGame">Play Until End of Game. Kill Server if it repeats too much</button>
 <button @onclick="GenerateMove">Generate Next Move</button>
 <button @onclick="UndoMove">Undo</button>
 <br />
