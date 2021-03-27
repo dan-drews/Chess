@@ -13,6 +13,7 @@ namespace ChessLibrary
         public Piece? CapturedPiece { get; set; }
 
         public Piece? PromotedPiece { get; set; }
+        public ulong Hash { get; set; } = 0;
 
         public Move(Piece piece, Colors player, Square startingSquare, Square destinationSquare)
         {
@@ -58,7 +59,8 @@ namespace ChessLibrary
             return new Move(Piece, Player, StartingSquare, DestinationSquare)
             {
                 CapturedPiece = CapturedPiece == null ? null : CapturedPiece,
-                PromotedPiece = PromotedPiece == null ? null : PromotedPiece
+                PromotedPiece = PromotedPiece == null ? null : PromotedPiece,
+                Hash = Hash
             };
         }
     }

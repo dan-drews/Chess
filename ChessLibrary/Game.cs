@@ -8,7 +8,7 @@ namespace ChessLibrary
 {
     public class Game : ICloneable
     {
-
+        internal ZobristTable ZobristTable { get; set; } = new ZobristTable();
         public IMoveLegality Evaluator { get; private set; }
         public IBoard Board { get; private set; }
 
@@ -89,6 +89,11 @@ namespace ChessLibrary
                 if (_legalMoves == null)
                 {
                     _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                }
+                var hashLookup = Moves.ToLookup(x => x.Hash);
+                if(hashLookup.Any(x=> x.Count() >= 3))
+                {
+                    return true;
                 }
                 if(Moves.Count > 50)
                 {
@@ -192,12 +197,16 @@ namespace ChessLibrary
             }
             if (!validate || legalMoves!.Any(x => x.Equals(move)))
             {
+                var hash = ZobristTable.CalculateZobristHash(Board);
                 if (validate)
                 {
-                    Moves.Add(legalMoves![legalMoves.IndexOf(move)]);
+                    var m = legalMoves![legalMoves.IndexOf(move)];
+                    m.Hash = hash;
+                    Moves.Add(m);
                 }
                 else
                 {
+                    move.Hash = hash;
                     Moves.Add(move);
                 }
                 Board.MovePiece(move);

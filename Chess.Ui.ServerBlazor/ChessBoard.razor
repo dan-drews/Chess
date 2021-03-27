@@ -34,7 +34,7 @@
                 CenterBorderValue = 10,
                 PawnValue = 40,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 1000,
+                MaxTimeMilliseconds = 2000,
                 QueenValue = 900,
                 RookValue = 300,
                 StartingDepth = 3
@@ -50,13 +50,13 @@
                 CenterBorderValue = 0,
                 PawnValue = 1,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 1000,
+                MaxTimeMilliseconds = 2000,
                 QueenValue = 9,
                 RookValue = 5,
                 StartingDepth = 3
             };
 
-            whiteEngine = new Engine(blackConfig);
+            whiteEngine = new Engine(whiteConfig);
             blackEngine = new Engine(whiteConfig);
 
             g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
@@ -260,7 +260,7 @@
         {
             TargetedSquares.Clear();
             selectedSquare = s;
-            var moves = g.Evaluator.GetAllLegalMoves(g.Board, s, g.Moves, false);
+            var moves = g.Evaluator.GetAllLegalMoves(g.Board, s, g.Moves.Cast<Move>().ToList(), false);
             foreach (var m in moves)
             {
                 TargetedSquares.Add((m.DestinationSquare.File, m.DestinationSquare.Rank));
@@ -302,7 +302,7 @@
                     }
                     try
                     {
-                        var moves = g.Evaluator.GetAllLegalMoves(g.Board, selectedSquare, g.Moves, false);
+                        var moves = g.Evaluator.GetAllLegalMoves(g.Board, selectedSquare, g.Moves.Cast<Move>().ToList(), false);
                         var m = moves.Where(x => x.DestinationSquare.Rank == s.Square.Rank && x.DestinationSquare.File == s.Square.File && x.PromotedPiece?.Type == promotedPiece?.Type);
                         g.AddMove(m.FirstOrDefault());
                         await JS.InvokeAsync<string>("PlaySound");
