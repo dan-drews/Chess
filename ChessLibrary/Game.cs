@@ -90,6 +90,23 @@ namespace ChessLibrary
                 {
                     _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
                 }
+                if(Moves.Count > 50)
+                {
+                    bool isFiftyMoveRule = true;
+                    for(int i = 1; i <= 50; i++)
+                    {
+                        var move = Moves.ElementAt(Moves.Count - i);
+                        if(move.Piece.Type == PieceTypes.Pawn || move.CapturedPiece != null)
+                        {
+                            isFiftyMoveRule = false;
+                            break;
+                        }
+                    }
+                    if (isFiftyMoveRule)
+                    {
+                        return true;
+                    }
+                }
                 return !GetAllLegalMoves().Any() && !IsKingInCheck(PlayerToMove);
             }
         }

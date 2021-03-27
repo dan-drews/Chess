@@ -14,6 +14,7 @@ namespace ChessLibrary
         public int SelfInCheckScore { get; set; } = -15;
         public int CenterSquareValue { get; set; } = 2;
         public int CenterBorderValue { get; set; } = 1;
+        public int StalemateScore { get; set; } = 0;
 
         public int PawnValue { get; set; } = 10;
         public int KnightValue { get; set; } = 40;
@@ -31,9 +32,9 @@ namespace ChessLibrary
             Config = config;
         }
 
-        public (int blackScore, int whiteScore) GetScore(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck)
+        public (int blackScore, int whiteScore) GetScore(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, bool isStalemate)
         {
-            return (GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.Black), GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.White));
+            return (GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.Black, isStalemate), GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.White, isStalemate));
         }
 
         private int GetPieceValue(PieceTypes piece)
@@ -63,8 +64,12 @@ namespace ChessLibrary
             }
         }
 
-        private int GetScoreInternal(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, Colors color)
+        private int GetScoreInternal(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, Colors color, bool isStalemate)
         {
+            if (isStalemate)
+            {
+                return Config.StalemateScore;
+            }
             int score = 0;
             for (Files f = Files.A; f <= Files.H; f++)
             {

@@ -20,11 +20,11 @@
     {
         if (g == null)
         {
-            var whiteConfig = new ScorerConfiguration()
-            {
+            //var whiteConfig = new ScorerConfiguration()
+            //{
 
-            };
-            var blackConfig = new ScorerConfiguration()
+            //};
+            var whiteConfig = new ScorerConfiguration()
             {
                 SelfInCheckScore = 0,
                 BishopValue = 100,
@@ -39,8 +39,25 @@
                 RookValue = 300,
                 StartingDepth = 3
             };
-            whiteEngine = new Engine(whiteConfig);
-            blackEngine = new Engine(blackConfig);
+
+            var blackConfig = new ScorerConfiguration()
+            {
+                SelfInCheckScore = 0,
+                BishopValue = 3,
+                KnightValue = 3,
+                OpponentInCheckScore = 0,
+                CenterSquareValue = 0,
+                CenterBorderValue = 0,
+                PawnValue = 1,
+                KingValue = 99999,
+                MaxTimeMilliseconds = 1000,
+                QueenValue = 9,
+                RookValue = 5,
+                StartingDepth = 3
+            };
+
+            whiteEngine = new Engine(blackConfig);
+            blackEngine = new Engine(whiteConfig);
 
             g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
             g.ResetGame();
@@ -112,7 +129,7 @@
     async Task GenerateMove()
     {
         try
-        {            
+        {
             var engine = g.PlayerToMove == Colors.White ? whiteEngine : blackEngine;
             (node, depth) = engine.GetBestMove(g, g.PlayerToMove);
             g.AddMove(node.Move);
