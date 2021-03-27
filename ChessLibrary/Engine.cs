@@ -10,11 +10,22 @@ namespace ChessLibrary
 {
     public class Engine
     {
-        const decimal MAX_DEPTH = 3M;
         public static int nodesEvaluated = 0;
         public static long miliseconds = 0;
         public static int skips = 0;
-        public static (NodeInfo? node, int depth) GetBestMove(Game game, Colors playerColor)
+
+        private int _maxTime;
+        private int _startingDepth;
+        public Scorer Scorer { get; set; }
+
+        public Engine(ScorerConfiguration scoreConfig)
+        {
+            Scorer = new Scorer(scoreConfig);
+            _maxTime = scoreConfig.MaxTimeMilliseconds;
+            _startingDepth = scoreConfig.StartingDepth;
+        }
+
+        public (NodeInfo? node, int depth) GetBestMove(Game game, Colors playerColor)
         {
             nodesEvaluated = 0;
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
@@ -23,9 +34,9 @@ namespace ChessLibrary
             {
                 NodeInfo? result = null;
                 var sw = new Stopwatch();
-                int depthToSearch = 3;
+                int depthToSearch = _startingDepth;
                 bool checkmate = false;
-                while (sw.ElapsedMilliseconds < 1000 && !checkmate)
+                while (sw.ElapsedMilliseconds < _maxTime && !checkmate)
                 {
                     nodesEvaluated = 0;
                     skips = 0;
@@ -44,7 +55,7 @@ namespace ChessLibrary
             return (null, 3);
         }
 
-        private static NodeInfo GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, int alpha, int beta)
+        private NodeInfo GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, int alpha, int beta)
         {
 
             var isCheckmate = game.IsCheckmate;
@@ -66,7 +77,10 @@ namespace ChessLibrary
                     return move.Piece.Color == playerColor ? new NodeInfo(move, 1000000000 + currentDepth, 0, 0) : new NodeInfo(move, -1000000000 + currentDepth, 0, 0);
                 }
 
-                return new NodeInfo(move, game.GetScore(playerColor) - game.GetScore(opponentColor), 0, 0);
+                var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black));
+                var playerScore = playerColor == Colors.Black ? scores.blackScore : scores.whiteScore;
+                var opponentScore = playerColor == Colors.Black ? scores.whiteScore : scores.blackScore;
+                return new NodeInfo(move, playerScore - opponentScore, 0, 0);
             }
 
             var legalMoves = game.GetAllLegalMoves().OrderBy(x=> Guid.NewGuid()).ToList();

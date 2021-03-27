@@ -10,6 +10,17 @@ namespace ChessConsole
         static void Main(string[] args)
         {
             var g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
+            var whiteConfig = new ScorerConfiguration()
+            {
+
+            };
+            var whiteEngine = new Engine(whiteConfig);
+
+            var blackConfig = new ScorerConfiguration()
+            {
+
+            };
+            var blackEngine = new Engine(blackConfig);
             g.ResetGame();
             RenderBoard(g);
 
@@ -22,7 +33,8 @@ namespace ChessConsole
                     {
                         if (move.ToLower() == "analyze")
                         {
-                            var bestMove = Engine.GetBestMove(g, g.PlayerToMove).node.Move;
+                            var engine = g.PlayerToMove == Colors.White ? whiteEngine : blackEngine;
+                            var bestMove = engine.GetBestMove(g, g.PlayerToMove).node.Move;
                             var promotion = string.Empty;
                             if(bestMove.PromotedPiece != null)
                             {

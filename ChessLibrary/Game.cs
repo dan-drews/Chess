@@ -115,76 +115,10 @@ namespace ChessLibrary
             return _legalMoves;
         }
 
-        public int GetScore(Colors color)
-        {
-            if (color == Colors.White)
-            {
-                if (_whiteScore == null)
-                {
-                    _whiteScore = GetScoreInternal(color);
-                }
-                return _whiteScore.Value;
-            }
-            else
-            {
-                if (_blackScore == null)
-                {
-                    _blackScore = GetScoreInternal(color);
-                }
-                return _blackScore.Value;
-            }
-        }
-
-        private int GetScoreInternal(Colors color)
-        {
-            int score = 0;
-            int highestPiece = 0;
-            Colors opposingColor = color == Colors.Black ? Colors.White : Colors.Black;
-            for (Files f = Files.A; f <= Files.H; f++)
-            {
-                for (int rank = 1; rank <= 8; rank++)
-                {
-                    var piece = Board.GetSquare(f, rank).Piece;
-                    if (piece != null && piece.Color == color)
-                    {
-                        score += piece.Score * 5;
-
-                        if ((rank == 5 || rank == 4) && (f == Files.D || f == Files.E))
-                        {
-                            score += 2;
-                        }
-                        else if (((rank == 6 || rank == 3) && f >= Files.C && f <= Files.F) ||
-                                 ((f == Files.C || f == Files.F) && (rank == 5 || rank == 4)))
-                        {
-                            score += 1;
-                        }
-
-                        if (piece.Score > highestPiece * 2 && piece.Type != PieceTypes.King)
-                        {
-                            highestPiece = piece.Score * 2;
-                        }
-                    }
-                }
-            }
-            if (IsKingInCheck(opposingColor))
-            {
-                score += highestPiece - 1;
-            }
-            if (IsKingInCheck(color))
-            {
-                score -= 15;
-            }
-            return score;
-        }
-
         private bool? _isBlackKingInCheck = null;
         private bool? _isWhiteKingInCheck = null;
 
-        private int? _blackScore = null;
-        private int? _whiteScore = null;
-
-
-        private bool IsKingInCheck(Colors color)
+        public bool IsKingInCheck(Colors color)
         {
             if (color == Colors.Black)
             {
@@ -251,8 +185,6 @@ namespace ChessLibrary
                 }
                 Board.MovePiece(move);
 
-                _blackScore = null;
-                _whiteScore = null;
                 _legalMoves = null;
                 _isWhiteKingInCheck = null;
                 _isBlackKingInCheck = null;
@@ -332,8 +264,7 @@ namespace ChessLibrary
                     }
                 }
             }
-            _blackScore = null;
-            _whiteScore = null;
+
             _legalMoves = null;
             _isWhiteKingInCheck = null;
             _isBlackKingInCheck = null;
