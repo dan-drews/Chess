@@ -77,7 +77,7 @@ namespace ChessLibrary
                     return move.Piece.Color == playerColor ? new NodeInfo(move, 1000000000 + currentDepth, 0, 0) : new NodeInfo(move, -1000000000 + currentDepth, 0, 0);
                 }
 
-                var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black));
+                var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black), game.IsStalemate);
                 var playerScore = playerColor == Colors.Black ? scores.blackScore : scores.whiteScore;
                 var opponentScore = playerColor == Colors.Black ? scores.whiteScore : scores.blackScore;
                 return new NodeInfo(move, playerScore - opponentScore, 0, 0);
