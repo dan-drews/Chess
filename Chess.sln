@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31005.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessLibrary", "ChessLibrary\ChessLibrary.csproj", "{3D754C72-803D-435A-B4C4-D184BD4E3AF3}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Benchmarks", "Chess.Benchmarks\Chess.Benchmarks.csproj", "{7B03970D-21F6-4887-AD4F-CB31B250CCB0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Perft", "Chess.Perft\Chess.Perft.csproj", "{72BABA8B-13AA-4605-A7C9-C91021E5261E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.WinForms", "Chess.WinForms\Chess.WinForms.csproj", "{A6537E4B-BEDB-40A4-A677-C0C9FB70A9BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{72BABA8B-13AA-4605-A7C9-C91021E5261E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72BABA8B-13AA-4605-A7C9-C91021E5261E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72BABA8B-13AA-4605-A7C9-C91021E5261E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6537E4B-BEDB-40A4-A677-C0C9FB70A9BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6537E4B-BEDB-40A4-A677-C0C9FB70A9BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6537E4B-BEDB-40A4-A677-C0C9FB70A9BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6537E4B-BEDB-40A4-A677-C0C9FB70A9BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

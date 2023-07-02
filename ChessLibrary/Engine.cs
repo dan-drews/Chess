@@ -18,6 +18,8 @@ namespace ChessLibrary
         private int _startingDepth;
         public Scorer Scorer { get; set; }
 
+        private Stopwatch _stopwatch = new Stopwatch();
+
         public Engine(ScorerConfiguration scoreConfig)
         {
             Scorer = new Scorer(scoreConfig);
@@ -27,26 +29,27 @@ namespace ChessLibrary
 
         public (NodeInfo? node, int depth) GetBestMove(Game game, Colors playerColor)
         {
+            _stopwatch.Restart();
             nodesEvaluated = 0;
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
             var isCheckmate = game.IsCheckmate;
             if (!isCheckmate)
             {
                 NodeInfo? result = null;
-                var sw = new Stopwatch();
                 int depthToSearch = _startingDepth;
                 bool checkmate = false;
-                while (sw.ElapsedMilliseconds < _maxTime && !checkmate)
+                while (_stopwatch.ElapsedMilliseconds < _maxTime && !checkmate)
                 {
                     nodesEvaluated = 0;
                     skips = 0;
                     depthToSearch++;
-                    sw.Reset();
-                    sw.Start();
+                    var previousResult = result;
                     result = GetMoveScores(game, playerColor, opponentColor, depthToSearch, null, int.MinValue, int.MaxValue);
                     checkmate = result.Score > 10000000;
-                    miliseconds = sw.ElapsedMilliseconds;
-                    sw.Stop();
+                    if(previousResult != null && previousResult.Score > result.Score)
+                    {
+                        result = previousResult;
+                    }
                 }
                 return (result, depthToSearch);
             }
@@ -89,7 +92,10 @@ namespace ChessLibrary
                 var value = new NodeInfo(move, int.MinValue, alpha, beta);
                 foreach(var m in legalMoves)
                 {
-
+                    if(_stopwatch.ElapsedMilliseconds >= _maxTime)
+                    {
+                        break;
+                    }
                     game.AddMove(m, false);
                     var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);
                     game.UndoLastMove();
@@ -108,6 +114,10 @@ namespace ChessLibrary
                 var value = new NodeInfo(move, int.MaxValue, alpha, beta);
                 foreach (var m in legalMoves)
                 {
+                    if (_stopwatch.ElapsedMilliseconds >= _maxTime)
+                    {
+                        break;
+                    }
                     game.AddMove(m, false);
                     var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);
                     game.UndoLastMove();
