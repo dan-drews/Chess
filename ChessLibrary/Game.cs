@@ -323,7 +323,7 @@ namespace ChessLibrary
             }
             if (!validate || legalMoves!.Any(x => x.Equals(move)))
             {
-
+                _legalNonQuietMoves = null;
                 _legalMoves = null; 
                 _isWhiteKingInCheck = null;
                 _isBlackKingInCheck = null;
@@ -471,7 +471,7 @@ namespace ChessLibrary
                     }
                 }
             }
-
+            _legalNonQuietMoves = null;
             _legalMoves = null;
             _isWhiteKingInCheck = null;
             _isBlackKingInCheck = null;

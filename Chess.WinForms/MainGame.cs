@@ -60,7 +60,7 @@ namespace Chess.WinForms
             chessBoard.WhiteEngine = _whiteEngine;
             chessBoard.OnMoveCalculated = (evaluationResult) =>
             {
-                label1.Text = $"Depth: {evaluationResult.depth}, Score: {evaluationResult.node?.Score}, Nodes Evaluated: {Engine.nodesEvaluated}, NonQuiet Nodes Evaulated: {Engine.nonQuietDepthNodesEvaluated}";
+                label1.Text = $"Depth: {evaluationResult.depth}, Score: {evaluationResult.node?.Score}, Nodes Evaluated: {Engine.nodesEvaluated}, NonQuiet Nodes Evaulated: {Engine.nonQuietDepthNodesEvaluated}, Zobrist Hash Matches : {Engine.zobristMatches}";
             };
         }
 

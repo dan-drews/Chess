@@ -9,7 +9,7 @@ namespace ChessLibrary
     {
         public static IEnumerable<Move> OrderMoves(this IEnumerable<Move> moves, Engine engine)
         {
-            return moves.OrderBy(x => x.CapturedPiece == null ? 0 : engine.Scorer.GetPieceValue(x.CapturedPiece.Type));
+            return moves.OrderByDescending(x => x.CapturedPiece == null ? 0 : engine.Scorer.GetPieceValue(x.CapturedPiece.Type));
         }
     }
 }
