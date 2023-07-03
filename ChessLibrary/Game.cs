@@ -2,6 +2,7 @@
 using ChessLibrary.MoveLegaility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace ChessLibrary
@@ -16,7 +17,19 @@ namespace ChessLibrary
         public bool BlackCanLongCastle { get; set; } = true;
         public bool WhiteCanShortCastle { get; set; } = true;
         public bool BlackCanShortCastle { get; set; } = true;
-        public Files? EnPassantFile { get; set; } = null;
+
+        private Files? _enPassantFile = null;
+        public Files? EnPassantFile
+        {
+            get
+            {
+                return _enPassantFile;
+            }
+            set
+            {
+                _enPassantFile = value;
+            }
+        }
 
         public Colors StartingColor { get; set; } = Colors.White;
 
@@ -34,10 +47,10 @@ namespace ChessLibrary
                     Board = new BitBoard();
                     Evaluator = new BitBoardLegality();
                     break;
-                case BoardType.Naive:
-                    Board = new NaiveBoard();
-                    Evaluator = new NaiveMoveLegality();
-                    break;
+                //case BoardType.Naive:
+                //    Board = new NaiveBoard();
+                //    Evaluator = new NaiveMoveLegality();
+                //    break;
                 default:
                     throw new Exception("Board Type Not Supported");
             }
@@ -53,7 +66,7 @@ namespace ChessLibrary
                 BlackCanLongCastle = BlackCanLongCastle,
                 BlackCanShortCastle = BlackCanShortCastle,
                 StartingColor = StartingColor,
-                EnPassantFile = EnPassantFile                
+                EnPassantFile = EnPassantFile
             };
         }
 
@@ -61,7 +74,7 @@ namespace ChessLibrary
         {
             get
             {
-                if(StartingColor == Colors.White)
+                if (StartingColor == Colors.White)
                 {
                     return Moves.Count % 2 == 0 ? Colors.White : Colors.Black;
                 }
@@ -86,22 +99,19 @@ namespace ChessLibrary
         {
             get
             {
-                if (_legalMoves == null)
-                {
-                    _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
-                }
+                GetAllLegalMoves();
                 var hashLookup = Moves.ToLookup(x => x.Hash);
-                if(hashLookup.Any(x=> x.Count() >= 3))
+                if (hashLookup.Any(x => x.Count() >= 3))
                 {
                     return true;
                 }
-                if(Moves.Count > 50)
+                if (Moves.Count > 50)
                 {
                     bool isFiftyMoveRule = true;
-                    for(int i = 1; i <= 50; i++)
+                    for (int i = 1; i <= 50; i++)
                     {
                         var move = Moves.ElementAt(Moves.Count - i);
-                        if(move.Piece.Type == PieceTypes.Pawn || move.CapturedPiece != null)
+                        if (move.Piece.Type == PieceTypes.Pawn || move.CapturedPiece != null)
                         {
                             isFiftyMoveRule = false;
                             break;
@@ -120,21 +130,32 @@ namespace ChessLibrary
         {
             get
             {
-                if (_legalMoves == null)
+                if (!IsKingInCheck(PlayerToMove))
                 {
-                    _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                    return false;
                 }
-                return !GetAllLegalMoves().Any() && IsKingInCheck(PlayerToMove);
+                return !GetAllLegalMoves().Any() ;
             }
         }
 
-        public List<Move> GetAllLegalMoves()
+        private List<Move>? _legalNonQuietMoves = null;
+        public List<Move> GetAllLegalMoves(bool includeQuietMoves = true)
         {
-            if (_legalMoves == null)
+            if (includeQuietMoves)
             {
-                _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, Moves);
+                if (_legalMoves == null)
+                {
+                    _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle, true);
+                }
+                return _legalMoves;
             }
-            return _legalMoves;
+
+            if(_legalNonQuietMoves == null)
+            {
+                _legalNonQuietMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle, false);
+            }
+            
+            return _legalNonQuietMoves;
         }
 
         private bool? _isBlackKingInCheck = null;
@@ -160,6 +181,108 @@ namespace ChessLibrary
             }
         }
 
+        public void LoadFen(string fen)
+        {
+            Moves.Clear();
+            var fenSections = fen.Split(' ');
+            var board = fenSections[0];
+            var sideToMove = fenSections[1];
+            var castlingAbility = fenSections[2];
+            var enPassantTargetSquare = fenSections[3];
+            var halfMoveClock = fenSections[4];
+            var fullMoveCounter = fenSections[5];
+
+            var ranks = board.Split('/');
+            RenderBoardFen(ranks);
+            StartingColor = sideToMove == "w" ? Colors.White : Colors.Black;
+            SetCastlingFen(castlingAbility);
+            EnPassantFile = enPassantTargetSquare[0] switch
+            {
+                'a' => Files.A,
+                'b' => Files.B,
+                'c' => Files.C,
+                'd' => Files.D,
+                'e' => Files.E,
+                'f' => Files.F,
+                'g' => Files.G,
+                'h' => Files.H,
+                '-' => null,
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        private void SetCastlingFen(string castlingAbility)
+        {
+            WhiteCanShortCastle = false;
+            WhiteCanLongCastle = false;
+            BlackCanShortCastle = false;
+            BlackCanLongCastle = false;
+            if (castlingAbility.Contains("K"))
+            {
+                WhiteCanShortCastle = true;
+            }
+
+            if (castlingAbility.Contains("Q"))
+            {
+                WhiteCanLongCastle = true;
+            }
+
+            if (castlingAbility.Contains("k"))
+            {
+                BlackCanShortCastle = true;
+            }
+
+            if (castlingAbility.Contains("q"))
+            {
+                BlackCanLongCastle = true;
+            }
+        }
+
+        private void RenderBoardFen(string[] ranks)
+        {
+            int currentRank = 8;
+            foreach (var rank in ranks)
+            {
+                int file = 1;
+                foreach (var c in rank)
+                {
+                    if (int.TryParse(c.ToString(), out int numberToSkip))
+                    {
+                        for (int i = 0; i < numberToSkip; i++)
+                        {
+                            Board.ClearPiece((Files)file, currentRank);
+                            file++;
+                        }
+                    }
+                    else
+                    {
+                        Colors color;
+                        if (c.ToString().ToLower() == c.ToString()) // It's lower-case so black piece
+                        {
+                            color = Colors.Black;
+                        }
+                        else
+                        {
+                            color = Colors.White;
+                        }
+                        PieceTypes piece = c.ToString().ToUpper() switch
+                        {
+                            "R" => PieceTypes.Rook,
+                            "B" => PieceTypes.Bishop,
+                            "N" => PieceTypes.Knight,
+                            "K" => PieceTypes.King,
+                            "Q" => PieceTypes.Queen,
+                            "P" => PieceTypes.Pawn,
+                            _ => throw new NotImplementedException()
+                        };
+                        Board.SetPiece((Files)file, currentRank, piece, color);
+                        file++;
+                    }
+                }
+                currentRank--;
+            }
+        }
+
         public void ResetGame()
         {
             Moves = new List<Move>();
@@ -180,23 +303,85 @@ namespace ChessLibrary
             var startingSquare = Board.GetSquare(move.StartingSquare.File, move.StartingSquare.Rank);
             if (startingSquare.Piece == null)
             {
+                Debugger.Break();
                 throw new Exception("No piece to move");
             }
             if (startingSquare.Piece.Color != PlayerToMove || startingSquare.Piece.Color != move.Player)
             {
+                Debugger.Break();
                 throw new Exception("Wrong Color Moving");
             }
             List<Move>? legalMoves = null;
             if (validate)
             {
-                legalMoves = Evaluator.GetAllLegalMoves(Board, startingSquare, Moves);
+                legalMoves = Evaluator.GetAllLegalMoves(Board, startingSquare, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle);
                 if (legalMoves == null)
                 {
+                    Debugger.Break();
                     throw new Exception("Invalid move");
                 }
             }
             if (!validate || legalMoves!.Any(x => x.Equals(move)))
             {
+
+                _legalMoves = null; 
+                _isWhiteKingInCheck = null;
+                _isBlackKingInCheck = null;
+                if (move.Piece.Type == PieceTypes.Pawn && Math.Abs(move.StartingSquare.Rank - move.DestinationSquare.Rank) == 2)
+                {
+                    EnPassantFile = move.StartingSquare.File;
+                }
+                else
+                {
+                    EnPassantFile = null;
+                }
+
+                if (move.Piece.Type == PieceTypes.King)
+                {
+                    if (PlayerToMove == Colors.White)
+                    {
+                        WhiteCanLongCastle = false;
+                        WhiteCanShortCastle = false;
+                    }
+                    else
+                    {
+                        BlackCanLongCastle = false;
+                        BlackCanShortCastle = false;
+                    }
+                }
+
+                if (move.Piece.Type == PieceTypes.Rook)
+                {
+                    if (PlayerToMove == Colors.White)
+                    {
+                        if (move.StartingSquare.Rank == 1)
+                        {
+                            if (move.StartingSquare.File == Files.A)
+                            {
+                                WhiteCanLongCastle = false;
+                            }
+                            if (move.StartingSquare.File == Files.H)
+                            {
+                                WhiteCanShortCastle = false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (move.StartingSquare.Rank == 8)
+                        {
+                            if (move.StartingSquare.File == Files.A)
+                            {
+                                BlackCanLongCastle = false;
+                            }
+                            if (move.StartingSquare.File == Files.H)
+                            {
+                                BlackCanShortCastle = false;
+                            }
+                        }
+                    }
+                }
+
                 var hash = ZobristTable.CalculateZobristHash(Board);
                 if (validate)
                 {
@@ -209,11 +394,7 @@ namespace ChessLibrary
                     move.Hash = hash;
                     Moves.Add(move);
                 }
-                Board.MovePiece(move);
-
-                _legalMoves = null;
-                _isWhiteKingInCheck = null;
-                _isBlackKingInCheck = null;
+                Board.MovePiece(move);                
                 return Board;
             }
             else
@@ -239,12 +420,12 @@ namespace ChessLibrary
                 if (move.StartingSquare.Rank == startingRank && move.DestinationSquare.File != move.StartingSquare.File)
                 {
                     // Pawn capture... but is it en passant?
-                    if(move.DestinationSquare.Rank == startingRank + moveDirection && Math.Abs(move.DestinationSquare.File - move.StartingSquare.File) == 1)
+                    if (move.DestinationSquare.Rank == startingRank + moveDirection && Math.Abs(move.DestinationSquare.File - move.StartingSquare.File) == 1)
                     {
                         // Moved diagonally, but still, was it an en passant?
                         var moveBeforeLast = Moves.ElementAt(Moves.Count - 2);
-                        if (moveBeforeLast.Piece.Type == PieceTypes.Pawn 
-                            && moveBeforeLast.StartingSquare.Rank == startingRank + (moveDirection * 2) 
+                        if (moveBeforeLast.Piece.Type == PieceTypes.Pawn
+                            && moveBeforeLast.StartingSquare.Rank == startingRank + (moveDirection * 2)
                             && moveBeforeLast.DestinationSquare.Rank == startingRank
                             && moveBeforeLast.DestinationSquare.File == move.DestinationSquare.File)
                         {
@@ -294,6 +475,66 @@ namespace ChessLibrary
             _legalMoves = null;
             _isWhiteKingInCheck = null;
             _isBlackKingInCheck = null;
+            if (Moves.Count >= 2)
+            {
+                var moveBeforeLast = Moves.ElementAt(Moves.Count - 2);
+                if (moveBeforeLast.Piece.Type == PieceTypes.Pawn &&
+                    Math.Abs(moveBeforeLast.StartingSquare.Rank - moveBeforeLast.DestinationSquare.Rank) == 2)
+                {
+                    EnPassantFile = moveBeforeLast.StartingSquare.File;
+                }
+                else
+                {
+                    EnPassantFile = null;
+                }
+            }
+
+            WhiteCanShortCastle = true;
+            WhiteCanLongCastle = true;
+            BlackCanShortCastle = true;
+            BlackCanLongCastle = true;
+            foreach (var previousMove in Moves.Where(x => x.Piece.Type == PieceTypes.Rook || x.Piece.Type == PieceTypes.King))
+            {
+                if (previousMove.Piece.Type == PieceTypes.King)
+                {
+                    if (previousMove.Piece.Color == Colors.White)
+                    {
+                        WhiteCanLongCastle = false;
+                        WhiteCanShortCastle = false;
+                    }
+                    else
+                    {
+                        BlackCanLongCastle = false;
+                        BlackCanShortCastle = false;
+                    }
+                }
+                else
+                {
+                    if (previousMove.Piece.Color == Colors.White && previousMove.StartingSquare.Rank == 1)
+                    {
+                        if (previousMove.StartingSquare.File == Files.A)
+                        {
+                            WhiteCanLongCastle = false;
+                        }
+                        else if (previousMove.StartingSquare.File == Files.H)
+                        {
+                            WhiteCanShortCastle = false;
+                        }
+                    }
+                    else if (previousMove.Piece.Color == Colors.Black && previousMove.StartingSquare.Rank == 8)
+                    {
+                        if (previousMove.StartingSquare.File == Files.A)
+                        {
+                            BlackCanLongCastle = false;
+                        }
+                        else if (previousMove.StartingSquare.File == Files.H)
+                        {
+                            BlackCanShortCastle = false;
+                        }
+                    }
+                }
+            }
+
             Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
             return Board;
         }

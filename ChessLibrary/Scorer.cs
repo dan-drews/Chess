@@ -37,7 +37,7 @@ namespace ChessLibrary
             return (GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.Black, isStalemate), GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.White, isStalemate));
         }
 
-        private int GetPieceValue(PieceTypes piece)
+        public int GetPieceValue(PieceTypes piece)
         {
             switch (piece)
             {

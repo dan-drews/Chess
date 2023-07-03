@@ -260,11 +260,11 @@
         {
             TargetedSquares.Clear();
             selectedSquare = s;
-            var moves = g.Evaluator.GetAllLegalMoves(g.Board, s, g.Moves.Cast<Move>().ToList(), false);
-            foreach (var m in moves)
-            {
-                TargetedSquares.Add((m.DestinationSquare.File, m.DestinationSquare.Rank));
-            }
+            //var moves = g.Evaluator.GetAllLegalMoves(g.Board, s, g.Moves.Cast<Move>().ToList(), false);
+            //foreach (var m in moves)
+            //{
+            //    TargetedSquares.Add((m.DestinationSquare.File, m.DestinationSquare.Rank));
+            //}
         }
         else
         {
@@ -302,10 +302,10 @@
                     }
                     try
                     {
-                        var moves = g.Evaluator.GetAllLegalMoves(g.Board, selectedSquare, g.Moves.Cast<Move>().ToList(), false);
-                        var m = moves.Where(x => x.DestinationSquare.Rank == s.Square.Rank && x.DestinationSquare.File == s.Square.File && x.PromotedPiece?.Type == promotedPiece?.Type);
-                        g.AddMove(m.FirstOrDefault());
-                        await JS.InvokeAsync<string>("PlaySound");
+                        //var moves = g.Evaluator.GetAllLegalMoves(g.Board, selectedSquare, g.Moves.Cast<Move>().ToList(), false);
+                        //var m = moves.Where(x => x.DestinationSquare.Rank == s.Square.Rank && x.DestinationSquare.File == s.Square.File && x.PromotedPiece?.Type == promotedPiece?.Type);
+                        //g.AddMove(m.FirstOrDefault());
+                        //await JS.InvokeAsync<string>("PlaySound");
                     }
                     catch (Exception ex)
                     {

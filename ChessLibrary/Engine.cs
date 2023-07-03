@@ -11,6 +11,7 @@ namespace ChessLibrary
     public class Engine
     {
         public static int nodesEvaluated = 0;
+        public static int nonQuietDepthNodesEvaluated = 0;
         public static long miliseconds = 0;
         public static int skips = 0;
 
@@ -31,6 +32,7 @@ namespace ChessLibrary
         {
             _stopwatch.Restart();
             nodesEvaluated = 0;
+            nonQuietDepthNodesEvaluated = 0;
             var opponentColor = playerColor == Colors.White ? Colors.Black : Colors.White;
             var isCheckmate = game.IsCheckmate;
             if (!isCheckmate)
@@ -41,6 +43,7 @@ namespace ChessLibrary
                 while (_stopwatch.ElapsedMilliseconds < _maxTime && !checkmate)
                 {
                     nodesEvaluated = 0;
+                    nonQuietDepthNodesEvaluated = 0;
                     skips = 0;
                     depthToSearch++;
                     var previousResult = result;
@@ -58,22 +61,72 @@ namespace ChessLibrary
             return (null, 3);
         }
 
+        private int GetLoudMoveScores(Game game, Colors playerColor, Colors opponentColor, Move? move, int alpha, int beta)
+        {
+
+            if (game.PlayerToMove == playerColor)
+            {
+            }
+
+            var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black), game.IsStalemate);
+            var playerScore = playerColor == Colors.Black ? scores.blackScore : scores.whiteScore;
+            var opponentScore = playerColor == Colors.Black ? scores.whiteScore : scores.blackScore;
+            Engine.nodesEvaluated++;
+            Engine.nonQuietDepthNodesEvaluated++;
+            if (playerScore - opponentScore >= beta)
+            {
+                return beta;
+            }
+
+            if (playerScore - opponentScore > alpha)
+            {
+                alpha = playerScore - opponentScore;
+            }
+
+            var legalNonQuietMoves = game.GetAllLegalMoves(false);
+            legalNonQuietMoves = legalNonQuietMoves.OrderMoves(this).ToList();
+            foreach (var nqm in legalNonQuietMoves)
+            {
+                game.AddMove(nqm, false);
+                playerScore = GetLoudMoveScores(game, playerColor, opponentColor, move, alpha, beta);
+                game.UndoLastMove();
+                if (playerScore >= beta)
+                {
+                    return beta;
+                }
+                if (playerScore > alpha)
+                {
+                    alpha = playerScore;
+                }
+
+
+
+            }
+            return playerScore;
+        }
+
         private NodeInfo GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, int alpha, int beta)
         {
 
             var isCheckmate = game.IsCheckmate;
             var isStalemate = game.IsStalemate;
 
+            if(currentDepth == 0)
+            {
+                var loudMoveScore = GetLoudMoveScores(game, playerColor, opponentColor, move, alpha, beta); 
+                //if(loudMoveScore)
+            }
+
             if (currentDepth == 0 || isCheckmate ||isStalemate)
             {
+                if (game.IsStalemate)
+                {
+                    return new NodeInfo(move, 0, 0, 0);
+                }
                 nodesEvaluated++;
                 if(move == null)
                 {
                     throw new Exception("Error! Move is null");
-                }
-                if (game.IsStalemate)
-                {
-                    return new NodeInfo(move, 0, 0, 0);
                 }
                 if (isCheckmate)
                 {
@@ -86,7 +139,8 @@ namespace ChessLibrary
                 return new NodeInfo(move, playerScore - opponentScore, 0, 0);
             }
 
-            var legalMoves = game.GetAllLegalMoves().OrderBy(x=> Guid.NewGuid()).ToList();
+            var legalMoves = game.GetAllLegalMoves();
+            legalMoves = legalMoves.OrderMoves(this).ToList();
             if (game.PlayerToMove == playerColor)
             {
                 var value = new NodeInfo(move, int.MinValue, alpha, beta);
@@ -94,7 +148,7 @@ namespace ChessLibrary
                 {
                     if(_stopwatch.ElapsedMilliseconds >= _maxTime)
                     {
-                        break;
+                        return value;
                     }
                     game.AddMove(m, false);
                     var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);
@@ -116,7 +170,7 @@ namespace ChessLibrary
                 {
                     if (_stopwatch.ElapsedMilliseconds >= _maxTime)
                     {
-                        break;
+                        return value;
                     }
                     game.AddMove(m, false);
                     var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);

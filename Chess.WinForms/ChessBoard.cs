@@ -13,26 +13,40 @@ namespace Chess.WinForms
 {
     public partial class ChessBoard : UserControl
     {
+        public Action<(Engine.NodeInfo? node, int depth)>? OnMoveCalculated;
 
         const int SQUARE_SIZE = 100;
         private Color _whiteColor = Color.FromArgb(250, 244, 212);
         private Color _blackColor = Color.FromArgb(66, 22, 0);
-        private Game _game;
-        private Engine? _whiteEngine;
-        private Engine? _blackEngine;
+        public Game Game { get; set; }
+        public Engine? WhiteEngine;
+        public Engine? BlackEngine;
 
         bool _isRendered = false;
         bool _areMovesRendered = false;
         private (Files File, int Rank)? _selectedSquare = null;
         private List<Move>? _moves = null;
 
+        public ChessBoard()
+        {
+            Game = new Game(ChessLibrary.Enums.BoardType.BitBoard);
+            this.Click += OnClick;
+            InitializeComponent();
+        }
+
+        public void ForceRender()
+        {
+            _isRendered = false;
+            this.Refresh();
+        }
+
         public ChessBoard(Game game, Engine? whiteEngine, Engine? blackEngine)
         {
             this.Click += OnClick;
-            _game = game;
+            Game = game;
             InitializeComponent();
-            _whiteEngine = whiteEngine;
-            _blackEngine = blackEngine;
+            WhiteEngine = whiteEngine;
+            BlackEngine = blackEngine;
         }
 
         private void OnClick(object? sender, EventArgs e)
@@ -41,7 +55,7 @@ namespace Chess.WinForms
             var squareTarget = GetSquareRankFileFromEventArgs(mouseEvent);
             if (_selectedSquare == null)
             {
-                var moves = _game.GetAllLegalMoves().Where(x => x.StartingSquare.Rank == squareTarget.Rank && x.StartingSquare.File == squareTarget.File).ToList();
+                var moves = Game.GetAllLegalMoves().Where(x => x.StartingSquare.Rank == squareTarget.Rank && x.StartingSquare.File == squareTarget.File).ToList();
                 if (moves.Any())
                 {
                     RenderMoves(moves);
@@ -66,15 +80,15 @@ namespace Chess.WinForms
                     var matchingMoveQuery = _moves.Where(x => x.DestinationSquare.Rank == squareTarget.Rank && x.DestinationSquare.File == squareTarget.File);
                     if (matchingMoveQuery.Any())
                     {
-                        _game.AddMove(matchingMoveQuery.First());
+                        Game.AddMove(matchingMoveQuery.First());
                         _isRendered = false;
                         this.Refresh();
-                        if (_game.PlayerToMove == Colors.Black && !_game.IsCheckmate)
+                        if (Game.PlayerToMove == Colors.Black && !Game.IsCheckmate)
                         {
-                            var evaluationResult = _blackEngine.GetBestMove(_game, Colors.Black);
-                            label1.Text = $"Depth: {evaluationResult.depth}, Score: {evaluationResult.node.Score}";
+                            var evaluationResult = BlackEngine.GetBestMove(Game, Colors.Black);
+                            OnMoveCalculated(evaluationResult);
                             var move = evaluationResult.node.Move;
-                            _game.AddMove(move);
+                            Game.AddMove(move);
                             _isRendered = false;
                             this.Refresh();
                         }
@@ -135,8 +149,8 @@ namespace Chess.WinForms
 
         void DrawBoard()
         {
-            this.ParentForm.AutoSize = true;
-            this.Size = new Size(SQUARE_SIZE * 8, SQUARE_SIZE * 8 + 200);
+            this.Size = new Size(SQUARE_SIZE * 8, SQUARE_SIZE * 8);
+            this.ParentForm.Size = new Size(this.Size.Width, this.Size.Height + 200);
             for (int rank = 1; rank <= 8; rank++)
             {
                 for (int file = 1; file <= 8; file++)
@@ -165,7 +179,7 @@ namespace Chess.WinForms
             {
                 for (int file = 1; file <= 8; file++)
                 {
-                    var square = _game.Board.GetSquare((Files)file, rank);
+                    var square = Game.Board.GetSquare((Files)file, rank);
                     if (square.Piece != null)
                     {
                         Image image = Image.FromFile(GetImagePathForPiece(square.Piece));

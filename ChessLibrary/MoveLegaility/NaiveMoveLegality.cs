@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChessLibrary
 {
-    public class NaiveMoveLegality : IMoveLegality
+    public class NaiveMoveLegality //: IMoveLegality
     {
 
         public List<Move> GetAllLegalMoves(IBoard b, Colors color, List<Move> pastMoves)

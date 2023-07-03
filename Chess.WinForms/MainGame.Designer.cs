@@ -28,23 +28,55 @@
         /// </summary>
         private void InitializeComponent()
         {
-            chessBoard = new ChessBoard(_game, _whiteEngine, _blackEngine);
+            label1 = new Label();
+            chessBoard = new ChessBoard();
+            txtFen = new TextBox();
+            btnLoadFen = new Button();
             SuspendLayout();
+            // 
+            // label1
+            // 
+            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            label1.AutoSize = true;
+            label1.Location = new Point(12, 937);
+            label1.Name = "label1";
+            label1.Size = new Size(38, 15);
+            label1.TabIndex = 1;
+            label1.Text = "label1";
             // 
             // chessBoard
             // 
-            chessBoard.AutoSize = true;
             chessBoard.Location = new Point(0, 0);
             chessBoard.Name = "chessBoard";
-            chessBoard.Size = new Size(400, 400);
-            chessBoard.TabIndex = 0;
+            chessBoard.Size = new Size(800, 800);
+            chessBoard.TabIndex = 2;
+            // 
+            // txtFen
+            // 
+            txtFen.Location = new Point(12, 848);
+            txtFen.Name = "txtFen";
+            txtFen.Size = new Size(585, 23);
+            txtFen.TabIndex = 3;
+            // 
+            // btnLoadFen
+            // 
+            btnLoadFen.Location = new Point(603, 848);
+            btnLoadFen.Name = "btnLoadFen";
+            btnLoadFen.Size = new Size(75, 23);
+            btnLoadFen.TabIndex = 4;
+            btnLoadFen.Text = "Load FEN";
+            btnLoadFen.UseVisualStyleBackColor = true;
+            btnLoadFen.Click += btnLoadFen_Click;
             // 
             // MainGame
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(484, 461);
+            ClientSize = new Size(984, 961);
+            Controls.Add(btnLoadFen);
+            Controls.Add(txtFen);
             Controls.Add(chessBoard);
+            Controls.Add(label1);
             Name = "MainGame";
             Text = "MainGame";
             ResumeLayout(false);
@@ -53,6 +85,9 @@
 
         #endregion
 
+        private Label label1;
         private ChessBoard chessBoard;
+        private TextBox txtFen;
+        private Button btnLoadFen;
     }
 }
