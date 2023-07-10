@@ -28,7 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             SuspendLayout();
+            // 
+            // backgroundWorker1
+            // 
+            backgroundWorker1.DoWork += backgroundWorker1_DoWork;
+            backgroundWorker1.RunWorkerCompleted += backgroundWorker1_RunWorkerCompleted;
             // 
             // ChessBoard
             // 
@@ -41,5 +47,7 @@
         }
 
         #endregion
+
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }

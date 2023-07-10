@@ -16,39 +16,56 @@ namespace Chess.WinForms
         private Game _game;
         private Engine? _whiteEngine;
         private Engine? _blackEngine;
+        public int Seconds { get; set; }
 
         public MainGame()
         {
             _game = new Game(ChessLibrary.Enums.BoardType.BitBoard);
+            //var whiteConfig = new ScorerConfiguration()
+            //{
+            //    SelfInCheckScore = 0,
+            //    BishopValue = 100,
+            //    KnightValue = 101,
+            //    OpponentInCheckScore = 0,
+            //    CenterSquareValue = 30,
+            //    CenterBorderValue = 10,
+            //    PawnValue = 40,
+            //    KingValue = 99999,
+            //    MaxTimeMilliseconds = 10000, // Int32.MaxValue, //2500,
+            //    QueenValue = 900,
+            //    RookValue = 300,
+            //    StartingDepth = 1
+            //};
+
             var whiteConfig = new ScorerConfiguration()
             {
-                SelfInCheckScore = 0,
-                BishopValue = 100,
-                KnightValue = 101,
-                OpponentInCheckScore = 0,
-                CenterSquareValue = 30,
-                CenterBorderValue = 10,
-                PawnValue = 40,
+                SelfInCheckScore = -100,
+                BishopValue = 320,
+                KnightValue = 325,
+                OpponentInCheckScore = 40,
+                CenterSquareValue = 60,
+                CenterBorderValue = 30,
+                PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 1000,
+                MaxTimeMilliseconds = 300_000,// Int32.MaxValue, //10000,
                 QueenValue = 900,
-                RookValue = 300,
+                RookValue = 600,
                 StartingDepth = 1
             };
 
             var blackConfig = new ScorerConfiguration()
             {
                 SelfInCheckScore = -100,
-                BishopValue = 40,
-                KnightValue = 40,
-                OpponentInCheckScore = 100,
-                CenterSquareValue = 6,
-                CenterBorderValue = 3,
-                PawnValue = 18,
+                BishopValue = 320,
+                KnightValue = 325,
+                OpponentInCheckScore = 40,
+                CenterSquareValue = 60,
+                CenterBorderValue = 30,
+                PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 5000,
-                QueenValue = 120,
-                RookValue = 80,
+                MaxTimeMilliseconds = 10000,// Int32.MaxValue, //10000,
+                QueenValue = 900,
+                RookValue = 600,
                 StartingDepth = 1
             };
             _whiteEngine = new Engine(whiteConfig);
@@ -58,16 +75,45 @@ namespace Chess.WinForms
             chessBoard.Game = _game;
             chessBoard.BlackEngine = _blackEngine;
             chessBoard.WhiteEngine = _whiteEngine;
+            chessBoard.MainGame = this;
             chessBoard.OnMoveCalculated = (evaluationResult) =>
             {
                 label1.Text = $"Depth: {evaluationResult.depth}, Score: {evaluationResult.node?.Score}, Nodes Evaluated: {Engine.nodesEvaluated}, NonQuiet Nodes Evaulated: {Engine.nonQuietDepthNodesEvaluated}, Zobrist Hash Matches : {Engine.zobristMatches}";
             };
+            timer1.Start();
         }
 
         private void btnLoadFen_Click(object sender, EventArgs e)
         {
             var fen = txtFen.Text;
             _game.LoadFen(fen);
+            chessBoard.ForceRender();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            chessBoard.SimulateGame();
+        }
+
+        private void chkBlackCpu_CheckedChanged(object sender, EventArgs e)
+        {
+            chessBoard.IsBlackAi = chkBlackCpu.Checked;
+        }
+
+        private void chkWhiteCpu_CheckedChanged(object sender, EventArgs e)
+        {
+            chessBoard.IsWhiteAi = chkWhiteCpu.Checked;
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            Seconds++;
+            lblTimer.Text = Seconds.ToString();
+
+        }
+
+        private void MainGame_ResizeEnd(object sender, EventArgs e)
+        {
             chessBoard.ForceRender();
         }
     }

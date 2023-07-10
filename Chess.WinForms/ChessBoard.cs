@@ -8,16 +8,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static ChessLibrary.Engine;
 
 namespace Chess.WinForms
 {
     public partial class ChessBoard : UserControl
     {
         public Action<(Engine.NodeInfo? node, int depth)>? OnMoveCalculated;
-
+        private bool _hasSimulationStarted = false;
         const int SQUARE_SIZE = 100;
         private Color _whiteColor = Color.FromArgb(250, 244, 212);
         private Color _blackColor = Color.FromArgb(66, 22, 0);
+        private Color _lastMoveColor = Color.FromArgb(99, 237, 255);
         public Game Game { get; set; }
         public Engine? WhiteEngine;
         public Engine? BlackEngine;
@@ -26,6 +28,11 @@ namespace Chess.WinForms
         bool _areMovesRendered = false;
         private (Files File, int Rank)? _selectedSquare = null;
         private List<Move>? _moves = null;
+
+        public bool IsWhiteAi { get; set; } = false;
+        public bool IsBlackAi { get; set; } = false;
+
+        public MainGame? MainGame { get; set; }
 
         public ChessBoard()
         {
@@ -47,6 +54,37 @@ namespace Chess.WinForms
             InitializeComponent();
             WhiteEngine = whiteEngine;
             BlackEngine = blackEngine;
+        }
+
+        private (NodeInfo? node, int Depth) ExecuteNextMoveForComputer()
+        {
+            (NodeInfo? node, int Depth) result;
+            if (Game.PlayerToMove == Colors.White)
+            {
+                result = WhiteEngine.GetBestMove(Game, Colors.White);
+            }
+            else
+            {
+                result = BlackEngine.GetBestMove(Game, Colors.Black);
+            }
+            return result;
+        }
+
+        public void SimulateGame()
+        {
+            if (_hasSimulationStarted)
+            {
+                return;
+            }
+            _hasSimulationStarted = true;
+            if (IsCurrentPlayerAnAi())
+            {
+                backgroundWorker1.RunWorkerAsync();
+            }
+            //while (!Game.IsGameOver)
+            //{
+            //    //ExecuteNextMoveForComputer();
+            //}
         }
 
         private void OnClick(object? sender, EventArgs e)
@@ -81,23 +119,32 @@ namespace Chess.WinForms
                     if (matchingMoveQuery.Any())
                     {
                         Game.AddMove(matchingMoveQuery.First());
-                        _isRendered = false;
-                        this.Refresh();
-                        if (Game.PlayerToMove == Colors.Black && !Game.IsCheckmate)
+                        if (this.MainGame != null)
                         {
-                            var evaluationResult = BlackEngine.GetBestMove(Game, Colors.Black);
-                            OnMoveCalculated(evaluationResult);
-                            var move = evaluationResult.node.Move;
-                            Game.AddMove(move);
-                            _isRendered = false;
-                            this.Refresh();
+                            this.MainGame.Seconds = 0;
+                        }
+                        ForceRender();
+                        if (IsCurrentPlayerAnAi() && !Game.IsCheckmate)
+                        {
+                            backgroundWorker1.RunWorkerAsync();
+                            //var evaluationResult = BlackEngine.GetBestMove(Game, Colors.Black);
+                            //OnMoveCalculated(evaluationResult);
+                            //var move = evaluationResult.node.Move;
+                            //if (!Game.IsGameOver)
+                            //{
+                            //    Game.AddMove(move);
+                            //    _isRendered = false;
+                            //    this.Refresh();
+                            //}
                         }
                     }
                 }
-                _isRendered = false;
-                this.Refresh();
-                _moves = null;
-                _selectedSquare = null;
+                else
+                {
+                    ForceRender();
+                }
+                    _moves = null;
+                    _selectedSquare = null;
             }
 
         }
@@ -139,6 +186,7 @@ namespace Chess.WinForms
 
         private void ChessBoard_OnPaint(object sender, PaintEventArgs e)
         {
+            //SimulateGame();
             if (!_isRendered)
             {
                 DrawBoard();
@@ -158,6 +206,18 @@ namespace Chess.WinForms
                     bool isLightSquare = (rank + file) % 2 != 0;
 
                     var squareColor = isLightSquare ? _whiteColor : _blackColor;
+
+                    if (Game.Moves.Any())
+                    {
+                        var lastMove = Game.Moves.Last();
+                        bool isLastMoveStartSquare = lastMove.StartingSquare.Rank == rank && lastMove.StartingSquare.File == (Files)file;
+                        bool isLastMoveDestinationSquare = lastMove.DestinationSquare.Rank == rank && lastMove.DestinationSquare.File == (Files)file;
+                        if (isLastMoveStartSquare || isLastMoveDestinationSquare)
+                        {
+                            squareColor = _lastMoveColor;
+                        }
+                    }
+
                     DrawSquare(squareColor, rank, file);
                 }
             }
@@ -230,6 +290,45 @@ namespace Chess.WinForms
             var rank = 8 - (position.Y / SQUARE_SIZE);
             var file = position.X / SQUARE_SIZE + 1;
             return ((Files)file, rank);
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var result = ExecuteNextMoveForComputer();
+            e.Result = result;
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            (NodeInfo? node, int Depth) result = ((NodeInfo?, int))e.Result;
+            if (result.node != null)
+            {
+                OnMoveCalculated(result);
+                var move = result.node.Move;
+                if (!Game.IsGameOver)
+                {
+
+                    Game.AddMove(move);
+                    if (this.MainGame != null)
+                    {
+                        this.MainGame.Seconds = 0;
+                    }
+                    ForceRender();
+                    if (IsCurrentPlayerAnAi())
+                    {
+                        backgroundWorker1.RunWorkerAsync();
+                    }
+                    else
+                    {
+                        _hasSimulationStarted = false;
+                    }
+                }
+            }
+        }
+
+        private bool IsCurrentPlayerAnAi()
+        {
+            return (Game.PlayerToMove == Colors.White && IsWhiteAi) || (Game.PlayerToMove == Colors.Black && IsBlackAi);
         }
 
     }
