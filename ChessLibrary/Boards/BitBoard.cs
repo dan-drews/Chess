@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChessLibrary.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -8,48 +9,6 @@ namespace ChessLibrary
 {
     public class BitBoard : IBoard
     {
-
-        static ulong[] FileMasks = new ulong[]
-        {
-            0x8080808080808080, 0x4040404040404040, 0x2020202020202020, 0x1010101010101010,
-            0x0808080808080808, 0x0404040404040404, 0x0202020202020202, 0x0101010101010101
-        };
-
-        static ulong[] RankMasks = new ulong[]
-        {
-            0x00000000000000FF, 0x000000000000FF00, 0x0000000000FF0000, 0x00000000FF000000,
-            0x000000FF00000000, 0x0000FF0000000000, 0x00FF000000000000, 0xFF00000000000000
-        };
-
-        static ulong[] DiagonalMasks = new ulong[]
-        {
-            // A8                        // A7, B8                          // A6, B7, C8                       // A5, B6, C7, D8               // A4, B5, C6, D7, E8
-            0x8000000000000000L,         0x4080000000000000L,               0x2040800000000000L,                0x1020408000000000L,            0x810204080000000L, 
-            // A3, B4, C5, D6, E7, F8    // A2, B3, C4, D5, E6, F7, G8      // A1, B2, C3, D4, E5, F6, G7, H8   // B1, C2, D3, E4, F5, G6, H7   // C1, D2, E3, F4, G5, H6
-            0x408102040800000L,          0x204081020408000L,                0x102040810204080L,                 0x1020408102040L,               0x10204081020L,
-            // D1, E2, F3, G4, H5        // E1, F2, G3, H4                  // F1, G2, H3                       // G1, H2                       // H1
-            0x102040810L,                0x1020408L,                        0x10204L,                           0x102L,                         0x1L
-        };
-
-        static ulong[] AntiDiagonalMasks = new ulong[]
-        {
-            // H8                        // G8, H7                          // F8, G7, H6                       // E8, F7, G6, H5               // D8, E7, F6, G5, H4
-            0x100000000000000L,          0x201000000000000L,                0x402010000000000L,                 0x804020100000000L,             0x1008040201000000L,
-            // C8, D7, E6, F5, G4, H3    // B8, C7, D6, E5, F4, G3, H2      // A8, B7, C6, D5, E4, F3, G2, H1   // A7, B6, C5, D4, E3, F2, G1   // A6, B5, C4, D3, E2, F1
-            0x2010080402010000L,         0x4020100804020100L,               0x8040201008040201L,                0x80402010080402L,              0x804020100804L,
-            // A5, B4, C3, D2, E1        // A4, B3, C2, D1                  // A3, B2, C1                       // A2, B1                       // A1 
-            0x8040201008L,               0x80402010L,                       0x804020L,                          0x8040L,                        0x80L
-        };
-
-        private const ulong Rank8 = 0xFF00000000000000;
-        private const ulong Rank1 = 0xFF;
-        private const ulong Rank4 = 0x00000000FF000000;
-        private const ulong Rank5 = 0x000000FF00000000;
-
-        private const ulong FileA = 0x8080808080808080;
-        private const ulong FileB = 0x4040404040404040;
-        private const ulong FileH = 0x0101010101010101;
-        private const ulong FileG = 0x0202020202020202;
 
         private const int KnightRangeBaseSquare = 18;
         private const ulong KnightSpan = 0x0000000A1100110A;
@@ -86,9 +45,11 @@ namespace ChessLibrary
         private ulong _blackQueens;
         private ulong _blackKing;
 
-        public BitBoard()
-        {
+        private MagicBitboards _magic;
 
+        public BitBoard(MagicBitboards magic)
+        {
+            _magic = magic;
         }
 
         public void SetupBoard()
@@ -110,7 +71,7 @@ namespace ChessLibrary
 
         public object Clone()
         {
-            var bb = new BitBoard();
+            var bb = new BitBoard(_magic);
             bb._whitePawns = _whitePawns;
             bb._whiteRooks = _whiteRooks;
             bb._whiteKnights = _whiteKnights;
@@ -295,13 +256,13 @@ namespace ChessLibrary
             ulong unsafeSpaces;
             if (color == Colors.White)
             {
-                unsafeSpaces = (_blackPawns >> 7) & ~FileH; // Pawn Capture Left
-                unsafeSpaces |= (_blackPawns >> 9) & ~FileA; // Pawn Capture Right
+                unsafeSpaces = (_blackPawns >> 7) & ~BitBoardMasks.FileH; // Pawn Capture Left
+                unsafeSpaces |= (_blackPawns >> 9) & ~BitBoardMasks.FileA; // Pawn Capture Right
             }
             else
             {
-                unsafeSpaces = (_whitePawns << 7) & ~FileA; // Pawn Capture Left
-                unsafeSpaces |= (_whitePawns << 9) & ~FileH; // Pawn Capture Right
+                unsafeSpaces = (_whitePawns << 7) & ~BitBoardMasks.FileA; // Pawn Capture Left
+                unsafeSpaces |= (_whitePawns << 9) & ~BitBoardMasks.FileH; // Pawn Capture Right
             }
 
             ulong possibilities;
@@ -322,11 +283,11 @@ namespace ChessLibrary
 
                 if (location % 8 >= 4)
                 {
-                    possibilities &= ~(FileG | FileH);
+                    possibilities &= ~(BitBoardMasks.FileG | BitBoardMasks.FileH);
                 }
                 else
                 {
-                    possibilities &= ~(FileA | FileB);
+                    possibilities &= ~(BitBoardMasks.FileA | BitBoardMasks.FileB);
                 }
                 unsafeSpaces |= possibilities;
                 knight &= ~i;
@@ -351,7 +312,7 @@ namespace ChessLibrary
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                possibilities = ValidHVMoves(location, OccupiedSquares);
+                possibilities = ValidHVMoves(location, OccupiedSquares, GetAllPieces(color));
                 unsafeSpaces |= possibilities;
                 queensAndRooks &= ~i;
                 i = queensAndRooks & ~(queensAndRooks - 1);
@@ -370,11 +331,11 @@ namespace ChessLibrary
             }
             if (kingLocation % 8 >= 4)
             {
-                possibilities &= ~(FileG | FileH);
+                possibilities &= ~(BitBoardMasks.FileG | BitBoardMasks.FileH);
             }
             else
             {
-                possibilities &= ~(FileA | FileB);
+                possibilities &= ~(BitBoardMasks.FileA | BitBoardMasks.FileB);
             }
             unsafeSpaces |= possibilities;
 
@@ -439,14 +400,14 @@ namespace ChessLibrary
                                   enemyKings >> 9 | enemyKings << 9;
 
                 var slidingAttacks = (ulong)0;
-                foreach(var rank in RankMasks)
+                foreach(var rank in BitBoardMasks.RankMasks)
                 {
                     if((rank & enemyRooks) > 0 || (rank & enemyQueens) > 0)
                     {
                         slidingAttacks |= rank;
                     }
                 }
-                foreach (var file in FileMasks)
+                foreach (var file in BitBoardMasks.FileMasks)
                 {
                     if ((file & enemyRooks) > 0 || (file & enemyQueens) > 0)
                     {
@@ -454,7 +415,7 @@ namespace ChessLibrary
                     }
                 }
 
-                foreach (var diagonal in DiagonalMasks)
+                foreach (var diagonal in BitBoardMasks.DiagonalMasks)
                 {
                     if ((diagonal & enemyBishops) > 0 || (diagonal & enemyQueens) > 0)
                     {
@@ -462,7 +423,7 @@ namespace ChessLibrary
                     }
                 }
 
-                foreach (var diagonal in AntiDiagonalMasks)
+                foreach (var diagonal in BitBoardMasks.AntiDiagonalMasks)
                 {
                     if ((diagonal & enemyBishops) > 0 || (diagonal & enemyQueens) > 0)
                     {
@@ -479,15 +440,30 @@ namespace ChessLibrary
             return (Unsafe(color) & (color == Colors.White ? _whiteKing : _blackKing)) > 0;
         }
 
-        private ulong ValidHVMoves(int index, ulong occupied)
+        private ulong ValidHVMoves(int index, ulong occupied, ulong friendlySquares)
         {
+            //var square = GetSquare(index);
+            //ulong binaryS = U1 << index;
+            //ulong fileMask = BitBoardMasks.FileMasks[(int)square.Square.File - 1];
+            //ulong rankMask = BitBoardMasks.RankMasks[square.Square.Rank - 1];
+            //ulong possibilitiesHorizontal = ((occupied & rankMask) - (2 * binaryS)) ^ ((occupied & rankMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
+            //ulong possibilitiesVertical = ((occupied & fileMask) - (2 * binaryS)) ^ Extensions.ReverseBits(Extensions.ReverseBits(occupied & fileMask) - 2 * Extensions.ReverseBits(binaryS)); // ((occupied & fileMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
+            //return (possibilitiesHorizontal & rankMask) | (possibilitiesVertical & fileMask);
             var square = GetSquare(index);
-            ulong binaryS = U1 << index;
-            ulong fileMask = FileMasks[(int)square.Square.File - 1];
-            ulong rankMask = RankMasks[square.Square.Rank - 1];
-            ulong possibilitiesHorizontal = ((occupied & rankMask) - (2 * binaryS)) ^ ((occupied & rankMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
-            ulong possibilitiesVertical = ((occupied & fileMask) - (2 * binaryS)) ^ Extensions.ReverseBits(Extensions.ReverseBits(occupied & fileMask) - 2 * Extensions.ReverseBits(binaryS)); // ((occupied & fileMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
-            return (possibilitiesHorizontal & rankMask) | (possibilitiesVertical & fileMask);
+            var board = 1UL << index;
+            var mask = occupied & (BitBoardMasks.FileMasks[(int)square.Square.File - 1] | BitBoardMasks.RankMasks[square.Square.Rank - 1]) & ~board;
+            
+            foreach(var edge in new[] { BitBoardMasks.FileA, BitBoardMasks.FileH, BitBoardMasks.Rank1, BitBoardMasks.Rank8 })
+            {
+                if((board & edge) == 0)
+                {
+                    mask &= ~edge;
+                }
+            }
+
+            //mask = mask // Leaving off here. I need to remove edges (other than edges that the piece is on) from the mask.l
+            var movesBitBoard = _magic.RookBitboards[(index, mask)];
+            return movesBitBoard & ~friendlySquares;
         }
 
         private ulong ValidDiagonalMoves(int index, ulong occupied)
@@ -495,8 +471,8 @@ namespace ChessLibrary
             var square = GetSquare(index);
             ulong binaryS = U1 << index;
 
-            ulong diagonalMask = DiagonalMasks[((int)square.Square.File - 1) + (8 - (int)square.Square.Rank)];
-            ulong antidiagonalMask = AntiDiagonalMasks[14 - (square.Square.Rank - 1 + (int)square.Square.File - 1)];
+            ulong diagonalMask = BitBoardMasks.DiagonalMasks[((int)square.Square.File - 1) + (8 - (int)square.Square.Rank)];
+            ulong antidiagonalMask = BitBoardMasks.AntiDiagonalMasks[14 - (square.Square.Rank - 1 + (int)square.Square.File - 1)];
 
             ulong possibilitiesDiagonal = ((occupied & diagonalMask) - (2 * binaryS)) ^ ((occupied & diagonalMask).ReverseBits() - (2 * binaryS.ReverseBits())).ReverseBits();
             ulong possibilitiesAntidiagonal = ((occupied & antidiagonalMask) - (2 * binaryS)) ^ Extensions.ReverseBits(Extensions.ReverseBits(occupied & antidiagonalMask) - 2 * Extensions.ReverseBits(binaryS));
@@ -554,7 +530,7 @@ namespace ChessLibrary
             {
                 int location = i.NumberOfTrailingZeros();
                 var currentSquare = GetSquare(location);
-                possibility = ValidHVMoves(location, occupied) & notMyPieces;
+                possibility = ValidHVMoves(location, occupied, GetAllPieces(color)) & notMyPieces;
                 ulong j = possibility & ~(possibility - 1);
                 while (j != 0)
                 {
@@ -588,7 +564,7 @@ namespace ChessLibrary
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                possibility = (ValidHVMoves(location, occupied) | ValidDiagonalMoves(location, occupied)) & notMyPieces;
+                possibility = (ValidHVMoves(location, occupied, GetAllPieces(color)) | ValidDiagonalMoves(location, occupied)) & notMyPieces;
                 ulong j = possibility & ~(possibility - 1);
                 var currentSquare = GetSquare(location);
                 while (j != 0)
@@ -629,11 +605,11 @@ namespace ChessLibrary
             }
             if (location % 8 >= 4)
             {
-                possibility &= ~(FileG | FileH) & notMyPieces;
+                possibility &= ~(BitBoardMasks.FileG | BitBoardMasks.FileH) & notMyPieces;
             }
             else
             {
-                possibility &= ~(FileA | FileB) & notMyPieces;
+                possibility &= ~(BitBoardMasks.FileA | BitBoardMasks.FileB) & notMyPieces;
             }
             var startingSquare = GetSquare(location);
             ulong j = possibility & ~(possibility - 1);
@@ -723,11 +699,11 @@ namespace ChessLibrary
                 }
                 if (location % 8 >= 4)
                 {
-                    possibility &= ~(FileG | FileH) & notMyPieces;
+                    possibility &= ~(BitBoardMasks.FileG | BitBoardMasks.FileH) & notMyPieces;
                 }
                 else
                 {
-                    possibility &= ~(FileA | FileB) & notMyPieces;
+                    possibility &= ~(BitBoardMasks.FileA | BitBoardMasks.FileB) & notMyPieces;
                 }
                 var startingSquare = GetSquare(location);
                 ulong j = possibility & ~(possibility - 1);
@@ -762,10 +738,10 @@ namespace ChessLibrary
             switch (color)
             {
                 case Colors.White:
-                    result = GetPawnMoves(Colors.White, _whitePawns, _blackPawns, opposingPieces, 7, 9, 1, Rank4, 5, enPassantFile, (ulong pieces, int amount) => pieces << amount, (ulong pieces, int amount) => pieces >> amount, includeQuietMoves);
+                    result = GetPawnMoves(Colors.White, _whitePawns, _blackPawns, opposingPieces, 7, 9, 1, BitBoardMasks.Rank4, 5, enPassantFile, (ulong pieces, int amount) => pieces << amount, (ulong pieces, int amount) => pieces >> amount, includeQuietMoves);
                     break;
                 case Colors.Black:
-                    result = GetPawnMoves(Colors.Black, _blackPawns, _whitePawns, opposingPieces, 9, 7, -1, Rank5, 4, enPassantFile, (ulong pieces, int amount) => pieces >> amount, (ulong pieces, int amount) => pieces << amount, includeQuietMoves);
+                    result = GetPawnMoves(Colors.Black, _blackPawns, _whitePawns, opposingPieces, 9, 7, -1, BitBoardMasks.Rank5, 4, enPassantFile, (ulong pieces, int amount) => pieces >> amount, (ulong pieces, int amount) => pieces << amount, includeQuietMoves);
                     break;
             }
 
@@ -811,7 +787,7 @@ namespace ChessLibrary
         private List<Move> GetPawnMoves(Colors color, ulong pawns, ulong opposingPawns, ulong opposingPieces, int leftShiftAmount, int rightShiftAmount, int pawnDirection, ulong doublePawnRank, int enPassantRank, Files? enPassantFile, Func<ulong, int, ulong> shiftOperation, Func<ulong, int, ulong> reverseShiftOperation, bool includeQuietMoves)
         {
             var result = new List<Move>();
-            ulong pawnMoves = shiftOperation(pawns, leftShiftAmount) & opposingPieces & ~FileA; // Capture Right
+            ulong pawnMoves = shiftOperation(pawns, leftShiftAmount) & opposingPieces & ~BitBoardMasks.FileA; // Capture Right
             ulong possibility = pawnMoves & ~(pawnMoves - 1);
             while (possibility != 0)
             {
@@ -826,7 +802,7 @@ namespace ChessLibrary
                 possibility = pawnMoves & ~(pawnMoves - 1);
             }
 
-            pawnMoves = shiftOperation(pawns, rightShiftAmount) & opposingPieces & ~FileH; // Capture Left
+            pawnMoves = shiftOperation(pawns, rightShiftAmount) & opposingPieces & ~BitBoardMasks.FileH; // Capture Left
             possibility = pawnMoves & ~(pawnMoves - 1);
             while (possibility != 0)
             {
@@ -873,7 +849,7 @@ namespace ChessLibrary
             {
 
                 var epSquare = U1 << GetPositionFromFileAndRank(enPassantFile.Value, enPassantRank + pawnDirection);
-                var captureLeftOperation = shiftOperation(pawns, rightShiftAmount) & epSquare & ~FileH; // Capture Left
+                var captureLeftOperation = shiftOperation(pawns, rightShiftAmount) & epSquare & ~BitBoardMasks.FileH; // Capture Left
 
                 if (captureLeftOperation != 0)
                 {
@@ -886,7 +862,7 @@ namespace ChessLibrary
                     });
                 }
 
-                var captureRightOperation = shiftOperation(pawns, leftShiftAmount) & epSquare & ~FileA; // Capture Right
+                var captureRightOperation = shiftOperation(pawns, leftShiftAmount) & epSquare & ~BitBoardMasks.FileA; // Capture Right
                 if (captureRightOperation != 0)
                 {
                     var destinationSquare = GetSquare(captureRightOperation.NumberOfTrailingZeros());// GetSquare(enPassantFile.Value, square.Square.Rank + pawnDirection);

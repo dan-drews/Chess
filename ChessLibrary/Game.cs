@@ -17,6 +17,7 @@ namespace ChessLibrary
         public bool BlackCanLongCastle { get; set; } = true;
         public bool WhiteCanShortCastle { get; set; } = true;
         public bool BlackCanShortCastle { get; set; } = true;
+        public MagicBitboards MagicBitboards { get; set; }
 
         private Files? _enPassantFile = null;
         public Files? EnPassantFile
@@ -44,8 +45,10 @@ namespace ChessLibrary
             switch (boardType)
             {
                 case BoardType.BitBoard:
-                    Board = new BitBoard();
                     Evaluator = new BitBoardLegality();
+                    MagicBitboards = new MagicBitboards();
+                    MagicBitboards.Initialize();
+                    Board = new BitBoard(MagicBitboards);
                     break;
                 //case BoardType.Naive:
                 //    Board = new NaiveBoard();
@@ -66,7 +69,8 @@ namespace ChessLibrary
                 BlackCanLongCastle = BlackCanLongCastle,
                 BlackCanShortCastle = BlackCanShortCastle,
                 StartingColor = StartingColor,
-                EnPassantFile = EnPassantFile
+                EnPassantFile = EnPassantFile,
+                MagicBitboards = MagicBitboards
             };
         }
 
