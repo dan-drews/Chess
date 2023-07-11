@@ -116,7 +116,24 @@ namespace ChessLibrary
             return GetSquare(position);
         }
 
+        private SquareState?[]? _squareCache = null;
         private SquareState GetSquare(int position)
+        {
+            if (_squareCache == null)
+            {
+                _squareCache = new SquareState?[64];
+            }
+
+            if (_squareCache[position] != null)
+            {
+                return _squareCache[position]!;
+            }
+
+            _squareCache[position] = GetSquareInternal(position);
+            return _squareCache[position]!;
+        }
+
+        private SquareState GetSquareInternal(int position)
         {
             ulong squareMask = (U1 << position);
             ulong occupiedSquares = OccupiedSquares;
@@ -202,6 +219,7 @@ namespace ChessLibrary
             _threatenedSquares = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
+            _squareCache = null;
         }
 
         public bool ResultsInOwnCheck(Move move, Colors color)
@@ -245,11 +263,11 @@ namespace ChessLibrary
         private ulong? _blackUnsafe = null;
         public ulong Unsafe(Colors color)
         {
-            if(color == Colors.White && _whiteUnsafe != null)
+            if (color == Colors.White && _whiteUnsafe != null)
             {
                 return _whiteUnsafe.Value;
             }
-            if(color == Colors.Black && _blackUnsafe != null)
+            if (color == Colors.Black && _blackUnsafe != null)
             {
                 return _blackUnsafe.Value;
             }
@@ -312,7 +330,7 @@ namespace ChessLibrary
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                possibilities = ValidHVMoves(location, OccupiedSquares, GetAllPieces(color));
+                possibilities = ValidHVMoves(location, OccupiedSquares, GetAllPieces(color == Colors.White ? Colors.Black : Colors.White));
                 unsafeSpaces |= possibilities;
                 queensAndRooks &= ~i;
                 i = queensAndRooks & ~(queensAndRooks - 1);
@@ -339,7 +357,7 @@ namespace ChessLibrary
             }
             unsafeSpaces |= possibilities;
 
-            if(color == Colors.White)
+            if (color == Colors.White)
             {
                 _whiteUnsafe = unsafeSpaces;
             }
@@ -386,7 +404,7 @@ namespace ChessLibrary
                 var enemyRooks = color == Colors.White ? _blackRooks : _whiteRooks;
                 var enemyKnights = color == Colors.White ? _blackKnights : _whiteKnights;
 
-                var knightSquares = enemyKnights << 6 | enemyKnights >> 6 | 
+                var knightSquares = enemyKnights << 6 | enemyKnights >> 6 |
                                     enemyKnights << 10 | enemyKnights >> 10 |
                                     enemyKnights << 15 | enemyKnights >> 15 |
                                     enemyKnights << 17 | enemyKnights >> 17;
@@ -400,9 +418,9 @@ namespace ChessLibrary
                                   enemyKings >> 9 | enemyKings << 9;
 
                 var slidingAttacks = (ulong)0;
-                foreach(var rank in BitBoardMasks.RankMasks)
+                foreach (var rank in BitBoardMasks.RankMasks)
                 {
-                    if((rank & enemyRooks) > 0 || (rank & enemyQueens) > 0)
+                    if ((rank & enemyRooks) > 0 || (rank & enemyQueens) > 0)
                     {
                         slidingAttacks |= rank;
                     }
@@ -449,20 +467,19 @@ namespace ChessLibrary
             //ulong possibilitiesHorizontal = ((occupied & rankMask) - (2 * binaryS)) ^ ((occupied & rankMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
             //ulong possibilitiesVertical = ((occupied & fileMask) - (2 * binaryS)) ^ Extensions.ReverseBits(Extensions.ReverseBits(occupied & fileMask) - 2 * Extensions.ReverseBits(binaryS)); // ((occupied & fileMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
             //return (possibilitiesHorizontal & rankMask) | (possibilitiesVertical & fileMask);
-            var square = GetSquare(index);
             var board = 1UL << index;
-            var mask = occupied & (BitBoardMasks.FileMasks[(int)square.Square.File - 1] | BitBoardMasks.RankMasks[square.Square.Rank - 1]) & ~board;
-            
-            foreach(var edge in new[] { BitBoardMasks.FileA, BitBoardMasks.FileH, BitBoardMasks.Rank1, BitBoardMasks.Rank8 })
+            var mask = occupied & _magic.RookAttackTable[index]; // (BitBoardMasks.FileMasks[(int)square.Square.File - 1] | BitBoardMasks.RankMasks[square.Square.Rank - 1]) & ~board;
+
+            foreach (var edge in new[] { BitBoardMasks.FileA, BitBoardMasks.FileH, BitBoardMasks.Rank1, BitBoardMasks.Rank8 })
             {
-                if((board & edge) == 0)
+                if ((board & edge) == 0)
                 {
                     mask &= ~edge;
                 }
             }
 
             //mask = mask // Leaving off here. I need to remove edges (other than edges that the piece is on) from the mask.l
-            var movesBitBoard = _magic.RookBitboards[(index, mask)];
+            var movesBitBoard = _magic.RookBitboards[index][mask];
             return movesBitBoard & ~friendlySquares;
         }
 
@@ -885,6 +902,7 @@ namespace ChessLibrary
             _threatenedSquares = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
+            _squareCache = null;
             var mask = ~(U1 << position);
             _whitePawns &= mask;
             _whiteRooks &= mask;
@@ -905,6 +923,7 @@ namespace ChessLibrary
         {
             int position = GetPositionFromFileAndRank(f, rank);
             _threatenedSquares = null;
+            _squareCache = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
             ClearPiece(f, rank); // Clear the piece first.

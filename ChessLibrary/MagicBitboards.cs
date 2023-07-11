@@ -8,8 +8,10 @@ namespace ChessLibrary
 {
     public class MagicBitboards
     {
-        public Dictionary<(int square, ulong mask), ulong> RookBitboards { get; set; } = new Dictionary<(int square, ulong mask), ulong>();
-        public Dictionary<(int square, ulong mask), ulong> BishopBitBoards { get; set; } = new Dictionary<(int square, ulong mask), ulong>();
+        public Dictionary<int, Dictionary<ulong, ulong>> RookBitboards { get; set; } = new Dictionary<int, Dictionary<ulong, ulong>>();
+        public Dictionary<int, Dictionary<ulong, ulong>> BishopBitBoards { get; set; } = new Dictionary<int, Dictionary<ulong, ulong>>();
+
+        public ulong[] RookAttackTable = new ulong[64];
 
         public void Initialize()
         {
@@ -53,6 +55,7 @@ namespace ChessLibrary
                 }
 
                 ulong movementMask = (BitBoardMasks.RankMasks[rank] | BitBoardMasks.FileMasks[file]) & ~board;
+                RookAttackTable[i] = movementMask;
                 if (rank != 0)
                 {
                     movementMask &= ~BitBoardMasks.RankMasks[0];
@@ -76,7 +79,11 @@ namespace ChessLibrary
                 foreach(var blockerBitBoard in blockerBitBoards)
                 {
                     ulong legalMoves = CreateRookLegalMoves(i, blockerBitBoard);
-                    RookBitboards.Add((i, blockerBitBoard), legalMoves);
+                    if (!RookBitboards.ContainsKey(i))
+                    {
+                        RookBitboards.Add(i, new Dictionary<ulong, ulong>());
+                    }
+                    RookBitboards[i].Add(blockerBitBoard, legalMoves);
                 }
             }
         }
