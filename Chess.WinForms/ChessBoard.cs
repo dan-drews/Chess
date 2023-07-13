@@ -27,7 +27,7 @@ namespace Chess.WinForms
         bool _isRendered = false;
         bool _areMovesRendered = false;
         private Square? _selectedSquare = null;
-        private List<NewMove>? _moves = null;
+        private List<Move>? _moves = null;
 
         public bool IsWhiteAi { get; set; } = false;
         public bool IsBlackAi { get; set; } = false;
@@ -149,7 +149,7 @@ namespace Chess.WinForms
 
         }
 
-        private void RenderMoves(List<NewMove> moves)
+        private void RenderMoves(List<Move> moves)
         {
             _areMovesRendered = true;
             foreach (var move in moves)

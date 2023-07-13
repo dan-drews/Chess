@@ -1,67 +1,125 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Numerics;
+using System.Text;
 
-//namespace ChessLibrary
-//{
-//    public class Move : ICloneable
-//    {
-//        public Piece Piece { get; set; }
-//        public Colors Player { get; set; }
-//        public Square StartingSquare { get; set; }
-//        public Square DestinationSquare { get; set; }
-//        public Piece? CapturedPiece { get; set; }
+namespace ChessLibrary
+{
+    public struct Move : ICloneable
+    {
+        public readonly struct Flag
+        {
+            public const int None = 0;
+            public const int EnPassantCapture = 1;
+            public const int LongCastle = 2;
+            public const int ShortCastle = 3;
+            public const int PromoteToQueen = 4;
+            public const int PromoteToRook = 5;
+            public const int PromoteToBishop = 6;
+            public const int PromoteToKnight = 7;
+            public const int PawnTwoForward = 8;
+        }
 
-//        public Piece? PromotedPiece { get; set; }
-//        public ulong Hash { get; set; } = 0;
+        private uint _moveValue;
+        const uint COLOR_MASK =
+            0b00000000010000000000000000000000;
+        const uint FLAG_MASK =
+            0b00000000001111000000000000000000;
+        const uint START_SQUARE_MASK =
+            0b00000000000000111111000000000000;
+        const uint DEST_SQUARE_MASK =
+            0b00000000000000000000111111000000;
+        const uint PIECE_MASK =
+            0b00000000000000000000000000111000;
+        const uint CAPTURE_PIECE_MASK =
+            0b00000000000000000000000000000111;
 
-//        public Move(Piece piece, Colors player, Square startingSquare, Square destinationSquare)
-//        {
-//            Piece = piece;
-//            Player = player;
-//            StartingSquare = startingSquare;
-//            DestinationSquare = destinationSquare;
-//        }
+        const int COLOR_SHIFT = 22;
+        const int FLAG_SHIFT = 18;
+        const int START_SHIFT = 12;
+        const int DEST_SHIFT = 6;
+        const int PIECE_SHIFT = 3;
+        const int CAPTURE_SHIFT = 0;
 
-//        public override bool Equals(object? obj)
-//        {
-//            if (obj == null)
-//            {
-//                return false;
-//            }
+        public ulong Hash { get; set; }
 
-//            var comp = obj as Move;
-//            if (comp == null)
-//            {
-//                return false;
-//            }
+        public override int GetHashCode()
+        {
+            return (int)_moveValue;
+        }
 
-//            bool promotedPiecesMatch = comp.PromotedPiece == null || PromotedPiece == null
-//                                        ? PromotedPiece == null && comp.PromotedPiece == null
-//                                        : comp.PromotedPiece.Color == PromotedPiece.Color && PromotedPiece.Type == comp.PromotedPiece.Type;
+        public Move(uint moveValue)
+        {
+            _moveValue = moveValue;
+        }
 
-//            return comp.Player == Player 
-//                    && comp.StartingSquare.File == StartingSquare.File 
-//                    && StartingSquare.Rank == comp.StartingSquare.Rank 
-//                    && comp.DestinationSquare.File == DestinationSquare.File 
-//                    && DestinationSquare.Rank == comp.DestinationSquare.Rank
-//                    && promotedPiecesMatch;
-//        }
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+            return SameMove((Move)obj, this);
+        }
 
-//        public override int GetHashCode()
-//        {
-//            return 17 * (int)StartingSquare.File + 18 * StartingSquare.Rank + 34 * (int)DestinationSquare.File + 79 * DestinationSquare.Rank
-//                      + (PromotedPiece == null ? 0 : 103 * (int)PromotedPiece.Type + 151 * (int)PromotedPiece.Color);
-//        }
+        public Move(
+            int startSquare,
+            int destinationSquare,
+            Colors color,
+            PieceTypes piece,
+            PieceTypes? capturedPiece = null,
+            int flags = 0
+        )
+        {
+            _moveValue = 0;
+            _moveValue |= (uint)color << COLOR_SHIFT;
+            _moveValue |= (uint)flags << FLAG_SHIFT;
+            _moveValue |= (uint)startSquare << START_SHIFT;
+            _moveValue |= (uint)destinationSquare << DEST_SHIFT;
+            _moveValue |= (uint)piece << PIECE_SHIFT;
+            _moveValue |= (uint)(capturedPiece ?? 0) << CAPTURE_SHIFT;
+        }
 
-//        public object Clone()
-//        {
-//            return new Move(Piece, Player, StartingSquare, DestinationSquare)
-//            {
-//                CapturedPiece = CapturedPiece == null ? null : CapturedPiece,
-//                PromotedPiece = PromotedPiece == null ? null : PromotedPiece,
-//                Hash = Hash
-//            };
-//        }
-//    }
-//}
+        public int TargetSquare => (int)((_moveValue & DEST_SQUARE_MASK) >> DEST_SHIFT);
+        public int StartingSquare => (int)((_moveValue & START_SQUARE_MASK) >> START_SHIFT);
+        public int Flags => (int)((_moveValue & FLAG_MASK) >> FLAG_SHIFT);
+        public Colors Color => (Colors)((_moveValue & COLOR_MASK) >> COLOR_SHIFT);
+        public PieceTypes Piece => (PieceTypes)((_moveValue & PIECE_MASK) >> PIECE_SHIFT);
+        public PieceTypes? CapturedPiece =>
+            (_moveValue & CAPTURE_PIECE_MASK) == 0
+                ? null
+                : (PieceTypes)(_moveValue & CAPTURE_PIECE_MASK);
+
+        public static bool SameMove(Move a, Move b)
+        {
+            return a._moveValue == b._moveValue;
+        }
+
+        public object Clone()
+        {
+            return new Move(_moveValue)
+            {
+                Hash = Hash,
+            };
+        }
+
+        public PieceTypes? PromotedType
+        {
+            get
+            {
+                switch (Flags)
+                {
+                    case Flag.PromoteToQueen:
+                        return PieceTypes.Queen;
+                    case Flag.PromoteToKnight:
+                        return PieceTypes.Knight;
+                    case Flag.PromoteToBishop:
+                        return PieceTypes.Bishop;
+                    case Flag.PromoteToRook:
+                        return PieceTypes.Rook;
+                }
+                return null;
+            }
+        }
+    }
+}

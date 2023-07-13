@@ -8,7 +8,7 @@ namespace ChessLibrary
     public static class MoveOrdering
     {
         const int CAPTURED_PIECE_MULTIPLIER = 10;
-        public static IEnumerable<NewMove> OrderMoves(this IEnumerable<NewMove> moves, Engine engine)
+        public static IEnumerable<Move> OrderMoves(this IEnumerable<Move> moves, Engine engine)
         {
             return moves
                     .OrderByDescending(x =>
