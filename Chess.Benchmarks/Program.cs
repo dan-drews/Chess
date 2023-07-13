@@ -20,10 +20,10 @@ namespace Chess.Benchmarks
         }
 
         [Benchmark]
-        public List<Move> GetAllMovesNaive() => Naive.GetAllLegalMoves();
+        public List<NewMove> GetAllMovesNaive() => Naive.GetAllLegalMoves();
 
         [Benchmark]
-        public List<Move> GetAllMovesBitBoard() => BitBoard.GetAllLegalMoves();
+        public List<NewMove> GetAllMovesBitBoard() => BitBoard.GetAllLegalMoves();
     }
 
     class Program

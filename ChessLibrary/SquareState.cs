@@ -51,7 +51,7 @@ namespace ChessLibrary
             }
         }
 
-        private ushort _valueInternal;
+        public ushort _valueInternal { get; set; }
 
         public SquareState(ushort value)
         {
@@ -65,19 +65,25 @@ namespace ChessLibrary
 
         private static ushort GetSquare(Square square)
         {
-            ushort squareNumber = (ushort)(((square.Rank - 1) * 8) + ((int)square.File - 1));
+            ushort squareNumber = (ushort)(((square.Rank - 1) * 8) + (8- (int)square.File));
             return (ushort)(squareNumber << 6);
         }
 
         private static Square GetSquare(ushort value)
         {
-            ushort squareNumber = (ushort)(value >> 6);
-
-            return new Square()
+            if (!_squaresInitialized)
             {
-                File = (Files)((squareNumber % 8) + 1),
-                Rank = (squareNumber / 8) + 1
-            };
+                for(int i = 0; i <= 63; i++)
+                {
+                    _squares[i] = new Square(i);
+                }
+                _squaresInitialized = true;
+            }
+            ushort squareNumber = (ushort)(value >> 6);
+            return _squares[squareNumber];
         }
+
+        private static Square[] _squares = new Square[64];
+        private static bool _squaresInitialized = false;
     }
 }

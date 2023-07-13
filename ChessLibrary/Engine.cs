@@ -77,7 +77,7 @@ namespace ChessLibrary
             return (null, 3);
         }
 
-        private int GetLoudMoveScores(Game game, Colors playerColor, Colors opponentColor, Move? move, int alpha, int beta)
+        private int GetLoudMoveScores(Game game, Colors playerColor, Colors opponentColor, NewMove? move, int alpha, int beta)
         {
             var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black), game.IsStalemate);
             var playerScore = playerColor == Colors.Black ? scores.blackScore : scores.whiteScore;
@@ -131,7 +131,7 @@ namespace ChessLibrary
         private NodeInfo GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth)
         {
             int? currentBestScore = null;
-            Move? currentBestMove = null;
+            NewMove? currentBestMove = null;
             //Parallel.ForEach(game.GetAllLegalMoves(), m =>
             //{
             //    Game clonedGame = (Game)game.Clone();
@@ -159,7 +159,7 @@ namespace ChessLibrary
             return new NodeInfo(currentBestMove, currentBestScore ?? 0, 0, 0);
         }
 
-        private int? GetRawMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, int alpha, int beta)
+        private int? GetRawMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, NewMove? move, int alpha, int beta)
         {
 
             if (_stopwatch.ElapsedMilliseconds >= MaxTime)
@@ -338,12 +338,12 @@ namespace ChessLibrary
 
         public class NodeInfo
         {
-            public Move? Move { get; set; }
+            public NewMove? Move { get; set; }
             public int Score { get; set; }
             public int Alpha { get; set; }
             public int Beta { get; set; }
 
-            public NodeInfo(Move? move, int score, int alpha, int beta)
+            public NodeInfo(NewMove? move, int score, int alpha, int beta)
             {
                 Move = move;
                 Score = score;

@@ -8,7 +8,7 @@ namespace ChessLibrary
     public static class MoveOrdering
     {
         const int CAPTURED_PIECE_MULTIPLIER = 10;
-        public static IEnumerable<Move> OrderMoves(this IEnumerable<Move> moves, Engine engine)
+        public static IEnumerable<NewMove> OrderMoves(this IEnumerable<NewMove> moves, Engine engine)
         {
             return moves
                     .OrderByDescending(x =>
@@ -16,12 +16,12 @@ namespace ChessLibrary
                         var score = 0;
                         if (x.CapturedPiece != null)
                         {
-                            score += CAPTURED_PIECE_MULTIPLIER * (x.CapturedPiece == null ? 0 : engine.Scorer.GetPieceValue(x.CapturedPiece.Type));
-                            score -= engine.Scorer.GetPieceValue(x.Piece.Type);
+                            score += CAPTURED_PIECE_MULTIPLIER * (x.CapturedPiece == null ? 0 : engine.Scorer.GetPieceValue(x.CapturedPiece.Value));
+                            score -= engine.Scorer.GetPieceValue(x.Piece);
                         }
-                        if (x.Piece.Type == PieceTypes.Pawn && x.PromotedPiece != null)
+                        if (x.Piece == PieceTypes.Pawn && x.PromotedType != null)
                         {
-                            score += engine.Scorer.GetPieceValue(x.PromotedPiece.Type);
+                            score += engine.Scorer.GetPieceValue(x.PromotedType.Value);
                         }
                         return score;
                     })

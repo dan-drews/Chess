@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 [assembly: InternalsVisibleTo("Chess.Tests")]
@@ -146,7 +147,7 @@ namespace ChessLibrary
         internal int GetPositionFromFileAndRank(Files file, int rank)
         {
             // In our bitboard, A8 == 63 H1 == 0.
-            return (rank - 1) * 8 + (8 - (int)file);
+            return ((rank - 1) * 8) + (8 - ((int)file));
         }
 
         public SquareState GetSquare(Files file, int rank)
@@ -155,101 +156,103 @@ namespace ChessLibrary
             return GetSquare(position);
         }
 
-        private SquareState GetSquare(int position)
+        public SquareState GetSquare(int position)
         {
             ulong squareMask = (U1 << position);
             ulong occupiedSquares = OccupiedSquares;
 
-            Files file = (Files)(8 - (position % 8));
-            int rank = position / 8 + 1;
-
             if ((occupiedSquares & squareMask) == 0)
             {
-                return new SquareState(new Square() { File = file, Rank = rank });
+                return new SquareState(new Square(position));
             }
 
             if ((_whitePawns & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Pawn } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Pawn } };
 
             if ((_blackPawns & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Pawn } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Pawn } };
 
             if ((_whiteRooks & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook } };
 
             if ((_blackRooks & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Rook } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Rook } };
 
             if ((_whiteKnights & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Knight } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Knight } };
 
             if ((_blackKnights & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Knight } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Knight } };
 
             if ((_whiteBishops & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Bishop } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Bishop } };
 
             if ((_blackBishops & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop } };
 
             if ((_whiteQueens & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Queen } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Queen } };
 
             if ((_blackQueens & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Queen } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Queen } };
 
             if ((_whiteKing & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.King } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.King } };
 
             if ((_blackKing & squareMask) != 0)
-                return new SquareState(new Square() { File = file, Rank = rank }) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King } };
+                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King } };
 
             throw new Exception("Not sure what piece is here.");
         }
 
-        public void MovePiece(Move move)
+        public void MovePiece(NewMove move)
         {
-            move.Piece = GetSquare(move.StartingSquare.File, move.StartingSquare.Rank).Piece!;
             // En Passant
-            if (move.Piece.Type == PieceTypes.Pawn && move.CapturedPiece != null && GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece == null)
+            if (move.Flags == NewMove.Flag.EnPassantCapture) // move.Piece == PieceTypes.Pawn && move.CapturedPiece != null && GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece == null)
             {
-                ClearPiece(move.DestinationSquare.File, move.StartingSquare.Rank);
-            }
-
-            // Castle
-            if (move.Piece.Type == PieceTypes.King && move.StartingSquare.File == Files.E && (move.DestinationSquare.File == Files.G || move.DestinationSquare.File == Files.C))
-            {
-                if (move.DestinationSquare.File == Files.G)
+                if (move.Color == Colors.White)
                 {
-                    // Short Castle
-                    var rook = GetSquare(Files.H, move.DestinationSquare.Rank).Piece!;
-                    ClearPiece(Files.H, move.DestinationSquare.Rank);
-                    SetPiece(Files.F, move.DestinationSquare.Rank, rook.Type, rook.Color);
+                    ClearPiece(move.TargetSquare - 8);
                 }
                 else
                 {
-                    // Long Castle
-                    var rook = GetSquare(Files.A, move.DestinationSquare.Rank).Piece!;
-                    ClearPiece(Files.A, move.DestinationSquare.Rank);
-                    SetPiece(Files.D, move.DestinationSquare.Rank, rook.Type, rook.Color);
+                    ClearPiece(move.TargetSquare + 8);
                 }
+                ClearPiece(move.TargetSquare);
             }
 
-            ClearPiece(move.StartingSquare.File, move.StartingSquare.Rank);
-            var newPiece = move.PromotedPiece ?? move.Piece;
-            SetPiece(move.DestinationSquare.File, move.DestinationSquare.Rank, newPiece.Type, newPiece.Color);
+            // Castle
+            if(move.Flags == NewMove.Flag.ShortCastle)
+            {
+                var targetSquare = new Square(move.TargetSquare);
+                ClearPiece(Files.H, targetSquare.Rank);                
+                SetPiece(Files.F, targetSquare.Rank, PieceTypes.Rook, move.Color);
+            }
+            if(move.Flags == NewMove.Flag.LongCastle)
+            {
+                // Long Castle
+                var targetSquare = new Square(move.TargetSquare);
+                ClearPiece(Files.A, targetSquare.Rank);
+                SetPiece(Files.D, targetSquare.Rank, PieceTypes.Rook, move.Color);
+            }
+
+            ClearPiece(move.TargetSquare);
+            var newPiece = move.PromotedType ?? move.Piece;
+
+            SetPiece(move.TargetSquare, newPiece, move.Color);
+            ClearPiece(move.StartingSquare);
             _threatenedSquares = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
         }
 
-        public bool ResultsInOwnCheck(Move move, Colors color)
+        public bool ResultsInOwnCheck(NewMove move, Colors color)
         {
             var king = color == Colors.White ? _whiteKing : _blackKing;
             ulong kingBoard;
-            if (move.Piece.Type == PieceTypes.King)
+            if (move.Piece == PieceTypes.King)
             {
-                kingBoard = U1 << GetPositionFromFileAndRank(move.DestinationSquare.File, move.DestinationSquare.Rank);
+                kingBoard = U1 << move.TargetSquare;
             }
             else
             {
@@ -284,11 +287,11 @@ namespace ChessLibrary
         private ulong? _blackUnsafe = null;
         public ulong Unsafe(Colors color)
         {
-            if(color == Colors.White && _whiteUnsafe != null)
+            if (color == Colors.White && _whiteUnsafe != null)
             {
                 return _whiteUnsafe.Value;
             }
-            if(color == Colors.Black && _blackUnsafe != null)
+            if (color == Colors.Black && _blackUnsafe != null)
             {
                 return _blackUnsafe.Value;
             }
@@ -378,7 +381,7 @@ namespace ChessLibrary
             }
             unsafeSpaces |= possibilities;
 
-            if(color == Colors.White)
+            if (color == Colors.White)
             {
                 _whiteUnsafe = unsafeSpaces;
             }
@@ -391,7 +394,7 @@ namespace ChessLibrary
             return unsafeSpaces;
         }
 
-        public List<Move> AllValidMoves(Colors color, Files? enPassantFile, bool blackCanLongCastle, bool blackCanShortCastle, bool whiteCanLongCastle, bool whiteCanShortCastle, bool ignoreCheck = false, bool includeQuietMoves = true)
+        public List<NewMove> AllValidMoves(Colors color, Files? enPassantFile, bool blackCanLongCastle, bool blackCanShortCastle, bool whiteCanLongCastle, bool whiteCanShortCastle, bool ignoreCheck = false, bool includeQuietMoves = true)
         {
             var result = ValidPawnMoves(color, enPassantFile, includeQuietMoves);
             result.AddRange(ValidKnightMoves(color, includeQuietMoves));
@@ -425,7 +428,7 @@ namespace ChessLibrary
                 var enemyRooks = color == Colors.White ? _blackRooks : _whiteRooks;
                 var enemyKnights = color == Colors.White ? _blackKnights : _whiteKnights;
 
-                var knightSquares = enemyKnights << 6 | enemyKnights >> 6 | 
+                var knightSquares = enemyKnights << 6 | enemyKnights >> 6 |
                                     enemyKnights << 10 | enemyKnights >> 10 |
                                     enemyKnights << 15 | enemyKnights >> 15 |
                                     enemyKnights << 17 | enemyKnights >> 17;
@@ -439,9 +442,9 @@ namespace ChessLibrary
                                   enemyKings >> 9 | enemyKings << 9;
 
                 var slidingAttacks = (ulong)0;
-                foreach(var rank in RankMasks)
+                foreach (var rank in RankMasks)
                 {
-                    if((rank & enemyRooks) > 0 || (rank & enemyQueens) > 0)
+                    if ((rank & enemyRooks) > 0 || (rank & enemyQueens) > 0)
                     {
                         slidingAttacks |= rank;
                     }
@@ -505,9 +508,9 @@ namespace ChessLibrary
             return (possibilitiesDiagonal & diagonalMask) | (possibilitiesAntidiagonal & antidiagonalMask);
         }
 
-        private List<Move> ValidBishopMoves(Colors color, bool includeQuietMoves)
+        private List<NewMove> ValidBishopMoves(Colors color, bool includeQuietMoves)
         {
-            var result = new List<Move>();
+            var result = new List<NewMove>();
             var occupied = OccupiedSquares;
             var currentSquares = color == Colors.White ? _whiteBishops : _blackBishops;
             var notMyPieces = ~GetAllPieces(color);
@@ -517,7 +520,6 @@ namespace ChessLibrary
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                var currentSquare = GetSquare(location);
                 possibility = ValidDiagonalMoves(location, occupied) & notMyPieces;
                 ulong j = possibility & ~(possibility - 1);
                 while (j != 0)
@@ -526,10 +528,7 @@ namespace ChessLibrary
                     var destinationSquare = GetSquare(index);
                     if (destinationSquare.Piece != null || includeQuietMoves)
                     {
-                        result.Add(new Move(currentSquare.Piece!, color, currentSquare.Square, destinationSquare.Square)
-                        {
-                            CapturedPiece = destinationSquare.Piece
-                        });
+                        result.Add(new NewMove(location, index, color, PieceTypes.Bishop, destinationSquare.Piece?.Type));
                     }
                     possibility &= ~j;
                     j = possibility & ~(possibility - 1);
@@ -541,9 +540,9 @@ namespace ChessLibrary
             return result;
         }
 
-        private List<Move> ValidRookMoves(Colors color, bool includeQuietMoves)
+        private List<NewMove> ValidRookMoves(Colors color, bool includeQuietMoves)
         {
-            var result = new List<Move>();
+            var result = new List<NewMove>();
             var occupied = OccupiedSquares;
             var currentSquares = color == Colors.White ? _whiteRooks : _blackRooks;
             var notMyPieces = ~GetAllPieces(color);
@@ -553,7 +552,6 @@ namespace ChessLibrary
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                var currentSquare = GetSquare(location);
                 possibility = ValidHVMoves(location, occupied) & notMyPieces;
                 ulong j = possibility & ~(possibility - 1);
                 while (j != 0)
@@ -562,10 +560,7 @@ namespace ChessLibrary
                     var destinationSquare = GetSquare(index);
                     if (destinationSquare.Piece != null || includeQuietMoves)
                     {
-                        result.Add(new Move(currentSquare.Piece!, color, currentSquare.Square, destinationSquare.Square)
-                        {
-                            CapturedPiece = destinationSquare.Piece
-                        });
+                        result.Add(new NewMove(location, index, color, PieceTypes.Rook, destinationSquare?.Piece?.Type));
                     }
                     possibility &= ~j;
                     j = possibility & ~(possibility - 1);
@@ -577,9 +572,9 @@ namespace ChessLibrary
             return result;
         }
 
-        private List<Move> ValidQueenMoves(Colors color, bool includeQuietMoves)
+        private List<NewMove> ValidQueenMoves(Colors color, bool includeQuietMoves)
         {
-            var result = new List<Move>();
+            var result = new List<NewMove>();
             var occupied = OccupiedSquares;
             var currentQueen = color == Colors.White ? _whiteQueens : _blackQueens;
             var notMyPieces = ~GetAllPieces(color);
@@ -590,17 +585,13 @@ namespace ChessLibrary
                 int location = i.NumberOfTrailingZeros();
                 possibility = (ValidHVMoves(location, occupied) | ValidDiagonalMoves(location, occupied)) & notMyPieces;
                 ulong j = possibility & ~(possibility - 1);
-                var currentSquare = GetSquare(location);
                 while (j != 0)
                 {
                     int index = j.NumberOfTrailingZeros();
                     var destinationSquare = GetSquare(index);
                     if (destinationSquare.Piece != null || includeQuietMoves)
                     {
-                        result.Add(new Move(currentSquare.Piece!, color, currentSquare.Square, destinationSquare.Square)
-                        {
-                            CapturedPiece = destinationSquare.Piece
-                        });
+                        result.Add(new NewMove(location, index, color, PieceTypes.Queen, destinationSquare?.Piece?.Type));
                     }
                     possibility &= ~j;
                     j = possibility & ~(possibility - 1);
@@ -611,9 +602,9 @@ namespace ChessLibrary
             return result;
         }
 
-        private List<Move> ValidKingMoves(Colors color, bool canLongCastle, bool canShortCastle, bool includeQuietMoves)
+        private List<NewMove> ValidKingMoves(Colors color, bool canLongCastle, bool canShortCastle, bool includeQuietMoves)
         {
-            var result = new List<Move>();
+            var result = new List<NewMove>();
             ulong currentKing = color == Colors.Black ? _blackKing : _whiteKing;
             var notMyPieces = ~GetAllPieces(color);
             ulong possibility;
@@ -643,10 +634,7 @@ namespace ChessLibrary
                 var destinationSquare = GetSquare(index);
                 if (destinationSquare.Piece != null || includeQuietMoves)
                 {
-                    result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, destinationSquare.Square)
-                    {
-                        CapturedPiece = destinationSquare.Piece
-                    });
+                    result.Add(new NewMove(location, index, color, PieceTypes.King, destinationSquare.Piece?.Type));
                 }
                 possibility &= ~j;
                 j = possibility & ~(possibility - 1);
@@ -682,7 +670,7 @@ namespace ChessLibrary
                         var castleStartSquare = color == Colors.White ? whiteShortCastleStartSquares : blackShortCastleStartSquares;
                         if ((castleSquares & dangerous) == 0 && (castleSquares & OccupiedSquares & ~currentKing) == 0 && (castleStartSquare & currentRooks) != 0)
                         {
-                            result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, GetSquare(Files.G, startingSquare.Square.Rank).Square));
+                            result.Add(new NewMove(location, GetPositionFromFileAndRank(Files.G, startingSquare.Square.Rank), color, PieceTypes.King, null, NewMove.Flag.ShortCastle));
                         }
                     }
 
@@ -692,7 +680,7 @@ namespace ChessLibrary
                         var castleStartSquare = color == Colors.White ? whiteLongCastleStartSquare : blackLongCastleStartSquare;
                         if ((castleSquares & dangerous) == 0 && (castleSquares & OccupiedSquares & ~currentKing) == 0 && (castleStartSquare & currentRooks) != 0)
                         {
-                            result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, GetSquare(Files.C, startingSquare.Square.Rank).Square));
+                            result.Add(new NewMove(location, GetPositionFromFileAndRank(Files.C, startingSquare.Square.Rank), color, PieceTypes.King, null, NewMove.Flag.LongCastle));
                         }
                     }
 
@@ -703,9 +691,9 @@ namespace ChessLibrary
             return result;
         }
 
-        private List<Move> ValidKnightMoves(Colors color, bool includeQuietMoves)
+        private List<NewMove> ValidKnightMoves(Colors color, bool includeQuietMoves)
         {
-            var result = new List<Move>();
+            var result = new List<NewMove>();
             ulong currentKnights = color == Colors.Black ? _blackKnights : _whiteKnights;
             ulong i = currentKnights & ~(currentKnights - 1);
             var notMyPieces = ~GetAllPieces(color);
@@ -729,7 +717,6 @@ namespace ChessLibrary
                 {
                     possibility &= ~(FileA | FileB) & notMyPieces;
                 }
-                var startingSquare = GetSquare(location);
                 ulong j = possibility & ~(possibility - 1);
                 while (j != 0)
                 {
@@ -737,10 +724,7 @@ namespace ChessLibrary
                     var destinationSquare = GetSquare(index);
                     if (destinationSquare.Piece != null || includeQuietMoves)
                     {
-                        result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, destinationSquare.Square)
-                        {
-                            CapturedPiece = destinationSquare.Piece
-                        });
+                        result.Add(new NewMove(location, index, color, PieceTypes.Knight, destinationSquare.Piece?.Type));
                     }
                     possibility &= ~j;
                     j = possibility & ~(possibility - 1);
@@ -752,9 +736,9 @@ namespace ChessLibrary
             return result;
         }
 
-        private List<Move> ValidPawnMoves(Colors color, Files? enPassantFile, bool includeQuietMoves)
+        private List<NewMove> ValidPawnMoves(Colors color, Files? enPassantFile, bool includeQuietMoves)
         {
-            var result = new List<Move>();
+            var result = new List<NewMove>();
             var opposingColor = color == Colors.White ? Colors.Black : Colors.White;
             var opposingPieces = GetAllPieces(opposingColor);
 
@@ -770,33 +754,22 @@ namespace ChessLibrary
             }
 
             var promotionRank = color == Colors.White ? 8 : 1;
-            var resultActual = new List<Move>();
+            var resultActual = new List<NewMove>();
             foreach (var m in result)
             {
-                if (m.DestinationSquare.Rank == promotionRank)
+
+                var targetBitBoard = 1UL << m.TargetSquare;
+
+                if ((targetBitBoard & RankMasks[promotionRank - 1]) > 0)
                 {
                     var piece = m.Piece;
                     // Promotion. Don'd add this move, but add 1 for each promoted piece type
-                    resultActual.Add(new Move(piece, color, m.StartingSquare, m.DestinationSquare)
-                    {
-                        CapturedPiece = m.CapturedPiece,
-                        PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Queen }
-                    });
-                    resultActual.Add(new Move(piece, color, m.StartingSquare, m.DestinationSquare)
-                    {
-                        CapturedPiece = m.CapturedPiece,
-                        PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Knight }
-                    });
-                    resultActual.Add(new Move(piece, color, m.StartingSquare, m.DestinationSquare)
-                    {
-                        CapturedPiece = m.CapturedPiece,
-                        PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Bishop }
-                    });
-                    resultActual.Add(new Move(piece, color, m.StartingSquare, m.DestinationSquare)
-                    {
-                        CapturedPiece = m.CapturedPiece,
-                        PromotedPiece = new Piece() { Color = color, Type = PieceTypes.Rook }
-                    });
+
+                    resultActual.Add(new NewMove(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, NewMove.Flag.PromoteToQueen));
+                    resultActual.Add(new NewMove(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, NewMove.Flag.PromoteToKnight));
+                    resultActual.Add(new NewMove(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, NewMove.Flag.PromoteToBishop));
+                    resultActual.Add(new NewMove(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, NewMove.Flag.PromoteToRook));
+
                 }
                 else
                 {
@@ -808,9 +781,9 @@ namespace ChessLibrary
             return result;
         }
 
-        private List<Move> GetPawnMoves(Colors color, ulong pawns, ulong opposingPawns, ulong opposingPieces, int leftShiftAmount, int rightShiftAmount, int pawnDirection, ulong doublePawnRank, int enPassantRank, Files? enPassantFile, Func<ulong, int, ulong> shiftOperation, Func<ulong, int, ulong> reverseShiftOperation, bool includeQuietMoves)
+        private List<NewMove> GetPawnMoves(Colors color, ulong pawns, ulong opposingPawns, ulong opposingPieces, int leftShiftAmount, int rightShiftAmount, int pawnDirection, ulong doublePawnRank, int enPassantRank, Files? enPassantFile, Func<ulong, int, ulong> shiftOperation, Func<ulong, int, ulong> reverseShiftOperation, bool includeQuietMoves)
         {
-            var result = new List<Move>();
+            var result = new List<NewMove>();
             ulong pawnMoves = shiftOperation(pawns, leftShiftAmount) & opposingPieces & ~FileA; // Capture Right
             ulong possibility = pawnMoves & ~(pawnMoves - 1);
             while (possibility != 0)
@@ -818,10 +791,7 @@ namespace ChessLibrary
                 int index = possibility.NumberOfTrailingZeros();
                 var destinationSquare = GetSquare(index);
                 var startingSquare = GetSquare(destinationSquare.Square.File - 1, destinationSquare.Square.Rank - pawnDirection);
-                result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, destinationSquare.Square)
-                {
-                    CapturedPiece = destinationSquare.Piece
-                });
+                result.Add(new NewMove(startingSquare.Square.SquareNumber, index, color, PieceTypes.Pawn, destinationSquare.Piece?.Type));
                 pawnMoves &= ~possibility;
                 possibility = pawnMoves & ~(pawnMoves - 1);
             }
@@ -833,10 +803,7 @@ namespace ChessLibrary
                 int index = possibility.NumberOfTrailingZeros();
                 var destinationSquare = GetSquare(index);
                 var startingSquare = GetSquare(destinationSquare.Square.File + 1, destinationSquare.Square.Rank - pawnDirection);
-                result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, destinationSquare.Square)
-                {
-                    CapturedPiece = destinationSquare.Piece
-                });
+                result.Add(new NewMove(startingSquare.Square.SquareNumber, index, color, PieceTypes.Pawn, destinationSquare.Piece?.Type));
                 pawnMoves &= ~possibility;
                 possibility = pawnMoves & ~(pawnMoves - 1);
             }
@@ -850,7 +817,7 @@ namespace ChessLibrary
                     int index = possibility.NumberOfTrailingZeros();
                     var destinationSquare = GetSquare(index);
                     var startingSquare = GetSquare(destinationSquare.Square.File, destinationSquare.Square.Rank - pawnDirection);
-                    result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, destinationSquare.Square));
+                    result.Add(new NewMove(startingSquare.Square.SquareNumber, index, color, PieceTypes.Pawn));
                     pawnMoves &= ~possibility;
                     possibility = pawnMoves & ~(pawnMoves - 1);
                 }
@@ -862,7 +829,7 @@ namespace ChessLibrary
                     int index = possibility.NumberOfTrailingZeros();
                     var destinationSquare = GetSquare(index);
                     var startingSquare = GetSquare(destinationSquare.Square.File, destinationSquare.Square.Rank - 2 * pawnDirection);
-                    result.Add(new Move(startingSquare.Piece!, color, startingSquare.Square, destinationSquare.Square));
+                    result.Add(new NewMove(startingSquare.Square.SquareNumber, index, color, PieceTypes.Pawn, null, NewMove.Flag.PawnTwoForward));
                     pawnMoves &= ~possibility;
                     possibility = pawnMoves & ~(pawnMoves - 1);
                 }
@@ -880,10 +847,7 @@ namespace ChessLibrary
                     var destinationSquare = GetSquare(captureLeftOperation.NumberOfTrailingZeros());// GetSquare(enPassantFile.Value, square.Square.Rank + pawnDirection);
                     var startingSquare = GetSquare(reverseShiftOperation(captureLeftOperation, rightShiftAmount).NumberOfTrailingZeros());
                     var targetPiece = GetSquare(reverseShiftOperation(captureLeftOperation, 8).NumberOfTrailingZeros()).Piece;
-                    result.Add(new Move(startingSquare.Piece, color, startingSquare.Square, destinationSquare.Square)
-                    {
-                        CapturedPiece = targetPiece
-                    });
+                    result.Add(new NewMove(startingSquare.Square.SquareNumber, destinationSquare.Square.SquareNumber, color, PieceTypes.Pawn, targetPiece!.Type, NewMove.Flag.EnPassantCapture));
                 }
 
                 var captureRightOperation = shiftOperation(pawns, leftShiftAmount) & epSquare & ~FileA; // Capture Right
@@ -892,10 +856,7 @@ namespace ChessLibrary
                     var destinationSquare = GetSquare(captureRightOperation.NumberOfTrailingZeros());// GetSquare(enPassantFile.Value, square.Square.Rank + pawnDirection);
                     var startingSquare = GetSquare(reverseShiftOperation(captureRightOperation, leftShiftAmount).NumberOfTrailingZeros());
                     var targetPiece = GetSquare(reverseShiftOperation(captureRightOperation, 8).NumberOfTrailingZeros()).Piece;
-                    result.Add(new Move(startingSquare.Piece, color, startingSquare.Square, destinationSquare.Square)
-                    {
-                        CapturedPiece = targetPiece
-                    });
+                    result.Add(new NewMove(startingSquare.Square.SquareNumber, destinationSquare.Square.SquareNumber, color, PieceTypes.Pawn, targetPiece!.Type, NewMove.Flag.EnPassantCapture));
                 }
 
             }
@@ -906,6 +867,11 @@ namespace ChessLibrary
         public void ClearPiece(Files f, int rank)
         {
             int position = GetPositionFromFileAndRank(f, rank);
+            ClearPiece(position);
+        }
+
+        public void ClearPiece(int position)
+        {
             _threatenedSquares = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
@@ -928,10 +894,15 @@ namespace ChessLibrary
         public void SetPiece(Files f, int rank, PieceTypes type, Colors color)
         {
             int position = GetPositionFromFileAndRank(f, rank);
+            SetPiece(position, type, color);
+        }
+
+        public void SetPiece(int position, PieceTypes type, Colors color)
+        {
             _threatenedSquares = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
-            ClearPiece(f, rank); // Clear the piece first.
+            ClearPiece(position); // Clear the piece first.
             switch (color)
             {
                 case Colors.White:

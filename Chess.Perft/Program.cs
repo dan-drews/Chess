@@ -24,9 +24,9 @@ namespace Chess.Perft
                 }
                 catch (Exception ex)
                 {
-                    var moves = g.Moves.Select(x => $"{x.StartingSquare.File} {x.StartingSquare.Rank} {x.DestinationSquare.File} {x.DestinationSquare.Rank}\r\n").ToList();
-                    moves.Add($"Exception: {ex}");
-                    System.IO.File.AppendAllLines(path, moves);
+                    //var moves = g.Moves.Select(x => $"{x.StartingSquare.File} {x.StartingSquare.Rank} {x.DestinationSquare.File} {x.DestinationSquare.Rank}\r\n").ToList();
+                    //moves.Add($"Exception: {ex}");
+                    //System.IO.File.AppendAllLines(path, moves);
                 }
             }
             Console.ReadLine();
