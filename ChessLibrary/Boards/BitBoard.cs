@@ -125,6 +125,10 @@ namespace ChessLibrary
             bb._blackBishops = _blackBishops;
             bb._blackQueens = _blackQueens;
             bb._blackKing = _blackKing;
+            
+            bb._emptySquareStates = _emptySquareStates;
+            bb._squares = _squares;
+            bb._emptySquares = _emptySquares;
             return bb;
         }
 
@@ -150,6 +154,8 @@ namespace ChessLibrary
             return ((rank - 1) * 8) + (8 - ((int)file));
         }
 
+        private SquareState?[] _squares = new SquareState[64];
+
         public SquareState GetSquare(Files file, int rank)
         {
             int position = GetPositionFromFileAndRank(file, rank);
@@ -158,49 +164,71 @@ namespace ChessLibrary
 
         public SquareState GetSquare(int position)
         {
+            if (_squares[position] != null)
+            {
+                return _squares[position]!;
+            }
+            _squares[position] = GetSquareInternal(position);
+            return _squares[position]!;
+        }
+
+        private SquareState[]? _emptySquareStates = null;
+        private Square[]? _emptySquares = null;
+        private SquareState GetSquareInternal(int position)
+        {
             ulong squareMask = (U1 << position);
             ulong occupiedSquares = OccupiedSquares;
+            if (_emptySquareStates == null || _emptySquares == null)
+            {
+                _emptySquareStates = new SquareState[64];
+                _emptySquares = new Square[64];
+                for (int i = 0; i < 64; i++)
+                {
+                    _emptySquares[i] = new Square(i);
+                    _emptySquareStates[i] = new SquareState(_emptySquares[i]);
+                }
+            }
 
             if ((occupiedSquares & squareMask) == 0)
             {
-                return new SquareState(new Square(position));
+                return _emptySquareStates[position];
             }
 
             if ((_whitePawns & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Pawn } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Pawn } };
 
             if ((_blackPawns & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Pawn } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Pawn } };
 
             if ((_whiteRooks & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook } };
 
             if ((_blackRooks & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Rook } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Rook } };
 
             if ((_whiteKnights & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Knight } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Knight } };
 
             if ((_blackKnights & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Knight } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Knight } };
 
             if ((_whiteBishops & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Bishop } };
+                return new SquareState(_emptySquares[position]  ) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Bishop } };
 
             if ((_blackBishops & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop } };
+                return new SquareState(_emptySquares[position]  ) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop } };
 
             if ((_whiteQueens & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Queen } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Queen } };
 
             if ((_blackQueens & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Queen } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Queen } };
 
             if ((_whiteKing & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.King } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.King } };
 
             if ((_blackKing & squareMask) != 0)
-                return new SquareState(new Square(position)) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King } };
+                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King } };
 
             throw new Exception("Not sure what piece is here.");
         }
@@ -244,6 +272,10 @@ namespace ChessLibrary
             _threatenedSquares = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
+            for (int i = 0; i < _squares.Length; i++)
+            {
+                _squares[i] = null;
+            }
         }
 
         public bool ResultsInOwnCheck(Move move, Colors color)
@@ -872,6 +904,10 @@ namespace ChessLibrary
 
         public void ClearPiece(int position)
         {
+            for (int i = 0; i < _squares.Length; i++)
+            {
+                _squares[i] = null;
+            }
             _threatenedSquares = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
@@ -899,6 +935,10 @@ namespace ChessLibrary
 
         public void SetPiece(int position, PieceTypes type, Colors color)
         {
+            for (int i = 0; i < _squares.Length; i++)
+            {
+                _squares[i] = null;
+            }
             _threatenedSquares = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
