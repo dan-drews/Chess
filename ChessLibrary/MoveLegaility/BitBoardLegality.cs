@@ -16,7 +16,7 @@ namespace ChessLibrary.MoveLegaility
         public List<Move>? GetAllLegalMoves(IBoard b, SquareState squareState, Files? enPassantFile, bool blackCanLongCastle, bool blackCanShortCastle, bool whiteCanLongCastle, bool whiteCanShortCastle, bool ignoreCheck = false, bool includeQuietMoves = true)
         {
             var allValidMoves = ((BitBoard)b).AllValidMoves(squareState.Piece!.Color, enPassantFile, blackCanLongCastle, blackCanShortCastle, whiteCanLongCastle, whiteCanShortCastle, ignoreCheck, includeQuietMoves);
-            return allValidMoves.Where(x => x.StartingSquare.Rank == squareState.Square.Rank && x.StartingSquare.File == squareState.Square.File).ToList();
+            return allValidMoves.Where(x => x.StartingSquare == squareState.Square.SquareNumber).ToList();
         }
 
         public bool IsKingInCheck(IBoard b, Colors color, List<Move> pastMoves)

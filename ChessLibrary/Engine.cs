@@ -147,7 +147,7 @@ namespace ChessLibrary
             foreach(var move in game.GetAllLegalMoves())
             {
                 game.AddMove(move, false);
-                var score = GetRawMoveScores(game, playerColor, opponentColor, currentDepth, move, Int32.MinValue, Int32.MaxValue);
+                var score = GetRawMoveScores(game, playerColor, opponentColor, currentDepth, Int32.MinValue, Int32.MaxValue);
                 game.UndoLastMove();
                 if (score != null && (currentBestScore == null || score > currentBestScore))
                 {
@@ -159,7 +159,7 @@ namespace ChessLibrary
             return new NodeInfo(currentBestMove, currentBestScore ?? 0, 0, 0);
         }
 
-        private int? GetRawMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? move, int alpha, int beta)
+        private int? GetRawMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, int alpha, int beta)
         {
 
             if (_stopwatch.ElapsedMilliseconds >= MaxTime)
@@ -221,7 +221,7 @@ namespace ChessLibrary
             foreach (var newMove in moves)
             {
                 game.AddMove(newMove, false);
-                var scoreForThisMove = GetRawMoveScores(game, playerColor, opponentColor, currentDepth - 1, newMove, alpha, beta);
+                var scoreForThisMove = GetRawMoveScores(game, playerColor, opponentColor, currentDepth - 1,  alpha, beta);
                 game.UndoLastMove();
                 if (scoreForThisMove == null)
                 {

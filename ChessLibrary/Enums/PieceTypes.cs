@@ -8,19 +8,19 @@ namespace ChessLibrary
     public enum PieceTypes
     {
         [PieceScore(1)]
-        Pawn,
+        Pawn = 1,
 
         [PieceScore(5)]
-        Rook,
+        Rook = 2,
 
         [PieceScore(3)]
-        Knight,
+        Knight = 3,
 
         [PieceScore(3)]
-        Bishop,
+        Bishop = 4,
 
         [PieceScore(9)]
-        Queen,
-        King
+        Queen = 5,
+        King = 6
     }
 }

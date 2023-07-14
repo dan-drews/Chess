@@ -26,7 +26,7 @@ namespace Chess.WinForms
 
         bool _isRendered = false;
         bool _areMovesRendered = false;
-        private (Files File, int Rank)? _selectedSquare = null;
+        private Square? _selectedSquare = null;
         private List<Move>? _moves = null;
 
         public bool IsWhiteAi { get; set; } = false;
@@ -93,7 +93,7 @@ namespace Chess.WinForms
             var squareTarget = GetSquareRankFileFromEventArgs(mouseEvent);
             if (_selectedSquare == null)
             {
-                var moves = Game.GetAllLegalMoves().Where(x => x.StartingSquare.Rank == squareTarget.Rank && x.StartingSquare.File == squareTarget.File).ToList();
+                var moves = Game.GetAllLegalMoves().Where(x => x.StartingSquare == squareTarget.SquareNumber).ToList();
                 if (moves.Any())
                 {
                     RenderMoves(moves);
@@ -115,7 +115,7 @@ namespace Chess.WinForms
             {
                 if (_moves != null)
                 {
-                    var matchingMoveQuery = _moves.Where(x => x.DestinationSquare.Rank == squareTarget.Rank && x.DestinationSquare.File == squareTarget.File);
+                    var matchingMoveQuery = _moves.Where(x => x.TargetSquare == squareTarget.SquareNumber);
                     if (matchingMoveQuery.Any())
                     {
                         Game.AddMove(matchingMoveQuery.First());
@@ -154,7 +154,8 @@ namespace Chess.WinForms
             _areMovesRendered = true;
             foreach (var move in moves)
             {
-                DrawCircle(Color.Gray, move.DestinationSquare.Rank, (int)move.DestinationSquare.File);
+                var destinationSquare = new Square(move.TargetSquare);
+                DrawCircle(Color.Gray, destinationSquare.Rank, (int)destinationSquare.File);
             }
         }
 
@@ -207,11 +208,17 @@ namespace Chess.WinForms
 
                     var squareColor = isLightSquare ? _whiteColor : _blackColor;
 
+                    var sq = new Square()
+                    {
+                        File = (Files)file,
+                        Rank = rank,
+                    };
+
                     if (Game.Moves.Any())
                     {
                         var lastMove = Game.Moves.Last();
-                        bool isLastMoveStartSquare = lastMove.StartingSquare.Rank == rank && lastMove.StartingSquare.File == (Files)file;
-                        bool isLastMoveDestinationSquare = lastMove.DestinationSquare.Rank == rank && lastMove.DestinationSquare.File == (Files)file;
+                        bool isLastMoveStartSquare = lastMove.StartingSquare == sq.SquareNumber;
+                        bool isLastMoveDestinationSquare = lastMove.TargetSquare == sq.SquareNumber;
                         if (isLastMoveStartSquare || isLastMoveDestinationSquare)
                         {
                             squareColor = _lastMoveColor;
@@ -284,12 +291,12 @@ namespace Chess.WinForms
             return $"assets/{colorPath}{typePath}.png";
         }
 
-        private (Files File, int Rank) GetSquareRankFileFromEventArgs(MouseEventArgs e)
+        private Square GetSquareRankFileFromEventArgs(MouseEventArgs e)
         {
             var position = e.Location;
             var rank = 8 - (position.Y / SQUARE_SIZE);
             var file = position.X / SQUARE_SIZE + 1;
-            return ((Files)file, rank);
+            return new Square() { File = (Files)file, Rank = rank };// ((Files)file, rank);
         }
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
@@ -308,7 +315,7 @@ namespace Chess.WinForms
                 if (!Game.IsGameOver)
                 {
 
-                    Game.AddMove(move);
+                    Game.AddMove(move!.Value);
                     if (this.MainGame != null)
                     {
                         this.MainGame.Seconds = 0;
