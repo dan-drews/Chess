@@ -1,4 +1,5 @@
-﻿using MoreLinq;
+﻿using ChessLibrary.Evaluation;
+using MoreLinq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -23,13 +24,13 @@ namespace ChessLibrary
         public int MaxTime { get; set; }
         private int _startingDepth;
         private bool _wasEvaluationCancelled = false;
-        public Scorer Scorer { get; set; }
+        public Evaluator Scorer { get; set; }
          
         private Stopwatch _stopwatch = new Stopwatch();
 
         public Engine(ScorerConfiguration scoreConfig)
         {
-            Scorer = new Scorer(scoreConfig);
+            Scorer = new Evaluator(scoreConfig);
             MaxTime = scoreConfig.MaxTimeMilliseconds;
             _startingDepth = scoreConfig.StartingDepth;
             ZobristScore.TryAdd(true, new ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>());
