@@ -103,6 +103,9 @@ namespace ChessLibrary
             };
         }
 
+        public static bool operator ==(Move lhs, Move rhs) => lhs._moveValue == rhs._moveValue;
+        public static bool operator !=(Move lhs, Move rhs) => lhs._moveValue != rhs._moveValue;
+
         public PieceTypes? PromotedType
         {
             get

@@ -52,20 +52,21 @@ namespace ChessLibrary
                 while (_stopwatch.ElapsedMilliseconds < MaxTime && !checkmate)
                 {
                     depthToSearch++;
-                    nodesEvaluated = 0;
+                    //nodesEvaluated = 0;
                     nonQuietDepthNodesEvaluated = 0;
-                    zobristMatches = 0;
+                    //zobristMatches = 0;
                     skips = 0;
                     var previousResult = result;
-                    result = GetMoveScores(game, playerColor, opponentColor, depthToSearch - 1);
+                    result = GetMoveScores(game, playerColor, opponentColor, depthToSearch - 1, previousResult?.Move);
                     checkmate = result.Score == Int32.MaxValue;
-                    if (result.Move == null && previousResult.Move != null)
+                    if (result.Move == null && previousResult?.Move != null)
                     {
                         result = previousResult;
                     }
                     else if (_wasEvaluationCancelled)
                     {
-                        result = previousResult;
+                        Console.Write("Cancelled");
+                        //result = previousResult;
                     }
                     _wasEvaluationCancelled = false;
 
@@ -95,7 +96,7 @@ namespace ChessLibrary
             }
 
             var legalNonQuietMoves = game.GetAllLegalMoves(false);
-            legalNonQuietMoves = legalNonQuietMoves.OrderMoves(this).ToList();
+            legalNonQuietMoves = legalNonQuietMoves.OrderMoves(this, null).ToList();
             foreach (var nqm in legalNonQuietMoves)
             {
                 game.AddMove(nqm, false);
@@ -128,7 +129,7 @@ namespace ChessLibrary
             return playerScore;
         }
 
-        private NodeInfo GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth)
+        private NodeInfo GetMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, Move? previousBest)
         {
             int? currentBestScore = null;
             Move? currentBestMove = null;
@@ -144,7 +145,9 @@ namespace ChessLibrary
             //        currentBestMove = m;
             //    }
             //});
-            foreach(var move in game.GetAllLegalMoves())
+            IEnumerable<Move> moves = game.GetAllLegalMoves();
+            moves = moves.OrderMoves(this, previousBest);
+            foreach (var move in moves)
             {
                 game.AddMove(move, false);
                 var score = GetRawMoveScores(game, playerColor, opponentColor, currentDepth, Int32.MinValue, Int32.MaxValue);
@@ -215,7 +218,7 @@ namespace ChessLibrary
                 zobristTable[currentDepth].TryAdd(hash, result);
                 return result;
             }
-            var moves = game.GetAllLegalMoves().OrderMoves(this).ToList();
+            var moves = game.GetAllLegalMoves().OrderMoves(this, null).ToList();
 
             int? bestScoreThisIteration = null;
             foreach (var newMove in moves)
