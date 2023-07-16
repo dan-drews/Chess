@@ -18,21 +18,24 @@ namespace ChessLibrary
         public static long miliseconds = 0;
         public static int skips = 0;
         public static int zobristMatches = 0;
+        public static List<Move> PreferredMoves = new List<Move>();
 
         private ConcurrentDictionary<bool, ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>> ZobristScore = new ConcurrentDictionary<bool, ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>>();
 
         public int MaxTime { get; set; }
         private int _startingDepth;
+        private int? _maxDepth;
         private bool _wasEvaluationCancelled = false;
-        public Evaluator Scorer { get; set; }
+        public IEvaluator Scorer { get; set; }
          
         private Stopwatch _stopwatch = new Stopwatch();
 
         public Engine(ScorerConfiguration scoreConfig)
         {
-            Scorer = new Evaluator(scoreConfig);
+            Scorer = new ComplexEvaluator(scoreConfig);
             MaxTime = scoreConfig.MaxTimeMilliseconds;
             _startingDepth = scoreConfig.StartingDepth;
+            _maxDepth = scoreConfig.MaxDepth;
             ZobristScore.TryAdd(true, new ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>());
             ZobristScore.TryAdd(false, new ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>());
         }
@@ -50,8 +53,9 @@ namespace ChessLibrary
                 NodeInfo? result = null;
                 int depthToSearch = _startingDepth - 1;
                 bool checkmate = false;
-                while (_stopwatch.ElapsedMilliseconds < MaxTime && !checkmate)
+                while (_stopwatch.ElapsedMilliseconds < MaxTime && !checkmate && depthToSearch < (_maxDepth ?? int.MaxValue))
                 {
+                    PreferredMoves.Clear();
                     depthToSearch++;
                     //nodesEvaluated = 0;
                     nonQuietDepthNodesEvaluated = 0;
@@ -81,7 +85,7 @@ namespace ChessLibrary
 
         private int GetLoudMoveScores(Game game, Colors playerColor, Colors opponentColor, Move? move, int alpha, int beta)
         {
-            var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black), game.IsStalemate);
+            var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black), game.IsStalemate, game.Moves.Count);
             var playerScore = playerColor == Colors.Black ? scores.blackScore : scores.whiteScore;
             var opponentScore = playerColor == Colors.Black ? scores.whiteScore : scores.blackScore;
             Engine.nodesEvaluated++;
@@ -151,12 +155,18 @@ namespace ChessLibrary
             foreach (var move in moves)
             {
                 game.AddMove(move, false);
+                PreferredMoves.Add(move);
                 var score = GetRawMoveScores(game, playerColor, opponentColor, currentDepth, Int32.MinValue, Int32.MaxValue);
                 game.UndoLastMove();
                 if (score != null && (currentBestScore == null || score > currentBestScore))
                 {
                     currentBestScore = score;
                     currentBestMove = move;
+                }
+                else
+                {
+
+                    PreferredMoves.RemoveAt(PreferredMoves.Count - 1);
                 }
 
             }
@@ -211,7 +221,7 @@ namespace ChessLibrary
 
                 //var loudScore = GetLoudMoveScores(game, playerColor, opponentColor, move, alpha, beta);
 
-                var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black), isStalemate);
+                var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black), isStalemate, game.Moves.Count);
                 var playerScore = playerColor == Colors.Black ? scores.blackScore : scores.whiteScore;
                 var opponentScore = playerColor == Colors.Black ? scores.whiteScore : scores.blackScore;
                 //var result = Math.Max(loudScore, playerScore - opponentScore);
@@ -222,14 +232,16 @@ namespace ChessLibrary
             var moves = game.GetAllLegalMoves().OrderMoves(this, null).ToList();
 
             int? bestScoreThisIteration = null;
-            foreach (var newMove in moves)
+            foreach (var move in moves)
             {
-                game.AddMove(newMove, false);
+                game.AddMove(move, false);
+                PreferredMoves.Add(move);
                 var scoreForThisMove = GetRawMoveScores(game, playerColor, opponentColor, currentDepth - 1,  alpha, beta);
                 game.UndoLastMove();
                 if (scoreForThisMove == null)
                 {
                     zobristTable[currentDepth].TryAdd(hash, null);
+                    PreferredMoves.RemoveAt(PreferredMoves.Count - 1);
                     return null;
                 }
                 if (bestScoreThisIteration == null)
@@ -243,6 +255,7 @@ namespace ChessLibrary
                     if (alpha >= beta)
                     {
                         skips++;
+                        PreferredMoves.RemoveAt(PreferredMoves.Count - 1);
                         break;
                     }
                 }
@@ -253,6 +266,7 @@ namespace ChessLibrary
                     if (alpha >= beta)
                     {
                         skips++;
+                        PreferredMoves.RemoveAt(PreferredMoves.Count - 1);
                         break;
                     }
                 }
