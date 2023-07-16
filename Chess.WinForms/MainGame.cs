@@ -1,13 +1,5 @@
 ﻿using ChessLibrary;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using ChessLibrary.Evaluation;
 
 namespace Chess.WinForms
 {
@@ -47,7 +39,7 @@ namespace Chess.WinForms
                 CenterBorderValue = 30,
                 PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 30_000, //300_000,// Int32.MaxValue, //10000,
+                MaxTimeMilliseconds = 8_000, //300_000,// Int32.MaxValue, //10000,
                 QueenValue = 900,
                 RookValue = 600,
                 StartingDepth = 1,
@@ -59,15 +51,21 @@ namespace Chess.WinForms
                 SelfInCheckScore = -100,
                 BishopValue = 320,
                 KnightValue = 325,
+                MaxDepth = null,
                 OpponentInCheckScore = 40,
                 CenterSquareValue = 60,
                 CenterBorderValue = 30,
                 PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 10000,// Int32.MaxValue, //10000,
+<<<<<<< Updated upstream
+                MaxTimeMilliseconds = 10_000, //Int32.MaxValue, //10000,
+=======
+                MaxTimeMilliseconds = 10_000,// Int32.MaxValue, //10000,
+>>>>>>> Stashed changes
                 QueenValue = 900,
                 RookValue = 600,
-                StartingDepth = 1
+                StartingDepth = 1,
+                //MaxDepth == null
             };
             _whiteEngine = new Engine(whiteConfig);
             _blackEngine = new Engine(blackConfig);
