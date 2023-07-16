@@ -52,12 +52,13 @@ namespace ChessLibrary
             if (!isCheckmate)
             {
 
-                if(game.Moves.Count <= 8)
+                if(game.Moves.Count < 8)
                 {
                     var hash = ZobristTable.CalculateZobristHash(game.Board);
                     var pickedMove = OpeningBookMovePicker.GetMoveForZobrist(hash);
                     if (pickedMove != null)
                     {
+                        System.Threading.Thread.Sleep(1000);
                         return (new NodeInfo(pickedMove.Value, 0, 0, 0), 1);
                     }
                 }
@@ -76,10 +77,15 @@ namespace ChessLibrary
                     var previousResult = result;
                     if(game.GetAllLegalMoves().Count == 1)
                     {
+                        System.Threading.Thread.Sleep(1000);
                         return (new NodeInfo(game.GetAllLegalMoves().First(), 0, 0, 0), 1);
                     }
                     result = GetMoveScores(game, playerColor, opponentColor, depthToSearch - 1, previousResult?.Move);
                     checkmate = result.Score == Int32.MaxValue;
+                    if(checkmate)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                    }
                     if (result.Move == null && previousResult?.Move != null)
                     {
                         result = previousResult;

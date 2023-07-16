@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -8,7 +10,7 @@ namespace ChessLibrary.OpeningBook
     public class OpeningBookMovePicker
     {
 
-        private static Dictionary<ulong, List<Move>> ZobristMoves = new Dictionary<ulong, List<Move>>();
+        private static Dictionary<ulong, List<Move>> _zobristMoves = new Dictionary<ulong, List<Move>>();
         private static bool _isInitialized = false;
         private static Random _random = new Random(DateTime.Now.Millisecond);
         public static void Initialize()
@@ -18,6 +20,17 @@ namespace ChessLibrary.OpeningBook
                 return;
             }
             _isInitialized = true;
+
+            var filePath = Path.Combine("book", "book.json");
+            if (!Directory.Exists("book"))
+            {
+                Directory.CreateDirectory("book");
+            }
+            if (File.Exists(filePath))
+            {                
+                _zobristMoves = JsonConvert.DeserializeObject<Dictionary<ulong, List<Move>>>(File.ReadAllText(filePath))!;
+                return;
+            }
 
             var games = System.IO.File.ReadAllText(System.IO.Path.Combine("GameList", "Games.txt"));
             var parser = new MatchParser();
@@ -32,23 +45,28 @@ namespace ChessLibrary.OpeningBook
                     var hash = ZobristTable.CalculateZobristHash(g.Board);
                     var m = parser.GetMoveFromChessNotation(g, move);
                     g.AddMove(m);
-                    if (!ZobristMoves.ContainsKey(hash))
+                    if (!_zobristMoves.ContainsKey(hash))
                     {
-                        ZobristMoves.Add(hash, new List<Move>());
+                        _zobristMoves.Add(hash, new List<Move>());
                     }
-                    ZobristMoves[hash].Add(m);
+                    _zobristMoves[hash].Add(m);
                 }
             }
+            File.WriteAllText(filePath, JsonConvert.SerializeObject(_zobristMoves));
         }
 
         public static Move? GetMoveForZobrist(ulong hash)
         {
-            if (!ZobristMoves.ContainsKey(hash))
+            if (!_zobristMoves.ContainsKey(hash))
             {
                 return null;
             }
-            var moves = ZobristMoves[hash];
-            return ZobristMoves[hash][_random.Next(moves.Count)];
+            var moves = _zobristMoves[hash];
+            if(moves.Count == 1)
+            {
+                return null; // Don't pick it if it's the only variation
+            }
+            return _zobristMoves[hash][_random.Next(moves.Count)];
         }
     }
 }

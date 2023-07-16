@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace ChessLibrary
@@ -10,6 +12,16 @@ namespace ChessLibrary
 
         static ZobristTable()
         {
+            var filePath = Path.Combine("zobrist", "zobrist.json");
+            if (!Directory.Exists("zobrist"))
+            {
+                Directory.CreateDirectory("zobrist");
+            }
+            if (File.Exists(filePath))
+            {
+                _table = JsonConvert.DeserializeObject<ulong[,]>(File.ReadAllText(filePath))!;
+                return;
+            }
             Random r = new Random();
             for(int i = 0; i < 12; i++)
             {
@@ -18,6 +30,7 @@ namespace ChessLibrary
                     _table[i, j] = GetRandomLong(r);
                 }
             }
+            File.WriteAllText(filePath, JsonConvert.SerializeObject(_table));
         }
 
         private static ulong GetRandomLong(Random rnd)
