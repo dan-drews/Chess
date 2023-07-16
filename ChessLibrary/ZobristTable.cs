@@ -6,9 +6,9 @@ namespace ChessLibrary
 {
     class ZobristTable
     {
-        private ulong[,] _table = new ulong[12, 64];
+        private static ulong[,] _table = new ulong[12, 64];
 
-        public ZobristTable()
+        static ZobristTable()
         {
             Random r = new Random();
             for(int i = 0; i < 12; i++)
@@ -20,14 +20,14 @@ namespace ChessLibrary
             }
         }
 
-        private ulong GetRandomLong(Random rnd)
+        private static ulong GetRandomLong(Random rnd)
         {
             var buffer = new byte[sizeof(ulong)];
             rnd.NextBytes(buffer);
             return BitConverter.ToUInt64(buffer, 0);
         }
 
-        public ulong CalculateZobristHash(IBoard board)
+        public static ulong CalculateZobristHash(IBoard board)
         {
             ulong hash = 0;
             int squareIndex = 0;

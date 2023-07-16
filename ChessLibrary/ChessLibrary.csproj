@@ -12,4 +12,14 @@
 	  <PackageReference Include="Shim.System.Numerics" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="GameList\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="GameList\Games.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

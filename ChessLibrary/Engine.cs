@@ -1,4 +1,5 @@
-﻿using MoreLinq;
+﻿using ChessLibrary.OpeningBook;
+using MoreLinq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -46,6 +47,17 @@ namespace ChessLibrary
             var isCheckmate = game.IsCheckmate;
             if (!isCheckmate)
             {
+
+                if(game.Moves.Count <= 8)
+                {
+                    var hash = ZobristTable.CalculateZobristHash(game.Board);
+                    var pickedMove = OpeningBookMovePicker.GetMoveForZobrist(hash);
+                    if (pickedMove != null)
+                    {
+                        return (new NodeInfo(pickedMove.Value, 0, 0, 0), 1);
+                    }
+                }
+
                 NodeInfo? result = null;
                 int depthToSearch = _startingDepth - 1;
                 bool checkmate = false;
@@ -57,6 +69,10 @@ namespace ChessLibrary
                     //zobristMatches = 0;
                     skips = 0;
                     var previousResult = result;
+                    if(game.GetAllLegalMoves().Count == 1)
+                    {
+                        return (new NodeInfo(game.GetAllLegalMoves().First(), 0, 0, 0), 1);
+                    }
                     result = GetMoveScores(game, playerColor, opponentColor, depthToSearch - 1, previousResult?.Move);
                     checkmate = result.Score == Int32.MaxValue;
                     if (result.Move == null && previousResult?.Move != null)
@@ -178,7 +194,7 @@ namespace ChessLibrary
                 zobristTable.TryAdd(currentDepth, new ConcurrentDictionary<ulong, int?>());
             }
 
-            var hash = game.ZobristTable.CalculateZobristHash(game.Board);
+            var hash = ZobristTable.CalculateZobristHash(game.Board);
             if (zobristTable[currentDepth].ContainsKey(hash))
             {
                 zobristMatches++;

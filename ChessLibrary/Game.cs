@@ -1,5 +1,6 @@
 ﻿using ChessLibrary.Enums;
 using ChessLibrary.MoveLegaility;
+using ChessLibrary.OpeningBook;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -41,6 +42,7 @@ namespace ChessLibrary
 
         public Game(BoardType boardType)
         {
+            OpeningBookMovePicker.Initialize();
             switch (boardType)
             {
                 case BoardType.BitBoard:

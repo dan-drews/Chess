@@ -47,10 +47,11 @@ namespace Chess.WinForms
                 CenterBorderValue = 30,
                 PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 8_000, //300_000,// Int32.MaxValue, //10000,
+                MaxTimeMilliseconds = 30_000, //300_000,// Int32.MaxValue, //10000,
                 QueenValue = 900,
                 RookValue = 600,
-                StartingDepth = 1
+                StartingDepth = 1,
+                //MaxDepth = null
             };
 
             var blackConfig = new ScorerConfiguration()
