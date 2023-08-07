@@ -1,4 +1,5 @@
 ﻿using ChessLibrary;
+using ChessLibrary.Evaluation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace Chess.Tests
             ulong hash = 0;
             for (int i = 0; i < 1_000_000; i++)
             {
-                hash = Game.ZobristTable.CalculateZobristHash(Game.Board);
+                hash = ZobristTable.CalculateZobristHash(Game.Board);
             }
             Assert.AreNotEqual(0, hash);
         }

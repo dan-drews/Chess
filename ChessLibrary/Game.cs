@@ -1,5 +1,6 @@
 ﻿using ChessLibrary.Enums;
 using ChessLibrary.MoveLegaility;
+using ChessLibrary.OpeningBook;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -41,16 +42,13 @@ namespace ChessLibrary
 
         public Game(BoardType boardType)
         {
+            OpeningBookMovePicker.Initialize();
             switch (boardType)
             {
                 case BoardType.BitBoard:
                     Board = new BitBoard();
                     Evaluator = new BitBoardLegality();
                     break;
-                //case BoardType.Naive:
-                //    Board = new NaiveBoard();
-                //    Evaluator = new NaiveMoveLegality();
-                //    break;
                 default:
                     throw new Exception("Board Type Not Supported");
             }
