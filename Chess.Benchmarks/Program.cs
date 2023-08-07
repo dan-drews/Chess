@@ -9,18 +9,13 @@ namespace Chess.Benchmarks
 
     public class NaiveVsBitBoard
     {
-        private Game Naive = new Game(ChessLibrary.Enums.BoardType.Naive);
         private Game BitBoard = new Game(ChessLibrary.Enums.BoardType.BitBoard);
 
         [GlobalSetup]
         public void Setup()
         {
-            Naive.ResetGame();
             BitBoard.ResetGame();
         }
-
-        [Benchmark]
-        public List<Move> GetAllMovesNaive() => Naive.GetAllLegalMoves();
 
         [Benchmark]
         public List<Move> GetAllMovesBitBoard() => BitBoard.GetAllLegalMoves();

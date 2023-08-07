@@ -49,10 +49,6 @@ namespace ChessLibrary
                     Board = new BitBoard();
                     Evaluator = new BitBoardLegality();
                     break;
-                //case BoardType.Naive:
-                //    Board = new NaiveBoard();
-                //    Evaluator = new NaiveMoveLegality();
-                //    break;
                 default:
                     throw new Exception("Board Type Not Supported");
             }
