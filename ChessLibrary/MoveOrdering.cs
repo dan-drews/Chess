@@ -7,11 +7,13 @@ namespace ChessLibrary
 {
     public static class MoveOrdering
     {
+        public static Random Random = new Random(DateTime.UtcNow.Millisecond);
         const int CAPTURED_PIECE_MULTIPLIER = 10;
-        public static IEnumerable<Move> OrderMoves(this IEnumerable<Move> moves, Engine engine)
+        public static IEnumerable<Move> OrderMoves(this IEnumerable<Move> moves, Engine engine, Move? previousBest)
         {
             return moves
-                    .OrderByDescending(x =>
+                    .OrderBy(x=> previousBest != null && x == previousBest.Value ? 0 : 1)
+                    .ThenByDescending(x =>
                     {
                         var score = 0;
                         if (x.CapturedPiece != null)
@@ -25,7 +27,7 @@ namespace ChessLibrary
                         }
                         return score;
                     })
-                    .ThenBy(x=> Guid.NewGuid().ToString());
+                    .ThenBy(x=> Random.Next());
         }
     }
 }

@@ -6,7 +6,6 @@ namespace ChessLibrary.Enums
 {
     public enum BoardType
     {
-        Naive = 1,
-        BitBoard = 2
+        BitBoard = 1
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
@@ -21,6 +22,9 @@ namespace ChessLibrary
         }
 
         private uint _moveValue;
+
+        public uint MoveValue { get { return _moveValue; }  set { _moveValue = value; } }
+
         const uint COLOR_MASK =
             0b00000000010000000000000000000000;
         const uint FLAG_MASK =
@@ -41,6 +45,7 @@ namespace ChessLibrary
         const int PIECE_SHIFT = 3;
         const int CAPTURE_SHIFT = 0;
 
+        [JsonIgnore]
         public ulong Hash { get; set; }
 
         public override int GetHashCode()
@@ -80,11 +85,17 @@ namespace ChessLibrary
             _moveValue |= (uint)(capturedPiece ?? 0) << CAPTURE_SHIFT;
         }
 
+        [JsonIgnore]
         public int TargetSquare => (int)((_moveValue & DEST_SQUARE_MASK) >> DEST_SHIFT);
+        [JsonIgnore]
         public int StartingSquare => (int)((_moveValue & START_SQUARE_MASK) >> START_SHIFT);
+        [JsonIgnore]
         public int Flags => (int)((_moveValue & FLAG_MASK) >> FLAG_SHIFT);
+        [JsonIgnore]
         public Colors Color => (Colors)((_moveValue & COLOR_MASK) >> COLOR_SHIFT);
+        [JsonIgnore]
         public PieceTypes Piece => (PieceTypes)((_moveValue & PIECE_MASK) >> PIECE_SHIFT);
+        [JsonIgnore]
         public PieceTypes? CapturedPiece =>
             (_moveValue & CAPTURE_PIECE_MASK) == 0
                 ? null
@@ -103,6 +114,10 @@ namespace ChessLibrary
             };
         }
 
+        public static bool operator ==(Move lhs, Move rhs) => lhs._moveValue == rhs._moveValue;
+        public static bool operator !=(Move lhs, Move rhs) => lhs._moveValue != rhs._moveValue;
+
+        [JsonIgnore]
         public PieceTypes? PromotedType
         {
             get
