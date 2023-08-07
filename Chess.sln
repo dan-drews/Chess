@@ -5,11 +5,7 @@ VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessLibrary", "ChessLibrary\ChessLibrary.csproj", "{3D754C72-803D-435A-B4C4-D184BD4E3AF3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessConsole", "ChessConsole\ChessConsole.csproj", "{C8EF2162-4C06-4778-937A-15DB26B1A9F2}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Tests", "Chess.Tests\Chess.Tests.csproj", "{AEC6836F-70C8-49ED-9909-1479CE314F0D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Ui.ServerBlazor", "Chess.Ui.ServerBlazor\Chess.Ui.ServerBlazor.csproj", "{D5979BD3-A214-454F-BDEE-4048553F6B93}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Benchmarks", "Chess.Benchmarks\Chess.Benchmarks.csproj", "{7B03970D-21F6-4887-AD4F-CB31B250CCB0}"
 EndProject
@@ -27,18 +23,10 @@ Global
 		{3D754C72-803D-435A-B4C4-D184BD4E3AF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D754C72-803D-435A-B4C4-D184BD4E3AF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D754C72-803D-435A-B4C4-D184BD4E3AF3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8EF2162-4C06-4778-937A-15DB26B1A9F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8EF2162-4C06-4778-937A-15DB26B1A9F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8EF2162-4C06-4778-937A-15DB26B1A9F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8EF2162-4C06-4778-937A-15DB26B1A9F2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AEC6836F-70C8-49ED-9909-1479CE314F0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AEC6836F-70C8-49ED-9909-1479CE314F0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEC6836F-70C8-49ED-9909-1479CE314F0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEC6836F-70C8-49ED-9909-1479CE314F0D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D5979BD3-A214-454F-BDEE-4048553F6B93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D5979BD3-A214-454F-BDEE-4048553F6B93}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D5979BD3-A214-454F-BDEE-4048553F6B93}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D5979BD3-A214-454F-BDEE-4048553F6B93}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7B03970D-21F6-4887-AD4F-CB31B250CCB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7B03970D-21F6-4887-AD4F-CB31B250CCB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B03970D-21F6-4887-AD4F-CB31B250CCB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
