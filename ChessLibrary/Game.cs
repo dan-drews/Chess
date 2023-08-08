@@ -415,7 +415,7 @@ namespace ChessLibrary
 
             if(initialPiece == PieceTypes.Pawn && move.CapturedPiece != null)
             {
-                Console.WriteLine("Debug");
+                //Console.WriteLine("Debug");
             }
             if (move.Flags == Move.Flag.EnPassantCapture)
             {

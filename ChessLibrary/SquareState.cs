@@ -8,6 +8,80 @@ namespace ChessLibrary
 {
     public class SquareState
     {
+        private static Piece[][] _pieces;
+
+        static SquareState()
+        {
+            _pieces = new Piece[][] {
+                new Piece[]
+                {
+                    new Piece()
+                    {
+                        Color = Colors.White,
+                        Type = PieceTypes.Pawn
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.White,
+                        Type = PieceTypes.Rook
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.White,
+                        Type = PieceTypes.Knight
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.White,
+                        Type = PieceTypes.Bishop
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.White,
+                        Type = PieceTypes.Queen
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.White,
+                        Type = PieceTypes.King
+                    }
+                },
+                new Piece[]
+                {
+                    new Piece()
+                    {
+                        Color = Colors.Black,
+                        Type = PieceTypes.Pawn
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.Black,
+                        Type = PieceTypes.Rook
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.Black,
+                        Type = PieceTypes.Knight
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.Black,
+                        Type = PieceTypes.Bishop
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.Black,
+                        Type = PieceTypes.Queen
+                    },
+                    new Piece()
+                    {
+                        Color = Colors.Black,
+                        Type = PieceTypes.King
+                    }
+                }
+            };
+        }
+
         public Square Square
         {
             get
@@ -23,17 +97,13 @@ namespace ChessLibrary
         {
             get
             {
-                if((_valueInternal & 0b10000) == 0)
+                if ((_valueInternal & 0b10000) == 0)
                 {
                     return null;
                 }
-                var color = (_valueInternal & 0b1000) == 0 ? Colors.White : Colors.Black;
-                var piece = (PieceTypes)(_valueInternal & 0b111);
-                return new Piece()
-                {
-                    Color = color,
-                    Type = piece
-                };
+                var color = (_valueInternal & 0b1000) == 0 ? 0 : 1;
+                var piece = (_valueInternal & 0b111) - 1;
+                return _pieces[color][piece]; ;
             }
             set
             {
@@ -65,7 +135,7 @@ namespace ChessLibrary
 
         private static ushort GetSquare(Square square)
         {
-            ushort squareNumber = (ushort)(((square.Rank - 1) * 8) + (8- (int)square.File));
+            ushort squareNumber = (ushort)(((square.Rank - 1) * 8) + (8 - (int)square.File));
             return (ushort)(squareNumber << 6);
         }
 
@@ -73,7 +143,7 @@ namespace ChessLibrary
         {
             if (!_squaresInitialized)
             {
-                for(int i = 0; i <= 63; i++)
+                for (int i = 0; i <= 63; i++)
                 {
                     _squares[i] = new Square(i);
                 }
