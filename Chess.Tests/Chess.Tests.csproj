@@ -16,4 +16,10 @@
   <ItemGroup>
     <ProjectReference Include="..\ChessLibrary\ChessLibrary.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="positions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
