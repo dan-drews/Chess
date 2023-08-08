@@ -24,11 +24,7 @@ namespace Chess.Tests
         [TestMethod]
         public void CanCalculateHash()
         {
-            ulong hash = 0;
-            for (int i = 0; i < 1_000_000; i++)
-            {
-                hash = ZobristTable.CalculateZobristHash(Game.Board);
-            }
+            ulong hash = ZobristTable.CalculateZobristHash(Game.Board);
             Assert.AreNotEqual(0, hash);
         }
 
@@ -67,12 +63,6 @@ namespace Chess.Tests
             if (depth == 0)
             {
                 return;
-            }
-            var startingSquare = new Square(move.StartingSquare);
-            var destinationSquare = new Square(move.TargetSquare);
-            if (startingSquare.Rank == 8 && startingSquare.File == Files.F && destinationSquare.Rank == 6 && destinationSquare.File == Files.H)
-            {
-                int i = 0;
             }
             Game.AddMove(move);
             var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.PlayerToMove, Game.EnPassantFile, Game.BlackCanLongCastle, Game.BlackCanShortCastle, Game.WhiteCanLongCastle, Game.WhiteCanShortCastle);

@@ -412,7 +412,6 @@ namespace ChessLibrary
                 throw new Exception("No piece to move");
             }
             var initialPiece = move.Piece;
-
             if (move.Flags == Move.Flag.EnPassantCapture)
             {
                 var moveBeforeLast = Moves.ElementAt(Moves.Count - 2);

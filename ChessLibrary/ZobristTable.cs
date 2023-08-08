@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ChessLibrary
 {
-    class ZobristTable
+    public class ZobristTable
     {
         private static ulong[,] _table = new ulong[12, 64];
 

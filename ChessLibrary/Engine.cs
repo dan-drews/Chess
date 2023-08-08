@@ -160,18 +160,6 @@ namespace ChessLibrary
         {
             int? currentBestScore = null;
             Move? currentBestMove = null;
-            //Parallel.ForEach(game.GetAllLegalMoves(), m =>
-            //{
-            //    Game clonedGame = (Game)game.Clone();
-            //    clonedGame.AddMove(m, false);
-            //    var score = GetRawMoveScores(clonedGame, playerColor, opponentColor, currentDepth, m, Int32.MinValue, Int32.MaxValue);
-            //    clonedGame.UndoLastMove();
-            //    if (score != null && (currentBestScore == null || score > currentBestScore))
-            //    {
-            //        currentBestScore = score;
-            //        currentBestMove = m;
-            //    }
-            //});
             IEnumerable<Move> moves = game.GetAllLegalMoves();
             moves = moves.OrderMoves(this, previousBest);
             foreach (var move in moves)
@@ -296,84 +284,6 @@ namespace ChessLibrary
             }
             zobristTable[currentDepth].TryAdd(hash, bestScoreThisIteration);
             return bestScoreThisIteration;
-
-            //var isCheckmate = game.IsCheckmate;
-            //var isStalemate = game.IsStalemate;
-
-            //if(currentDepth == 0)
-            //{
-            //    var loudMoveScore = GetLoudMoveScores(game, playerColor, opponentColor, move, alpha, beta); 
-            //    //if(loudMoveScore)
-            //}
-
-            //if (currentDepth == 0 || isCheckmate ||isStalemate)
-            //{
-            //    if (game.IsStalemate)
-            //    {
-            //        return new NodeInfo(move, 0, 0, 0);
-            //    }
-            //    nodesEvaluated++;
-            //    if(move == null)
-            //    {
-            //        throw new Exception("Error! Move is null");
-            //    }
-            //    if (isCheckmate)
-            //    {
-            //        return move.Piece.Color == playerColor ? new NodeInfo(move, 1000000000 + currentDepth, 0, 0) : new NodeInfo(move, -1000000000 + currentDepth, 0, 0);
-            //    }
-
-            //    var scores = Scorer.GetScore(game.Board, game.IsKingInCheck(Colors.White), game.IsKingInCheck(Colors.Black), game.IsStalemate);
-            //    var playerScore = playerColor == Colors.Black ? scores.blackScore : scores.whiteScore;
-            //    var opponentScore = playerColor == Colors.Black ? scores.whiteScore : scores.blackScore;
-            //    return new NodeInfo(move, playerScore - opponentScore, 0, 0);
-            //}
-
-            //var legalMoves = game.GetAllLegalMoves();
-            //legalMoves = legalMoves.OrderMoves(this).ToList();
-            //if (game.PlayerToMove == playerColor)
-            //{
-            //    var value = new NodeInfo(move, int.MinValue, alpha, beta);
-            //    foreach(var m in legalMoves)
-            //    {
-            //        if(_stopwatch.ElapsedMilliseconds >= _maxTime)
-            //        {
-            //            return value;
-            //        }
-            //        game.AddMove(m, false);
-            //        var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);
-            //        game.UndoLastMove();
-            //        value = value.Score >= node.Score ? value : new NodeInfo(m, node.Score, node.Alpha, node.Beta);
-            //        alpha = Math.Max(alpha, value.Score);                    
-            //        if (alpha >= beta)
-            //        {
-            //            skips++;
-            //            break;
-            //        }
-            //    }
-            //    return value;
-            //}
-            //else
-            //{
-            //    var value = new NodeInfo(move, int.MaxValue, alpha, beta);
-            //    foreach (var m in legalMoves)
-            //    {
-            //        if (_stopwatch.ElapsedMilliseconds >= _maxTime)
-            //        {
-            //            return value;
-            //        }
-            //        game.AddMove(m, false);
-            //        var node = GetMoveScores(game, playerColor, opponentColor, currentDepth - 1, m, alpha, beta);
-            //        game.UndoLastMove();
-            //        value = value.Score <= node.Score ? value : new NodeInfo(m, node.Score, node.Alpha, node.Beta);
-            //        beta = Math.Min(beta, value.Score);
-            //        if (alpha >= beta)
-            //        {
-            //            skips++;
-            //            break;
-            //        }
-            //    }
-            //    return value;
-            //}
         }
 
         public class NodeInfo
