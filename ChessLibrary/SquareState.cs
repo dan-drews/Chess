@@ -8,78 +8,34 @@ namespace ChessLibrary
 {
     public class SquareState
     {
-        private static Piece[][] _pieces;
+
+        public static SquareState[][][] SquareStateMap;
 
         static SquareState()
         {
-            _pieces = new Piece[][] {
-                new Piece[]
+            SquareStateMap = new SquareState[64][][];
+            Array colors = Enum.GetValues(typeof(Colors));
+
+            for (int i = 0; i <= 63; i++)
+            {
+                SquareStateMap[i] = new SquareState[2][];
+                foreach (Colors c in colors)
                 {
-                    new Piece()
+                    SquareStateMap[i][(int)c] = new SquareState[6];
+                    Array pieces = Enum.GetValues(typeof(PieceTypes));
+                    foreach(PieceTypes pieceType in pieces)
                     {
-                        Color = Colors.White,
-                        Type = PieceTypes.Pawn
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.Rook
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.Knight
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.Bishop
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.Queen
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.King
-                    }
-                },
-                new Piece[]
-                {
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Pawn
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Rook
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Knight
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Bishop
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Queen
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.King
+                        SquareStateMap[i][(int)c][(int)pieceType - 1] = new SquareState(new Square(i))
+                        {
+                            Piece = new Piece()
+                            {
+                                Color = c,
+                                Type = pieceType
+                            }
+                        };
                     }
                 }
-            };
+            }
         }
 
         public Square Square
@@ -103,7 +59,7 @@ namespace ChessLibrary
                 }
                 var color = (_valueInternal & 0b1000) == 0 ? 0 : 1;
                 var piece = (_valueInternal & 0b111) - 1;
-                return _pieces[color][piece]; ;
+                return Piece.Pieces[color][piece]; ;
             }
             set
             {

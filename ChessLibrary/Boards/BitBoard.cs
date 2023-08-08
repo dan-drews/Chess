@@ -193,42 +193,45 @@ namespace ChessLibrary
             {
                 return _emptySquareStates[position];
             }
+            
+            // Casting from enum to int is taking a lot of CPU power
+            // So we are avoiding using enum values here
 
             if ((_whitePawns & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Pawn } };
+                return SquareState.SquareStateMap[position][0][0]; // White Pawn
 
             if ((_blackPawns & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Pawn } };
+                return SquareState.SquareStateMap[position][1][0]; // Black Pawn
 
             if ((_whiteRooks & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Rook } };
+                return SquareState.SquareStateMap[position][0][1]; // White Rook
 
             if ((_blackRooks & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Rook } };
+                return SquareState.SquareStateMap[position][1][1]; // Black Rook
 
             if ((_whiteKnights & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Knight } };
+                return SquareState.SquareStateMap[position][0][2]; // White Knight
 
             if ((_blackKnights & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Knight } };
+                return SquareState.SquareStateMap[position][1][2]; // Black Knight
 
             if ((_whiteBishops & squareMask) != 0)
-                return new SquareState(_emptySquares[position]  ) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Bishop } };
+                return SquareState.SquareStateMap[position][0][3]; // White Bishop
 
             if ((_blackBishops & squareMask) != 0)
-                return new SquareState(_emptySquares[position]  ) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop } };
+                return SquareState.SquareStateMap[position][1][3]; // Black Bishop
 
             if ((_whiteQueens & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.Queen } };
+                return SquareState.SquareStateMap[position][0][4]; // White Queen
 
             if ((_blackQueens & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.Queen } };
+                return SquareState.SquareStateMap[position][1][4]; // Black Queen
 
             if ((_whiteKing & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.White, Type = PieceTypes.King } };
+                return SquareState.SquareStateMap[position][0][5]; // White King
 
             if ((_blackKing & squareMask) != 0)
-                return new SquareState(_emptySquares[position]) { Piece = new Piece() { Color = Colors.Black, Type = PieceTypes.King } };
+                return SquareState.SquareStateMap[position][1][5]; // Black King
 
             throw new Exception("Not sure what piece is here.");
         }
