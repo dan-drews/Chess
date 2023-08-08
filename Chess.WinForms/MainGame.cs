@@ -39,7 +39,7 @@ namespace Chess.WinForms
                 CenterBorderValue = 30,
                 PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 300_000, //300_000,// Int32.MaxValue, //10000,
+                MaxTimeMilliseconds = 15_000, //300_000,// Int32.MaxValue, //10000,
                 QueenValue = 900,
                 RookValue = 600,
                 StartingDepth = 1,

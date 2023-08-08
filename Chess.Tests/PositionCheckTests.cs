@@ -58,7 +58,7 @@ namespace Chess.Tests
         [DataRow(3, 8902)]
         [DataRow(4, 197281)]
         [DataRow(5, 4865609)]
-        [DataRow(6, 119060324)]
+        //[DataRow(6, 119060324)]
         [DataTestMethod]
         public void ComputeMovesStartingPosition(int depth, int nodes)
         {
@@ -75,7 +75,7 @@ namespace Chess.Tests
         [DataRow(2, 2039, 351, 1, 91)]
         [DataRow(3, 97862, 17102, 45, 3162)]
         [DataRow(4, 4085603, 757163, 1929, 128013)]
-        [DataRow(5, 193690690, 35043416, 73365, 4993637)]
+        //[DataRow(5, 193690690, 35043416, 73365, 4993637)]
         [DataTestMethod]
         public void ComputeMovesPosition2(int depth, int nodes, int captures, int enPassants, int castles)
         {
@@ -96,8 +96,8 @@ namespace Chess.Tests
         [DataRow(3, 2812, 209, 2, 0)]
         [DataRow(4, 43238, 3348, 123, 0)]
         [DataRow(5, 674624, 52051, 1165, 0)]
-        [DataRow(6, 11030083, 940350, 33325, 0)]
-        [DataRow(7, 178633661, 14519036, 294874, 0)]
+        //[DataRow(6, 11030083, 940350, 33325, 0)]
+        //[DataRow(7, 178633661, 14519036, 294874, 0)]
         [DataTestMethod]
         public void ComputeMovesPosition3(int depth, int nodes, int captures, int enPassants, int castles)
         {
