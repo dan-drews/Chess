@@ -412,11 +412,6 @@ namespace ChessLibrary
                 throw new Exception("No piece to move");
             }
             var initialPiece = move.Piece;
-
-            if(initialPiece == PieceTypes.Pawn && move.CapturedPiece != null)
-            {
-                //Console.WriteLine("Debug");
-            }
             if (move.Flags == Move.Flag.EnPassantCapture)
             {
                 var moveBeforeLast = Moves.ElementAt(Moves.Count - 2);
@@ -473,7 +468,8 @@ namespace ChessLibrary
                     EnPassantFile = null;
                 }
             }
-
+                
+            Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
             WhiteCanShortCastle = true;
             WhiteCanLongCastle = true;
             BlackCanShortCastle = true;
@@ -523,7 +519,6 @@ namespace ChessLibrary
 
 
 
-            Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
             return Board;
         }
 
