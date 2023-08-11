@@ -17,7 +17,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.ClearPiece(Files.A, 8);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Count;
+            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(20, count);
         }
 
@@ -36,7 +36,7 @@ namespace Chess.Tests
             {
                 Game.ResetGame();
                 var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true);
-                count = moves.Count;
+                count = moves.Length;
             }
             Assert.AreEqual(20, count);
         }
@@ -50,7 +50,7 @@ namespace Chess.Tests
             {
                 Game.ResetGame();
                 var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true);
-                count = moves.Count;
+                count = moves.Length;
                 foreach (var move in moves)
                 {
                     RecurseMoves(Game, move, 5);
@@ -97,7 +97,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.ClearPiece(Files.H, 2);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Count;
+            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(24, count);
         }
 
@@ -106,7 +106,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.SetPiece(Files.D, 4, PieceTypes.Rook, Colors.White);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Count;
+            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(30, count);
         }
 
@@ -115,7 +115,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.SetPiece(Files.D, 4, PieceTypes.Queen, Colors.White);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Count;
+            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(38, count);
         }
 
@@ -124,7 +124,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.ClearPiece(Files.E, 2);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Count;
+            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(29, count);
         }
 
@@ -155,7 +155,7 @@ namespace Chess.Tests
                     if (square?.Piece?.Color == Colors.White)
                     {
                         var legalMoves = Game.Evaluator.GetAllLegalMoves(Game.Board, square, null, true, true, true, true);
-                        count += legalMoves?.Count ?? 0;
+                        count += legalMoves?.Length ?? 0;
                     }
                 }
             }
@@ -173,7 +173,7 @@ namespace Chess.Tests
 
             var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.B, 5), null, true, true, true, true);
 
-            Assert.AreEqual(14, moves.Count);
+            Assert.AreEqual(14, moves.Length);
         }
 
         [TestMethod]
@@ -188,7 +188,7 @@ namespace Chess.Tests
 
             var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.B, 5), null, true, true, true, true);
 
-            Assert.AreEqual(10, moves.Count);
+            Assert.AreEqual(10, moves.Length);
         }
 
         [TestMethod]
@@ -202,7 +202,7 @@ namespace Chess.Tests
 
             var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.H, 3), null, true, true, true, true);
 
-            Assert.AreEqual(4, moves.Count);
+            Assert.AreEqual(4, moves.Length);
         }
 
         [TestMethod]
@@ -228,7 +228,7 @@ namespace Chess.Tests
 
             var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.D, 7), null, true, true, true, true);
 
-            Assert.AreEqual(4, moves.Count);
+            Assert.AreEqual(4, moves.Length);
         }
 
         [TestMethod]
