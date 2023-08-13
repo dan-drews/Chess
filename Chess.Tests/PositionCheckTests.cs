@@ -120,7 +120,7 @@ namespace Chess.Tests
                 var moves = _game.GetAllLegalMoves();
                 var ep = moves.Where(x => x.Flags == Move.Flag.EnPassantCapture).Count();
                 var castles = moves.Where(x => x.Flags == Move.Flag.LongCastle || x.Flags == Move.Flag.ShortCastle).Count();
-                return (moves.Count, moves.Where(x => x.CapturedPiece != null).Count(), ep, castles);
+                return (moves.Length, moves.Where(x => x.CapturedPiece != null).Count(), ep, castles);
             }
 
             (int moves, int caputres, int enPassants, int castles) total = (0, 0, 0, 0);

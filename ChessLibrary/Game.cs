@@ -91,7 +91,7 @@ namespace ChessLibrary
             }
         }
 
-        private List<Move>? _legalMoves;
+        private Move[]? _legalMoves;
 
         public bool IsStalemate
         {
@@ -136,8 +136,8 @@ namespace ChessLibrary
             }
         }
 
-        private List<Move>? _legalNonQuietMoves = null;
-        public List<Move> GetAllLegalMoves(bool includeQuietMoves = true)
+        private Move[]? _legalNonQuietMoves = null;
+        public Move[] GetAllLegalMoves(bool includeQuietMoves = true)
         {
             if (includeQuietMoves)
             {
@@ -294,6 +294,8 @@ namespace ChessLibrary
                 }
             }
             SetupBoard();
+            _legalMoves = null;
+            _legalNonQuietMoves = null;
         }
 
         public IBoard AddMove(Move move, bool validate = true)
@@ -309,7 +311,7 @@ namespace ChessLibrary
                 Debugger.Break();
                 throw new Exception("Wrong Color Moving");
             }
-            List<Move>? legalMoves = null;
+            Move[]? legalMoves = null;
             if (validate)
             {
                 legalMoves = Evaluator.GetAllLegalMoves(Board, startingSquare, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle);
@@ -384,7 +386,7 @@ namespace ChessLibrary
                 var hash = ZobristTable.CalculateZobristHash(Board);
                 if (validate)
                 {
-                    var m = legalMoves![legalMoves.IndexOf(move)];
+                    var m = legalMoves![Array.IndexOf(legalMoves, move)];
                     m.Hash = hash;
                     Moves.Add(m);
                 }

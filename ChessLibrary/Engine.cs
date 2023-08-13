@@ -75,7 +75,7 @@ namespace ChessLibrary
                     //zobristMatches = 0;
                     skips = 0;
                     var previousResult = result;
-                    if(game.GetAllLegalMoves().Count == 1)
+                    if(game.GetAllLegalMoves().Length == 1)
                     {
                         System.Threading.Thread.Sleep(1000);
                         return (new NodeInfo(game.GetAllLegalMoves().First(), 0, 0, 0), 1);
@@ -123,7 +123,7 @@ namespace ChessLibrary
             }
 
             var legalNonQuietMoves = game.GetAllLegalMoves(false);
-            legalNonQuietMoves = legalNonQuietMoves.OrderMoves(this, null).ToList();
+            legalNonQuietMoves = legalNonQuietMoves.OrderMoves(this, null).ToArray();
             foreach (var nqm in legalNonQuietMoves)
             {
                 game.AddMove(nqm, false);

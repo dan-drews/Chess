@@ -4,12 +4,14 @@ using BenchmarkDotNet.Running;
 using ChessLibrary;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Chess.Benchmarks
 {
 
     [SimpleJob(RuntimeMoniker.Net70)]
     [RPlotExporter]
+    [MemoryDiagnoser(true)]
     public class NaiveVsBitBoard
     {
         private Game BitBoard = new Game(ChessLibrary.Enums.BoardType.BitBoard);
@@ -30,34 +32,85 @@ namespace Chess.Benchmarks
             MaxDepth = 6
         });
 
+        [IterationSetup]
+        public void Iteration()
+        {
+            BitBoard.ResetGame();
+        }
+
         [GlobalSetup]
         public void Setup()
         {
-            BitBoard.ResetGame();            
+            BitBoard.ResetGame();
         }
 
         [Benchmark]
         public void GetBestMove()
         {
-            BitBoard.ResetGame();
             e.GetBestMove(BitBoard, BitBoard.PlayerToMove);
         }
 
         [Benchmark]
-        public void GetAllLegalMovesRecursively()
+        public void GetAllLegalMoveBaseline()
         {
-            BitBoard.ResetGame();
+            BitBoard.GetAllLegalMoves();
+        }
+
+        [Benchmark]
+        public void SortMoves()
+        {
+            var moves = BitBoard.GetAllLegalMoves();
+            moves.OrderMoves(e, new Move(123));
+        }
+
+        [Benchmark]
+        public void Perft1()
+        {
+            BitBoard.Evaluator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+        }
+
+        [Benchmark]
+        public void Perft2()
+        {
             var moves = BitBoard.Evaluator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
             foreach (var move in moves)
             {
-                RecurseMoves(BitBoard, move, 4);
+                RecurseMoves(BitBoard, move, 1);
             }
         }
+
+        [Benchmark]
+        public void Perft3()
+        {
+            var moves = BitBoard.Evaluator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            foreach (var move in moves)
+            {
+                RecurseMoves(BitBoard, move, 2);
+            }
+        }
+
+        [Benchmark]
+        public void Perft4()
+        {
+            var moves = BitBoard.Evaluator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            foreach (var move in moves)
+            {
+                RecurseMoves(BitBoard, move, 3);
+            }
+        }
+
+
 
         [Benchmark]
         public void ZobristHash()
         {
             ZobristTable.CalculateZobristHash(BitBoard.Board);
+        }
+
+        [Benchmark]
+        public void LoadFen()
+        {
+            BitBoard.LoadFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
         }
 
         void RecurseMoves(Game g, Move move, int depth)
