@@ -41,13 +41,26 @@ namespace Chess.Benchmarks
         [GlobalSetup]
         public void Setup()
         {
-            BitBoard.ResetGame();            
+            BitBoard.ResetGame();
         }
 
         [Benchmark]
         public void GetBestMove()
         {
             e.GetBestMove(BitBoard, BitBoard.PlayerToMove);
+        }
+
+        [Benchmark]
+        public void GetAllLegalMoveBaseline()
+        {
+            BitBoard.GetAllLegalMoves();
+        }
+
+        [Benchmark]
+        public void SortMoves()
+        {
+            var moves = BitBoard.GetAllLegalMoves();
+            moves.OrderMoves(e, new Move(123));
         }
 
         [Benchmark]
@@ -86,7 +99,7 @@ namespace Chess.Benchmarks
             }
         }
 
-        
+
 
         [Benchmark]
         public void ZobristHash()

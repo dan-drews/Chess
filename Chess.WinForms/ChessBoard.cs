@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -119,6 +120,8 @@ namespace Chess.WinForms
                     if (matchingMoveQuery.Any())
                     {
                         Game.AddMove(matchingMoveQuery.First());
+                        SoundPlayer sound = new SoundPlayer(Path.Combine("Assets","move-self.wav"));
+                        sound.Play();
                         if (this.MainGame != null)
                         {
                             this.MainGame.Seconds = 0;
@@ -316,6 +319,8 @@ namespace Chess.WinForms
                 {
 
                     Game.AddMove(move!.Value);
+                    SoundPlayer sound = new SoundPlayer(Path.Combine("Assets", "move-self.wav"));
+                    sound.Play();
                     if (this.MainGame != null)
                     {
                         this.MainGame.Seconds = 0;
