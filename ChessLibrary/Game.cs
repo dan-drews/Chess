@@ -300,6 +300,11 @@ namespace ChessLibrary
 
         public IBoard AddMove(Move move, bool validate = true)
         {
+            if (move == Move.NullMove)
+            {
+                Moves.Add(move);
+                return Board;
+            }
             var startingSquare = Board.GetSquare(move.StartingSquare);
             if (startingSquare.Piece == null)
             {
@@ -407,6 +412,11 @@ namespace ChessLibrary
         public IBoard UndoLastMove()
         {
             var move = Moves.Last();
+            if (move == Move.NullMove)
+            {
+                Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
+                return Board;
+            }
             var startingSquare = Board.GetSquare(move.TargetSquare);
             var moveStartingSquare = Board.GetSquare(move.StartingSquare);
             if (startingSquare.Piece == null)

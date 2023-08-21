@@ -19,7 +19,6 @@ namespace ChessLibrary
         public static long miliseconds = 0;
         public static int skips = 0;
         public static int zobristMatches = 0;
-        public static List<Move> PreferredMoves = new List<Move>();
 
         private ConcurrentDictionary<bool, ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>> ZobristScore = new ConcurrentDictionary<bool, ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>>();
 
@@ -27,6 +26,7 @@ namespace ChessLibrary
         private int _startingDepth;
         private int? _maxDepth;
         private bool _wasEvaluationCancelled = false;
+        public bool UseNullMovePruning {  get; set; }
         public IEvaluator Scorer { get; set; }
          
         private Stopwatch _stopwatch = new Stopwatch();
@@ -68,7 +68,6 @@ namespace ChessLibrary
                 bool checkmate = false;
                 while (_stopwatch.ElapsedMilliseconds < MaxTime && !checkmate && depthToSearch < (_maxDepth ?? int.MaxValue))
                 {
-                    PreferredMoves.Clear();
                     depthToSearch++;
                     //nodesEvaluated = 0;
                     nonQuietDepthNodesEvaluated = 0;
@@ -165,18 +164,12 @@ namespace ChessLibrary
             foreach (var move in moves)
             {
                 game.AddMove(move, false);
-                PreferredMoves.Add(move);
                 var score = GetRawMoveScores(game, playerColor, opponentColor, currentDepth, Int32.MinValue, Int32.MaxValue);
                 game.UndoLastMove();
                 if (score != null && (currentBestScore == null || score > currentBestScore))
                 {
                     currentBestScore = score;
                     currentBestMove = move;
-                }
-                else
-                {
-
-                    PreferredMoves.RemoveAt(PreferredMoves.Count - 1);
                 }
 
             }
@@ -212,7 +205,10 @@ namespace ChessLibrary
 
             if (currentDepth == 0 || isCheckmate || isStalemate)
             {
-                nodesEvaluated++;
+                if (game.Moves.Last() != Move.NullMove)
+                {
+                    nodesEvaluated++;
+                }
                 if (isStalemate)
                 {
                     zobristTable[currentDepth].TryAdd(hash, 0);
@@ -239,19 +235,26 @@ namespace ChessLibrary
                 zobristTable[currentDepth].TryAdd(hash, result);
                 return result;
             }
-            var moves = game.GetAllLegalMoves().OrderMoves(this, null).ToList();
 
+            var moves = game.GetAllLegalMoves().OrderMoves(this, null).ToList();
+            if(UseNullMovePruning && currentDepth >= 3 && game.IsKingInCheck(playerColor))
+            {
+                moves.Insert(0, Move.NullMove);
+            }
             int? bestScoreThisIteration = null;
             foreach (var move in moves)
             {
                 game.AddMove(move, false);
-                PreferredMoves.Add(move);
-                var scoreForThisMove = GetRawMoveScores(game, playerColor, opponentColor, currentDepth - 1,  alpha, beta);
+                var newDepth = currentDepth - 1;
+                if(move == Move.NullMove)
+                {
+                    newDepth = currentDepth - 1 - 2;
+                }
+                var scoreForThisMove = GetRawMoveScores(game, playerColor, opponentColor, newDepth,  alpha, beta);
                 game.UndoLastMove();
                 if (scoreForThisMove == null)
                 {
                     zobristTable[currentDepth].TryAdd(hash, null);
-                    PreferredMoves.RemoveAt(PreferredMoves.Count - 1);
                     return null;
                 }
                 if (bestScoreThisIteration == null)
@@ -265,7 +268,6 @@ namespace ChessLibrary
                     if (alpha >= beta)
                     {
                         skips++;
-                        PreferredMoves.RemoveAt(PreferredMoves.Count - 1);
                         break;
                     }
                 }
@@ -276,7 +278,6 @@ namespace ChessLibrary
                     if (alpha >= beta)
                     {
                         skips++;
-                        PreferredMoves.RemoveAt(PreferredMoves.Count - 1);
                         break;
                     }
                 }

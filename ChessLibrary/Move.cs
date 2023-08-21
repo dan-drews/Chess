@@ -21,6 +21,8 @@ namespace ChessLibrary
             public const int PawnTwoForward = 8;
         }
 
+        public static Move NullMove = new Move(0);
+
         private uint _moveValue;
 
         public uint MoveValue { get { return _moveValue; }  set { _moveValue = value; } }

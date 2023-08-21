@@ -57,13 +57,16 @@ namespace Chess.WinForms
                 CenterBorderValue = 30,
                 PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 40_000, //Int32.MaxValue, //10000,
+                MaxTimeMilliseconds = 4_000, //Int32.MaxValue, //10000,
                 QueenValue = 900,
                 RookValue = 600,
                 StartingDepth = 1,
                 //MaxDepth == null
             };
-            _whiteEngine = new Engine(whiteConfig);
+            _whiteEngine = new Engine(whiteConfig)
+            {
+                UseNullMovePruning = false,
+            };
             _blackEngine = new Engine(blackConfig);
             _game.ResetGame();
             InitializeComponent();
