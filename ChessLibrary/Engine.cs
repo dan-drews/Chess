@@ -14,6 +14,8 @@ namespace ChessLibrary
 {
     public class Engine
     {
+        private readonly object moveLock = new object();
+
         public static int nodesEvaluated = 0;
         public static int nonQuietDepthNodesEvaluated = 0;
         public static long miliseconds = 0;
@@ -159,20 +161,41 @@ namespace ChessLibrary
         {
             int? currentBestScore = null;
             Move? currentBestMove = null;
+            object l = new object();
             IEnumerable<Move> moves = game.GetAllLegalMoves();
             moves = moves.OrderMoves(this, previousBest);
-            foreach (var move in moves)
+            if(previousBest != null)
             {
-                game.AddMove(move, false);
+                game.AddMove(previousBest.Value, false);
                 var score = GetRawMoveScores(game, playerColor, opponentColor, currentDepth, Int32.MinValue, Int32.MaxValue);
                 game.UndoLastMove();
-                if (score != null && (currentBestScore == null || score > currentBestScore))
+                moves = moves.Except(new Move[] { previousBest.Value });
+                if (score != null)
                 {
                     currentBestScore = score;
-                    currentBestMove = move;
+                    currentBestMove = previousBest.Value;
                 }
-
             }
+            Parallel.ForEach(moves, (move) =>
+            {
+                Game tempGame = (Game)game.Clone();
+                tempGame.AddMove(move, false);
+                var score = GetRawMoveScores(tempGame, playerColor, opponentColor, currentDepth, Int32.MinValue, Int32.MaxValue);
+                tempGame.UndoLastMove();
+                lock (l)
+                {
+                    if (score != null && (currentBestScore == null || score > currentBestScore))
+                    {
+                        currentBestScore = score;
+                        currentBestMove = move;
+                    }
+                }
+            });
+            //foreach (var move in moves)
+            //{
+                
+
+            //}
             return new NodeInfo(currentBestMove, currentBestScore ?? 0, 0, 0);
         }
 

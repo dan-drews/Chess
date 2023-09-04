@@ -42,7 +42,7 @@ namespace Chess.WinForms
                 MaxTimeMilliseconds = 300_000, //300_000,// Int32.MaxValue, //10000,
                 QueenValue = 900,
                 RookValue = 600,
-                StartingDepth = 1,
+                StartingDepth = 4,
                 MaxDepth = null
             };
 
@@ -57,10 +57,10 @@ namespace Chess.WinForms
                 CenterBorderValue = 30,
                 PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 4_000, //Int32.MaxValue, //10000,
+                MaxTimeMilliseconds = 10_000, //Int32.MaxValue, //10000,
                 QueenValue = 900,
                 RookValue = 600,
-                StartingDepth = 1,
+                StartingDepth = 4,
                 //MaxDepth == null
             };
             _whiteEngine = new Engine(whiteConfig)
@@ -112,7 +112,10 @@ namespace Chess.WinForms
 
         private void MainGame_ResizeEnd(object sender, EventArgs e)
         {
-            chessBoard.ForceRender();
+            if (!chessBoard.IsCalculationg)
+            {
+                chessBoard.ForceRender();
+            }
         }
     }
 }

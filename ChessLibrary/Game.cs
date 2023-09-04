@@ -58,7 +58,7 @@ namespace ChessLibrary
         {
             return new Game(Evaluator, (IBoard)Board.Clone())
             {
-                Moves = Moves.Select(x => (Move)x.Clone()).ToList(),
+                Moves = new List<Move>(Moves),
                 WhiteCanLongCastle = WhiteCanLongCastle,
                 WhiteCanShortCastle = WhiteCanShortCastle,
                 BlackCanLongCastle = BlackCanLongCastle,
