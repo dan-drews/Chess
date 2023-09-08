@@ -1,5 +1,5 @@
 ﻿using ChessLibrary.Enums;
-using ChessLibrary.MoveLegaility;
+using ChessLibrary.MoveGeneration;
 using ChessLibrary.OpeningBook;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ namespace ChessLibrary
     public class Game : ICloneable
     {
         internal ZobristTable ZobristTable { get; set; } = new ZobristTable();
-        public IMoveLegality Evaluator { get; private set; }
+        public IMoveGenerator Evaluator { get; private set; }
         public IBoard Board { get; private set; }
 
         public bool WhiteCanLongCastle { get; set; } = true;
@@ -34,7 +34,7 @@ namespace ChessLibrary
 
         public Colors StartingColor { get; set; } = Colors.White;
 
-        private Game(IMoveLegality evaluator, IBoard board)
+        private Game(IMoveGenerator evaluator, IBoard board)
         {
             Evaluator = evaluator;
             Board = board;
@@ -47,7 +47,7 @@ namespace ChessLibrary
             {
                 case BoardType.BitBoard:
                     Board = new BitBoard();
-                    Evaluator = new BitBoardLegality();
+                    Evaluator = new BitBoardMoveGenerator();
                     break;
                 default:
                     throw new Exception("Board Type Not Supported");

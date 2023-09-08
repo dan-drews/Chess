@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ChessLibrary.MoveLegaility
+namespace ChessLibrary.MoveGeneration
 {
-    public class BitBoardLegality : IMoveLegality
+    public class BitBoardMoveGenerator : IMoveGenerator
     {
         public Move[] GetAllLegalMoves(IBoard b, Colors color, Files? enPassantFile, bool blackCanLongCastle, bool blackCanShortCastle, bool whiteCanLongCastle, bool whiteCanShortCastle, bool includeQuietMoves = true)
         {
