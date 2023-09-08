@@ -19,8 +19,8 @@ namespace Chess.WinForms
         public bool IsCalculationg { get; set; } = false;
         private bool _hasSimulationStarted = false;
         const int SQUARE_SIZE = 100;
-        private Color _whiteColor = Color.FromArgb(250, 244, 212);
-        private Color _blackColor = Color.FromArgb(66, 22, 0);
+        private Color _whiteColor = Color.FromArgb(240, 217, 181);
+        private Color _blackColor = Color.FromArgb(181, 136, 100);
         private Color _lastMoveColor = Color.FromArgb(99, 237, 255);
         public Game Game { get; set; }
         public Engine? WhiteEngine;

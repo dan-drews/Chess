@@ -32,9 +32,10 @@ namespace ChessLibrary
         public IEvaluator Scorer { get; set; }
          
         private Stopwatch _stopwatch = new Stopwatch();
-
+        ScorerConfiguration _config;
         public Engine(ScorerConfiguration scoreConfig)
         {
+            _config = scoreConfig;
             Scorer = new ComplexEvaluator(scoreConfig);
             MaxTime = scoreConfig.MaxTimeMilliseconds;
             _startingDepth = scoreConfig.StartingDepth;
@@ -54,7 +55,7 @@ namespace ChessLibrary
             if (!isCheckmate)
             {
 
-                if(game.Moves.Count < 8)
+                if(_config.UseOpeningBook && game.Moves.Count < 8)
                 {
                     var hash = ZobristTable.CalculateZobristHash(game.Board);
                     var pickedMove = OpeningBookMovePicker.GetMoveForZobrist(hash);

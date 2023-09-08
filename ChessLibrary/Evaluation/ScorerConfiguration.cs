@@ -18,5 +18,7 @@
         public int RookValue { get; set; } = 65;
         public int QueenValue { get; set; } = 105;
         public int KingValue { get; set; } = 500;
+
+        public bool UseOpeningBook = true;
     }
 }

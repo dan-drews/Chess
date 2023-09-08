@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ namespace ChessLibrary
 {
     public static class Extensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetNotation(this PieceTypes p)
         {
             switch (p)
@@ -28,11 +30,14 @@ namespace ChessLibrary
             return "";
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int NumberOfTrailingZeros(this ulong n)
         {
             return System.Numerics.BitOperations.TrailingZeroCount(n);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ReverseBits(this ulong i)
         {
             i = (i & 0x5555555555555555) << 1 | (i >> 1) & 0x5555555555555555L;
