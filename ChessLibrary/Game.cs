@@ -98,8 +98,8 @@ namespace ChessLibrary
             get
             {
                 GetAllLegalMoves();
-                var hashLookup = Moves.ToLookup(x => x.Hash);
-                if (hashLookup.Any(x => x.Count() >= 3))
+                var hash = ZobristTable.CalculateZobristHash(Board);
+                if(Moves.Count(x=> x.Hash == hash) >= 3)
                 {
                     return true;
                 }
@@ -387,8 +387,9 @@ namespace ChessLibrary
                         }
                     }
                 }
-
+                Board.MovePiece(move);
                 var hash = ZobristTable.CalculateZobristHash(Board);
+
                 if (validate)
                 {
                     var m = legalMoves![Array.IndexOf(legalMoves, move)];
@@ -400,7 +401,6 @@ namespace ChessLibrary
                     move.Hash = hash;
                     Moves.Add(move);
                 }
-                Board.MovePiece(move);
                 return Board;
             }
             else

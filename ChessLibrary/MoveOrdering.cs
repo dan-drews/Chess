@@ -12,7 +12,7 @@ namespace ChessLibrary
         public static IEnumerable<Move> OrderMoves(this IEnumerable<Move> moves, Engine engine, Move? previousBest)
         {
             return moves
-                    .OrderBy(x=> previousBest != null && x == previousBest.Value ? 0 : 1)
+                    .OrderBy(x => previousBest != null && x == previousBest.Value ? 0 : 1)
                     .ThenByDescending(x =>
                     {
                         var score = 0;
@@ -26,8 +26,7 @@ namespace ChessLibrary
                             score += engine.Scorer.GetPieceValue(x.PromotedType.Value);
                         }
                         return score;
-                    })
-                    .ThenBy(x=> Random.Next());
+                    });
         }
     }
 }

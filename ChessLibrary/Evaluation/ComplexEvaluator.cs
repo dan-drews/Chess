@@ -19,29 +19,16 @@ public class ComplexEvaluator : IEvaluator
 
     public int GetPieceValue(PieceTypes piece)
     {
-        switch (piece)
+        return piece switch
         {
-            case PieceTypes.Pawn:
-                return Config.PawnValue;
-
-            case PieceTypes.Knight:
-                return Config.KnightValue;
-
-            case PieceTypes.Bishop:
-                return Config.BishopValue;
-
-            case PieceTypes.Rook:
-                return Config.RookValue;
-
-            case PieceTypes.Queen:
-                return Config.QueenValue;
-
-            case PieceTypes.King:
-                return Config.KingValue;
-
-            default:
-                return 0;
-        }
+            PieceTypes.Pawn => Config.PawnValue,
+            PieceTypes.Bishop => Config.BishopValue,
+            PieceTypes.Rook => Config.RookValue,
+            PieceTypes.Knight => Config.KnightValue,
+            PieceTypes.Queen => Config.QueenValue,
+            PieceTypes.King => Config.KingValue,
+            _ => 0
+        };        
     }
 
     private int GetScoreInternal(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, Colors color, bool isStalemate, int totalMoveCount)

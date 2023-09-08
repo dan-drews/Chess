@@ -12,22 +12,16 @@ namespace ChessLibrary
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetNotation(this PieceTypes p)
         {
-            switch (p)
+            return p switch
             {
-                case PieceTypes.Bishop:
-                    return "B";
-                case PieceTypes.King:
-                    return "K";
-                case PieceTypes.Knight:
-                    return "N";
-                case PieceTypes.Pawn:
-                    return "P";
-                case PieceTypes.Queen:
-                    return "Q";
-                case PieceTypes.Rook:
-                    return "R";
-            }
-            return "";
+                PieceTypes.Bishop => "B",
+                PieceTypes.King => "K",
+                PieceTypes.Knight => "N",
+                PieceTypes.Pawn => "P",
+                PieceTypes.Queen => "Q",
+                PieceTypes.Rook => "R",
+                _ => ""
+            };            
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
