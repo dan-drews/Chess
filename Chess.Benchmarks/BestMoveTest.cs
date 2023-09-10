@@ -53,12 +53,12 @@ namespace Chess.Benchmarks
             BitBoard.ResetGame();
         }
 
-        //[Benchmark]
-        //public void GetBestMove()
-        //{
+        [Benchmark]
+        public void GetBestMove()
+        {
 
-        //    e.GetBestMove(BitBoard, BitBoard.PlayerToMove);
-        //}
+            e.GetBestMove(BitBoard, BitBoard.PlayerToMove);
+        }
 
         [Benchmark]
         public void GetBestMoveFromFen1()

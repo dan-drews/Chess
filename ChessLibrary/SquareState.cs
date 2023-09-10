@@ -11,6 +11,8 @@ namespace ChessLibrary
 
         public static SquareState[][][] SquareStateMap;
 
+        private SquareState() { }
+
         static SquareState()
         {
             SquareStateMap = new SquareState[64][][];
@@ -78,11 +80,6 @@ namespace ChessLibrary
         }
 
         public ushort _valueInternal { get; set; }
-
-        public SquareState(ushort value)
-        {
-            _valueInternal = value;
-        }
 
         public SquareState(Square square)
         {
