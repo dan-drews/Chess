@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ChessLibrary.MoveLegaility
+namespace ChessLibrary.MoveGeneration
 {
-    public class BitBoardLegality : IMoveLegality
+    public class BitBoardMoveGenerator : IMoveGenerator
     {
         public Move[] GetAllLegalMoves(IBoard b, Colors color, Files? enPassantFile, bool blackCanLongCastle, bool blackCanShortCastle, bool whiteCanLongCastle, bool whiteCanShortCastle, bool includeQuietMoves = true)
         {
@@ -19,7 +19,7 @@ namespace ChessLibrary.MoveLegaility
             return allValidMoves.Where(x => x.StartingSquare == squareState.Square.SquareNumber).ToArray();
         }
 
-        public bool IsKingInCheck(IBoard b, Colors color, List<Move> pastMoves)
+        public bool IsKingInCheck(IBoard b, Colors color)
         {
             return ((BitBoard)b).IsKingInCheck(color);
         }

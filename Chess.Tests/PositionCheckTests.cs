@@ -118,8 +118,8 @@ namespace Chess.Tests
             if(depth == 1)
             {
                 var moves = _game.GetAllLegalMoves();
-                var ep = moves.Where(x => x.Flags == Move.Flag.EnPassantCapture).Count();
-                var castles = moves.Where(x => x.Flags == Move.Flag.LongCastle || x.Flags == Move.Flag.ShortCastle).Count();
+                var ep = moves.Where(x => x.Flags == Flag.EnPassantCapture).Count();
+                var castles = moves.Where(x => x.Flags == Flag.LongCastle || x.Flags == Flag.ShortCastle).Count();
                 return (moves.Length, moves.Where(x => x.CapturedPiece != null).Count(), ep, castles);
             }
 

@@ -1,9 +1,4 @@
-﻿using ChessLibrary.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ChessLibrary
+﻿namespace ChessLibrary
 {
     public class Piece
     {
@@ -85,7 +80,7 @@ namespace ChessLibrary
         public Colors Color { get; set; }
 
         private int? _score = null;
-        
+
         public int Score
         {
             get

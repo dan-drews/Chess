@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using ChessLibrary;
+using ChessLibrary.Evaluation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace Chess.Benchmarks
     public class NaiveVsBitBoard
     {
         private Game BitBoard = new Game(ChessLibrary.Enums.BoardType.BitBoard);
-        private Engine e = new Engine(new ChessLibrary.Evaluation.ScorerConfiguration()
+        private ScorerConfiguration config = new ScorerConfiguration()
         {
             SelfInCheckScore = -100,
             BishopValue = 320,
@@ -25,16 +26,24 @@ namespace Chess.Benchmarks
             CenterBorderValue = 30,
             PawnValue = 120,
             KingValue = 99999,
-            //MaxTimeMilliseconds = 300_000, //300_000,// Int32.MaxValue, //10000,
+            MaxTimeMilliseconds = 300_000, //300_000,// Int32.MaxValue, //10000,
             QueenValue = 900,
             RookValue = 600,
-            StartingDepth = 6,
-            MaxDepth = 6
-        });
+            StartingDepth = 1,
+            MaxDepth = 6,
+            UseOpeningBook = false
+        };
+        private Engine e;
+
+        public NaiveVsBitBoard()
+        {
+            e = new Engine(config);
+        }
 
         [IterationSetup]
         public void Iteration()
         {
+            e = new Engine(config);
             BitBoard.ResetGame();
         }
 
@@ -42,12 +51,6 @@ namespace Chess.Benchmarks
         public void Setup()
         {
             BitBoard.ResetGame();
-        }
-
-        [Benchmark]
-        public void GetBestMove()
-        {
-            e.GetBestMove(BitBoard, BitBoard.PlayerToMove);
         }
 
         [Benchmark]

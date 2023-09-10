@@ -47,9 +47,9 @@ namespace ChessLibrary
         {
             if (move == "O-O" || move == "O-O+" || move == "O-O#")
             {
-                return game.GetAllLegalMoves().First(x => x.Flags == Move.Flag.ShortCastle);
+                return game.GetAllLegalMoves().First(x => x.Flags == Flag.ShortCastle);
             }
-            return game.GetAllLegalMoves().First(x => x.Flags == Move.Flag.LongCastle);
+            return game.GetAllLegalMoves().First(x => x.Flags == Flag.LongCastle);
         }
 
         private Move GetStandardMove(Game game, string move)

@@ -6,24 +6,44 @@ using System.Text;
 
 namespace ChessLibrary
 {
-    public struct Move : ICloneable
+    public readonly struct Flag
     {
-        public readonly struct Flag
+        public const int None = 0;
+        public const int EnPassantCapture = 1;
+        public const int LongCastle = 2;
+        public const int ShortCastle = 3;
+        public const int PromoteToQueen = 4;
+        public const int PromoteToRook = 5;
+        public const int PromoteToBishop = 6;
+        public const int PromoteToKnight = 7;
+        public const int PawnTwoForward = 8;
+    }
+
+    public struct MoveWithHash
+    {
+        public Move Move { get; set; }
+        public ulong Hash { get; set; }
+        public MoveWithHash(Move move, ulong hash)
         {
-            public const int None = 0;
-            public const int EnPassantCapture = 1;
-            public const int LongCastle = 2;
-            public const int ShortCastle = 3;
-            public const int PromoteToQueen = 4;
-            public const int PromoteToRook = 5;
-            public const int PromoteToBishop = 6;
-            public const int PromoteToKnight = 7;
-            public const int PawnTwoForward = 8;
+            Move = move;
+            Hash = hash;
         }
+
+        public MoveWithHash()
+        {
+
+        }
+    }
+
+    public struct Move
+    {
+
+        public static Move NullMove = new Move(0);
+        public static Move EmptyMove = new Move(uint.MaxValue);
 
         private uint _moveValue;
 
-        public uint MoveValue { get { return _moveValue; }  set { _moveValue = value; } }
+        //public uint MoveValue { get { return _moveValue; }  set { _moveValue = value; } }
 
         const uint COLOR_MASK =
             0b00000000010000000000000000000000;
@@ -44,9 +64,6 @@ namespace ChessLibrary
         const int DEST_SHIFT = 6;
         const int PIECE_SHIFT = 3;
         const int CAPTURE_SHIFT = 0;
-
-        [JsonIgnore]
-        public ulong Hash { get; set; }
 
         public override int GetHashCode()
         {
@@ -104,14 +121,6 @@ namespace ChessLibrary
         public static bool SameMove(Move a, Move b)
         {
             return a._moveValue == b._moveValue;
-        }
-
-        public object Clone()
-        {
-            return new Move(_moveValue)
-            {
-                Hash = Hash,
-            };
         }
 
         public static bool operator ==(Move lhs, Move rhs) => lhs._moveValue == rhs._moveValue;

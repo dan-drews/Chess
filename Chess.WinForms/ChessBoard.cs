@@ -16,10 +16,11 @@ namespace Chess.WinForms
     public partial class ChessBoard : UserControl
     {
         public Action<(Engine.NodeInfo? node, int depth)>? OnMoveCalculated;
+        public bool IsCalculationg { get; set; } = false;
         private bool _hasSimulationStarted = false;
         const int SQUARE_SIZE = 100;
-        private Color _whiteColor = Color.FromArgb(250, 244, 212);
-        private Color _blackColor = Color.FromArgb(66, 22, 0);
+        private Color _whiteColor = Color.FromArgb(240, 217, 181);
+        private Color _blackColor = Color.FromArgb(181, 136, 100);
         private Color _lastMoveColor = Color.FromArgb(99, 237, 255);
         public Game Game { get; set; }
         public Engine? WhiteEngine;
@@ -94,26 +95,11 @@ namespace Chess.WinForms
             var squareTarget = GetSquareRankFileFromEventArgs(mouseEvent);
             if (_selectedSquare == null)
             {
-                var moves = Game.GetAllLegalMoves().Where(x => x.StartingSquare == squareTarget.SquareNumber).ToList();
-                if (moves.Any())
-                {
-                    RenderMoves(moves);
-                    _selectedSquare = squareTarget;
-                    _moves = moves;
-                }
-                else
-                {
-                    _isRendered = false;
-                    if (_areMovesRendered)
-                    {
-                        this.Refresh();
-                    }
-                    _selectedSquare = null;
-                    _moves = null;
-                }
+                RenderMovesForSelectedSquare(squareTarget);
             }
             else
             {
+                ForceRender();
                 if (_moves != null)
                 {
                     var matchingMoveQuery = _moves.Where(x => x.TargetSquare == squareTarget.SquareNumber);
@@ -140,16 +126,41 @@ namespace Chess.WinForms
                             //    this.Refresh();
                             //}
                         }
+                        _moves = null;
+                        _selectedSquare = null;
+                    }
+                    else
+                    {
+                        RenderMovesForSelectedSquare(squareTarget);
                     }
                 }
                 else
                 {
                     ForceRender();
                 }
-                    _moves = null;
-                    _selectedSquare = null;
             }
 
+        }
+
+        private void RenderMovesForSelectedSquare(Square squareTarget)
+        {
+            var moves = Game.GetAllLegalMoves().Where(x => x.StartingSquare == squareTarget.SquareNumber).ToList();
+            if (moves.Any())
+            {
+                RenderMoves(moves);
+                _selectedSquare = squareTarget;
+                _moves = moves;
+            }
+            else
+            {
+                _isRendered = false;
+                if (_areMovesRendered)
+                {
+                    this.Refresh();
+                }
+                _selectedSquare = null;
+                _moves = null;
+            }
         }
 
         private void RenderMoves(List<Move> moves)
@@ -219,7 +230,7 @@ namespace Chess.WinForms
 
                     if (Game.Moves.Any())
                     {
-                        var lastMove = Game.Moves.Last();
+                        var lastMove = Game.Moves.Last().Move;
                         bool isLastMoveStartSquare = lastMove.StartingSquare == sq.SquareNumber;
                         bool isLastMoveDestinationSquare = lastMove.TargetSquare == sq.SquareNumber;
                         if (isLastMoveStartSquare || isLastMoveDestinationSquare)
@@ -304,12 +315,14 @@ namespace Chess.WinForms
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
+            IsCalculationg = true;
             var result = ExecuteNextMoveForComputer();
             e.Result = result;
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            IsCalculationg = false;
             (NodeInfo? node, int Depth) result = ((NodeInfo?, int))e.Result;
             if (result.node != null)
             {

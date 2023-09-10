@@ -241,7 +241,7 @@ namespace ChessLibrary
         public void MovePiece(Move move)
         {
             // En Passant
-            if (move.Flags == Move.Flag.EnPassantCapture) // move.Piece == PieceTypes.Pawn && move.CapturedPiece != null && GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece == null)
+            if (move.Flags == Flag.EnPassantCapture) // move.Piece == PieceTypes.Pawn && move.CapturedPiece != null && GetSquare(move.DestinationSquare.File, move.DestinationSquare.Rank).Piece == null)
             {
                 if (move.Color == Colors.White)
                 {
@@ -255,13 +255,13 @@ namespace ChessLibrary
             }
 
             // Castle
-            if(move.Flags == Move.Flag.ShortCastle)
+            if(move.Flags == Flag.ShortCastle)
             {
                 var targetSquare = new Square(move.TargetSquare);
                 ClearPiece(Files.H, targetSquare.Rank);                
                 SetPiece(Files.F, targetSquare.Rank, PieceTypes.Rook, move.Color);
             }
-            if(move.Flags == Move.Flag.LongCastle)
+            if(move.Flags == Flag.LongCastle)
             {
                 // Long Castle
                 var targetSquare = new Square(move.TargetSquare);
@@ -717,7 +717,7 @@ namespace ChessLibrary
                         var castleStartSquare = color == Colors.White ? whiteShortCastleStartSquares : blackShortCastleStartSquares;
                         if ((castleSquares & dangerous) == 0 && (castleSquares & OccupiedSquares & ~currentKing) == 0 && (castleStartSquare & currentRooks) != 0)
                         {
-                            var move = new Move(location, GetPositionFromFileAndRank(Files.G, startingSquare.Square.Rank), color, PieceTypes.King, null, Move.Flag.ShortCastle);
+                            var move = new Move(location, GetPositionFromFileAndRank(Files.G, startingSquare.Square.Rank), color, PieceTypes.King, null, Flag.ShortCastle);
                             if (includeSelfChecks || !ResultsInOwnCheck(move, color))
                             {
                                 result.Add(move);
@@ -732,7 +732,7 @@ namespace ChessLibrary
                         var squaresThatCannotBeDangerous = color == Colors.White ? whiteLongCastleDangerousSquares : blackLongCastleDangerousSquares;
                         if ((squaresThatCannotBeDangerous & dangerous) == 0 && (castleSquares & OccupiedSquares & ~currentKing) == 0 && (castleStartSquare & currentRooks) != 0)
                         {
-                            var move = new Move(location, GetPositionFromFileAndRank(Files.C, startingSquare.Square.Rank), color, PieceTypes.King, null, Move.Flag.LongCastle);
+                            var move = new Move(location, GetPositionFromFileAndRank(Files.C, startingSquare.Square.Rank), color, PieceTypes.King, null, Flag.LongCastle);
                             if (includeSelfChecks || !ResultsInOwnCheck(move, color))
                             {
                                 result.Add(move);
@@ -823,10 +823,10 @@ namespace ChessLibrary
                     var piece = m.Piece;
                     // Promotion. Don'd add this move, but add 1 for each promoted piece type
 
-                    resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Move.Flag.PromoteToQueen));
-                    resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Move.Flag.PromoteToKnight));
-                    resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Move.Flag.PromoteToBishop));
-                    resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Move.Flag.PromoteToRook));
+                    resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Flag.PromoteToQueen));
+                    resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Flag.PromoteToKnight));
+                    resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Flag.PromoteToBishop));
+                    resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Flag.PromoteToRook));
 
                 }
                 else
@@ -903,7 +903,7 @@ namespace ChessLibrary
                     int index = possibility.NumberOfTrailingZeros();
                     var destinationSquare = GetSquare(index);
                     var startingSquare = GetSquare(destinationSquare.Square.File, destinationSquare.Square.Rank - 2 * pawnDirection);
-                    var move = new Move(startingSquare.Square.SquareNumber, index, color, PieceTypes.Pawn, null, Move.Flag.PawnTwoForward);
+                    var move = new Move(startingSquare.Square.SquareNumber, index, color, PieceTypes.Pawn, null, Flag.PawnTwoForward);
                     if (includeSelfChecks || !ResultsInOwnCheck(move, color))
                     {
                         result.Add(move);
@@ -925,7 +925,7 @@ namespace ChessLibrary
                     var destinationSquare = GetSquare(captureLeftOperation.NumberOfTrailingZeros());// GetSquare(enPassantFile.Value, square.Square.Rank + pawnDirection);
                     var startingSquare = GetSquare(reverseShiftOperation(captureLeftOperation, rightShiftAmount).NumberOfTrailingZeros());
                     var targetPiece = GetSquare(reverseShiftOperation(captureLeftOperation, 8).NumberOfTrailingZeros()).Piece;
-                    var move = new Move(startingSquare.Square.SquareNumber, destinationSquare.Square.SquareNumber, color, PieceTypes.Pawn, targetPiece!.Type, Move.Flag.EnPassantCapture);
+                    var move = new Move(startingSquare.Square.SquareNumber, destinationSquare.Square.SquareNumber, color, PieceTypes.Pawn, targetPiece!.Type, Flag.EnPassantCapture);
                     if (includeSelfChecks || !ResultsInOwnCheck(move, color))
                     {
                         result.Add(move);
@@ -938,7 +938,7 @@ namespace ChessLibrary
                     var destinationSquare = GetSquare(captureRightOperation.NumberOfTrailingZeros());// GetSquare(enPassantFile.Value, square.Square.Rank + pawnDirection);
                     var startingSquare = GetSquare(reverseShiftOperation(captureRightOperation, leftShiftAmount).NumberOfTrailingZeros());
                     var targetPiece = GetSquare(reverseShiftOperation(captureRightOperation, 8).NumberOfTrailingZeros()).Piece;
-                    var move = new Move(startingSquare.Square.SquareNumber, destinationSquare.Square.SquareNumber, color, PieceTypes.Pawn, targetPiece!.Type, Move.Flag.EnPassantCapture);
+                    var move = new Move(startingSquare.Square.SquareNumber, destinationSquare.Square.SquareNumber, color, PieceTypes.Pawn, targetPiece!.Type, Flag.EnPassantCapture);
                     if (includeSelfChecks || !ResultsInOwnCheck(move, color))
                     {
                         result.Add(move);
