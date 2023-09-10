@@ -168,7 +168,7 @@ namespace ChessLibrary
 
             if (currentDepth == 0 || isCheckmate || isStalemate)
             {
-                if (game.Moves.Last() != Move.NullMove)
+                if (game.Moves.Last().Move != Move.NullMove)
                 {
                     nodesEvaluated++;
                 }

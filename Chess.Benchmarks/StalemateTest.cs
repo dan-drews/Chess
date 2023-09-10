@@ -47,7 +47,7 @@ namespace Chess.Benchmarks
         [MinIterationTime(500)]
         public void Baseline()
         {
-            var lastMove = BitBoard.Moves.Last();
+            var lastMove = BitBoard.Moves.Last().Move;
             BitBoard.UndoLastMove();
             BitBoard.AddMove(lastMove, false);
         }
@@ -68,7 +68,7 @@ namespace Chess.Benchmarks
         [MinIterationTime(500)]
         public void StalemateDetection()
         {
-            var lastMove = BitBoard.Moves.Last();
+            var lastMove = BitBoard.Moves.Last().Move;
             BitBoard.UndoLastMove();
             BitBoard.AddMove(lastMove, false);
             var a = BitBoard.IsStalemate;
@@ -78,7 +78,7 @@ namespace Chess.Benchmarks
         [MinIterationTime(500)]
         public void CheckmateDetection()
         {
-            var lastMove = BitBoard.Moves.Last();
+            var lastMove = BitBoard.Moves.Last().Move;
             BitBoard.UndoLastMove();
             BitBoard.AddMove(lastMove, false);
             var a = BitBoard.IsCheckmate;

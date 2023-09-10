@@ -58,7 +58,7 @@ namespace ChessLibrary
         {
             return new Game(Evaluator, (IBoard)Board.Clone())
             {
-                Moves = new List<Move>(Moves),
+                Moves = new List<MoveWithHash>(Moves),
                 WhiteCanLongCastle = WhiteCanLongCastle,
                 WhiteCanShortCastle = WhiteCanShortCastle,
                 BlackCanLongCastle = BlackCanLongCastle,
@@ -80,7 +80,7 @@ namespace ChessLibrary
             }
         }
 
-        public List<Move> Moves { get; private set; } = new List<Move>();
+        public List<MoveWithHash> Moves { get; private set; } = new List<MoveWithHash>();
 
 
         public bool IsGameOver
@@ -109,7 +109,7 @@ namespace ChessLibrary
                     for (int i = 1; i <= 50; i++)
                     {
                         var move = Moves.ElementAt(Moves.Count - i);
-                        if (move.Piece == PieceTypes.Pawn || move.CapturedPiece != null)
+                        if (move.Move.Piece == PieceTypes.Pawn || move.Move.CapturedPiece != null)
                         {
                             isFiftyMoveRule = false;
                             break;
@@ -165,7 +165,7 @@ namespace ChessLibrary
             {
                 if (_isBlackKingInCheck == null)
                 {
-                    _isBlackKingInCheck = Evaluator.IsKingInCheck(Board, color, Moves);
+                    _isBlackKingInCheck = Evaluator.IsKingInCheck(Board, color);
                 }
                 return _isBlackKingInCheck.Value;
             }
@@ -173,7 +173,7 @@ namespace ChessLibrary
             {
                 if (_isWhiteKingInCheck == null)
                 {
-                    _isWhiteKingInCheck = Evaluator.IsKingInCheck(Board, color, Moves);
+                    _isWhiteKingInCheck = Evaluator.IsKingInCheck(Board, color);
                 }
                 return _isWhiteKingInCheck.Value;
             }
@@ -283,7 +283,7 @@ namespace ChessLibrary
 
         public void ResetGame()
         {
-            Moves = new List<Move>();
+            Moves = new List<MoveWithHash>();
 
             // Clear Board
             for (Files f = Files.A; f <= Files.H; f++)
@@ -302,7 +302,7 @@ namespace ChessLibrary
         {
             if (move == Move.NullMove)
             {
-                Moves.Add(move);
+                Moves.Add(new MoveWithHash() { Move = move });
                 return Board;
             }
             var startingSquare = Board.GetSquare(move.StartingSquare);
@@ -333,7 +333,7 @@ namespace ChessLibrary
                 _isWhiteKingInCheck = null;
                 _isBlackKingInCheck = null;
                 var sq = Board.GetSquare(move.StartingSquare);
-                if (move.Flags == Move.Flag.PawnTwoForward)
+                if (move.Flags == Flag.PawnTwoForward)
                 {
                     EnPassantFile = startingSquare.Square.File;
                 }
@@ -392,14 +392,13 @@ namespace ChessLibrary
 
                 if (validate)
                 {
-                    var m = legalMoves![Array.IndexOf(legalMoves, move)];
-                    m.Hash = hash;
+                    var m = new MoveWithHash(legalMoves![Array.IndexOf(legalMoves, move)], hash);
                     Moves.Add(m);
                 }
                 else
                 {
-                    move.Hash = hash;
-                    Moves.Add(move);
+                    var m = new MoveWithHash(move, hash);
+                    Moves.Add(m);
                 }
                 return Board;
             }
@@ -411,7 +410,7 @@ namespace ChessLibrary
 
         public IBoard UndoLastMove()
         {
-            var move = Moves.Last();
+            var move = Moves.Last().Move;
             if (move == Move.NullMove)
             {
                 Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
@@ -424,9 +423,9 @@ namespace ChessLibrary
                 throw new Exception("No piece to move");
             }
             var initialPiece = move.Piece;
-            if (move.Flags == Move.Flag.EnPassantCapture)
+            if (move.Flags == Flag.EnPassantCapture)
             {
-                var moveBeforeLast = Moves.ElementAt(Moves.Count - 2);
+                var moveBeforeLast = Moves.ElementAt(Moves.Count - 2).Move;
                 // Yup, it was en passant.
                 Board.SetPiece(moveBeforeLast.TargetSquare, moveBeforeLast.Piece, moveBeforeLast.Color);
                 Board.SetPiece(move.StartingSquare, initialPiece, move.Color);
@@ -447,14 +446,14 @@ namespace ChessLibrary
                 if (initialPiece == PieceTypes.King)
                 {
                     var rank = move.Color == Colors.Black ? 8 : 1;
-                    if (move.Flags == Move.Flag.ShortCastle)
+                    if (move.Flags == Flag.ShortCastle)
                     {
                         // Castling.
                         Board.SetPiece(Files.H, rank, PieceTypes.Rook, move.Color);
                         Board.ClearPiece(Files.F, rank);
                     }
 
-                    if (move.Flags == Move.Flag.LongCastle)
+                    if (move.Flags == Flag.LongCastle)
                     {
                         Board.SetPiece(Files.A, rank, PieceTypes.Rook, move.Color);
                         Board.ClearPiece(Files.D, rank);
@@ -467,7 +466,7 @@ namespace ChessLibrary
             _isBlackKingInCheck = null;
             if (Moves.Count >= 2)
             {
-                var moveBeforeLast = Moves.ElementAt(Moves.Count - 2);
+                var moveBeforeLast = Moves.ElementAt(Moves.Count - 2).Move;
                 var previousStarting = Board.GetSquare(moveBeforeLast.StartingSquare);
                 var previousDestination = Board.GetSquare(moveBeforeLast.TargetSquare);
                 if (moveBeforeLast.Piece == PieceTypes.Pawn &&
@@ -486,7 +485,7 @@ namespace ChessLibrary
             WhiteCanLongCastle = true;
             BlackCanShortCastle = true;
             BlackCanLongCastle = true;
-            foreach (var previousMove in Moves.Where(x => x.Piece == PieceTypes.Rook || x.Piece == PieceTypes.King))
+            foreach (var previousMove in Moves.Where(x => x.Move.Piece == PieceTypes.Rook || x.Move.Piece == PieceTypes.King).Select(x=> x.Move))
             {
                 var previousStarting = Board.GetSquare(previousMove.StartingSquare);
                 if (previousMove.Piece == PieceTypes.King)

@@ -19,7 +19,7 @@ namespace ChessLibrary.MoveGeneration
             return allValidMoves.Where(x => x.StartingSquare == squareState.Square.SquareNumber).ToArray();
         }
 
-        public bool IsKingInCheck(IBoard b, Colors color, List<Move> pastMoves)
+        public bool IsKingInCheck(IBoard b, Colors color)
         {
             return ((BitBoard)b).IsKingInCheck(color);
         }

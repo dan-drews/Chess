@@ -29,7 +29,7 @@ namespace Chess.Benchmarks
             MaxTimeMilliseconds = 300_000, //300_000,// Int32.MaxValue, //10000,
             QueenValue = 900,
             RookValue = 600,
-            StartingDepth = 1,
+            StartingDepth = 6,
             MaxDepth = 6,
             UseOpeningBook = false
         };

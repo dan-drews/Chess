@@ -144,8 +144,8 @@ namespace Chess.Tests
                 Rank = 2
             };
 
-            Game.AddMove(new Move(GetSquare("E2"), GetSquare("E4"), Colors.White, PieceTypes.Pawn, null, Move.Flag.PawnTwoForward));
-            Game.AddMove(new Move(GetSquare("E7"), GetSquare("E5"), Colors.Black, PieceTypes.Pawn, null, Move.Flag.PawnTwoForward));
+            Game.AddMove(new Move(GetSquare("E2"), GetSquare("E4"), Colors.White, PieceTypes.Pawn, null, Flag.PawnTwoForward));
+            Game.AddMove(new Move(GetSquare("E7"), GetSquare("E5"), Colors.Black, PieceTypes.Pawn, null, Flag.PawnTwoForward));
             int count = 0;
             for (Files file = Files.A; file <= Files.H; file++)
             {
@@ -213,7 +213,7 @@ namespace Chess.Tests
 
 
             Game.AddMove(new Move(Game.Board.GetSquare(Files.B, 1).Square.SquareNumber, Game.Board.GetSquare(Files.C, 3).Square.SquareNumber, Colors.White, Game.Board.GetSquare(Files.B, 1).Piece.Type));
-            Game.AddMove(new Move(Game.Board.GetSquare(Files.D, 7).Square.SquareNumber, Game.Board.GetSquare(Files.D, 5).Square.SquareNumber, Colors.Black, Game.Board.GetSquare(Files.D, 7).Piece.Type, null, Move.Flag.PawnTwoForward));
+            Game.AddMove(new Move(Game.Board.GetSquare(Files.D, 7).Square.SquareNumber, Game.Board.GetSquare(Files.D, 5).Square.SquareNumber, Colors.Black, Game.Board.GetSquare(Files.D, 7).Piece.Type, null, Flag.PawnTwoForward));
             Game.AddMove(new Move(Game.Board.GetSquare(Files.G, 1).Square.SquareNumber, Game.Board.GetSquare(Files.F, 3).Square.SquareNumber, Colors.White, Game.Board.GetSquare(Files.G, 1).Piece.Type));
             Game.AddMove(new Move(Game.Board.GetSquare(Files.G, 8).Square.SquareNumber, Game.Board.GetSquare(Files.F, 6).Square.SquareNumber, Colors.Black, Game.Board.GetSquare(Files.G, 8).Piece.Type));
             Game.AddMove(new Move(Game.Board.GetSquare(Files.H, 1).Square.SquareNumber, Game.Board.GetSquare(Files.G, 1).Square.SquareNumber, Colors.White, Game.Board.GetSquare(Files.H, 1).Piece.Type));
@@ -222,7 +222,7 @@ namespace Chess.Tests
             Game.AddMove(new Move(Game.Board.GetSquare(Files.F, 7).Square.SquareNumber, Game.Board.GetSquare(Files.F, 6).Square.SquareNumber, Colors.Black, Game.Board.GetSquare(Files.F, 7).Piece.Type));
             Game.AddMove(new Move(Game.Board.GetSquare(Files.D, 5).Square.SquareNumber, Game.Board.GetSquare(Files.C, 7).Square.SquareNumber, Colors.White, Game.Board.GetSquare(Files.D, 5).Piece.Type, Game.Board.GetSquare(Files.C, 7).Piece.Type));
             Game.AddMove(new Move(Game.Board.GetSquare(Files.E, 8).Square.SquareNumber, Game.Board.GetSquare(Files.D, 7).Square.SquareNumber, Colors.Black, Game.Board.GetSquare(Files.E, 8).Piece.Type));
-            Game.AddMove(new Move(Game.Board.GetSquare(Files.E, 2).Square.SquareNumber, Game.Board.GetSquare(Files.E, 4).Square.SquareNumber, Colors.White, Game.Board.GetSquare(Files.E, 2).Piece.Type, null, Move.Flag.PawnTwoForward));
+            Game.AddMove(new Move(Game.Board.GetSquare(Files.E, 2).Square.SquareNumber, Game.Board.GetSquare(Files.E, 4).Square.SquareNumber, Colors.White, Game.Board.GetSquare(Files.E, 2).Piece.Type, null, Flag.PawnTwoForward));
             Game.AddMove(new Move(Game.Board.GetSquare(Files.D, 8).Square.SquareNumber, Game.Board.GetSquare(Files.C, 7).Square.SquareNumber, Colors.Black, Game.Board.GetSquare(Files.D, 8).Piece.Type, Game.Board.GetSquare(Files.C, 7).Piece.Type));
             Game.AddMove(new Move(Game.Board.GetSquare(Files.E, 4).Square.SquareNumber, Game.Board.GetSquare(Files.E, 5).Square.SquareNumber, Colors.White, Game.Board.GetSquare(Files.E, 4).Piece.Type));
 
@@ -332,7 +332,7 @@ namespace Chess.Tests
             {
                 if(Math.Abs(startingRank - destinationRank) == 2)
                 {
-                    flags = Move.Flag.PawnTwoForward;
+                    flags = Flag.PawnTwoForward;
                 }
             }
 
@@ -340,11 +340,11 @@ namespace Chess.Tests
             {
                 if(destinationFile == Files.G)
                 {
-                    flags = Move.Flag.ShortCastle;
+                    flags = Flag.ShortCastle;
                 }
                 else
                 {
-                    flags = Move.Flag.LongCastle;
+                    flags = Flag.LongCastle;
                 }
             }
 

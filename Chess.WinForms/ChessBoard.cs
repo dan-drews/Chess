@@ -230,7 +230,7 @@ namespace Chess.WinForms
 
                     if (Game.Moves.Any())
                     {
-                        var lastMove = Game.Moves.Last();
+                        var lastMove = Game.Moves.Last().Move;
                         bool isLastMoveStartSquare = lastMove.StartingSquare == sq.SquareNumber;
                         bool isLastMoveDestinationSquare = lastMove.TargetSquare == sq.SquareNumber;
                         if (isLastMoveStartSquare || isLastMoveDestinationSquare)
