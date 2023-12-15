@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace ChessLibrary
 {
@@ -407,7 +408,7 @@ namespace ChessLibrary
                 throw new Exception("Invalid Move");
             }
         }
-
+        
         public IBoard UndoLastMove()
         {
             var move = Moves.Last().Move;
@@ -478,6 +479,10 @@ namespace ChessLibrary
                 {
                     EnPassantFile = null;
                 }
+            }
+            else
+            {
+                EnPassantFile = null;
             }
                 
             Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.

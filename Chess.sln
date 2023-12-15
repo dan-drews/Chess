@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.Perft", "Chess.Perft\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chess.WinForms", "Chess.WinForms\Chess.WinForms.csproj", "{A6537E4B-BEDB-40A4-A677-C0C9FB70A9BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Engine.Console", "Chess.Engine.Console\Chess.Engine.Console.csproj", "{B4C79B07-B209-4AF9-B4AA-525AAAB3E6D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{A6537E4B-BEDB-40A4-A677-C0C9FB70A9BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6537E4B-BEDB-40A4-A677-C0C9FB70A9BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6537E4B-BEDB-40A4-A677-C0C9FB70A9BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4C79B07-B209-4AF9-B4AA-525AAAB3E6D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4C79B07-B209-4AF9-B4AA-525AAAB3E6D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4C79B07-B209-4AF9-B4AA-525AAAB3E6D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4C79B07-B209-4AF9-B4AA-525AAAB3E6D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
