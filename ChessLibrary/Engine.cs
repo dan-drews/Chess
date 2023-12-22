@@ -22,9 +22,9 @@ namespace ChessLibrary
 
         private ConcurrentDictionary<bool, ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>> ZobristScore = new ConcurrentDictionary<bool, ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>>();
 
-        public int MaxTime { get; set; }
-        private int _startingDepth;
-        private int? _maxDepth;
+        private int _maxTime => Config.MaxTimeMilliseconds;
+        private int _startingDepth => Config.StartingDepth;
+        private int? _maxDepth => Config.MaxDepth;
         private bool _wasEvaluationCancelled = false;
         public bool UseNullMovePruning {  get; set; }
         public IEvaluator Scorer { get; set; }
@@ -35,15 +35,14 @@ namespace ChessLibrary
         {
             Config = scoreConfig;
             Scorer = new ComplexEvaluator(scoreConfig);
-            MaxTime = scoreConfig.MaxTimeMilliseconds;
-            _startingDepth = scoreConfig.StartingDepth;
-            _maxDepth = scoreConfig.MaxDepth;
             ZobristScore.TryAdd(true, new ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>());
             ZobristScore.TryAdd(false, new ConcurrentDictionary<int, ConcurrentDictionary<ulong, int?>>());
         }
 
         public (NodeInfo? node, int depth) GetBestMove(Game game, Colors playerColor)
         {
+            ZobristScore[true].Clear();
+            ZobristScore[false].Clear();
             _stopwatch.Restart();
             nodesEvaluated = 0;
             nonQuietDepthNodesEvaluated = 0;
@@ -59,6 +58,7 @@ namespace ChessLibrary
                     var pickedMove = OpeningBookMovePicker.GetMoveForZobrist(hash);
                     if (pickedMove != null)
                     {
+                        System.Threading.Thread.Sleep(1000);
                         return (new NodeInfo(pickedMove.Value, 0, 0, 0), 1);
                     }
                 }
@@ -66,7 +66,7 @@ namespace ChessLibrary
                 NodeInfo? result = null;
                 int depthToSearch = _startingDepth - 1;
                 bool checkmate = false;
-                while (_stopwatch.ElapsedMilliseconds < MaxTime && !checkmate && depthToSearch < (_maxDepth ?? int.MaxValue))
+                while (_stopwatch.ElapsedMilliseconds < _maxTime && !checkmate && depthToSearch < (_maxDepth ?? int.MaxValue))
                 {
                     _wasEvaluationCancelled = false;
                     depthToSearch++;
@@ -143,7 +143,7 @@ namespace ChessLibrary
         private int? GetRawMoveScores(Game game, Colors playerColor, Colors opponentColor, int currentDepth, int alpha, int beta)
         {
 
-            if (_stopwatch.ElapsedMilliseconds >= MaxTime)
+            if (_stopwatch.ElapsedMilliseconds >= _maxTime)
             {
                 _wasEvaluationCancelled = true;
                 return null;

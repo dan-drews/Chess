@@ -10,7 +10,7 @@ using System.Linq;
 namespace Chess.Benchmarks
 {
 
-    [SimpleJob(RuntimeMoniker.Net70)]
+    [SimpleJob(RuntimeMoniker.Net80)]
     [RPlotExporter]
     [MemoryDiagnoser(true)]
     public class NaiveVsBitBoard

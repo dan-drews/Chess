@@ -43,7 +43,7 @@ namespace ChessLibrary
 
         private uint _moveValue;
 
-        //public uint MoveValue { get { return _moveValue; }  set { _moveValue = value; } }
+        public uint MoveValue { get { return _moveValue; }  set { _moveValue = value; } }
 
         const uint COLOR_MASK =
             0b00000000010000000000000000000000;
@@ -118,7 +118,7 @@ namespace ChessLibrary
                 ? null
                 : (PieceTypes)(_moveValue & CAPTURE_PIECE_MASK);
 
-        public static bool SameMove(Move a, Move b)
+        public static bool SameMove(Move a, Move b) 
         {
             return a._moveValue == b._moveValue;
         }

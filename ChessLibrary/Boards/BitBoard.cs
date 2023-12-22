@@ -987,6 +987,13 @@ namespace ChessLibrary
             SetPiece(position, type, color);
         }
 
+        public int PawnsInFile(Files file, Colors color)
+        {
+            var pawns = color == Colors.White ? _whitePawns : _blackPawns;
+            var fileMask = FileMasks[(int)file - 1];
+            return (pawns & fileMask).CountSetBits();
+        }
+
         public void SetPiece(int position, PieceTypes type, Colors color)
         {
             for (int i = 0; i < _squares.Length; i++)
