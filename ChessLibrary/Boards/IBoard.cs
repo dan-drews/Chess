@@ -12,5 +12,6 @@ namespace ChessLibrary
         void SetPiece(int position, PieceTypes type, Colors color);
         void ClearPiece(Files f, int rank);
         void ClearPiece(int position);
+        int PawnsInFile(Files file, Colors color);
     }
 }

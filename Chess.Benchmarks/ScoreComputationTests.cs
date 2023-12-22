@@ -13,7 +13,7 @@ namespace Chess.Benchmarks
     [SimpleJob(RuntimeMoniker.Net80)]
     [RPlotExporter]
     [MemoryDiagnoser(true)]
-    public class BestMoveTest
+    public class ScoreComputationTests
     {
         private Game BitBoard = new Game(ChessLibrary.Enums.BoardType.BitBoard);
         private ScorerConfiguration config = new ScorerConfiguration()
@@ -35,36 +35,22 @@ namespace Chess.Benchmarks
         };
         private Engine e;
 
-        public BestMoveTest()
+        public ScoreComputationTests()
         {
             e = new Engine(config);
         }
 
-        [IterationSetup]
-        public void Iteration()
+        [Benchmark]
+        public void GetBoardScore()
         {
-            e = new Engine(config);
-            BitBoard.ResetGame();
-        }
-
-        [GlobalSetup]
-        public void Setup()
-        {
-            BitBoard.ResetGame();
+            e.Scorer.GetScore(BitBoard.Board, false, false, false, 5);
         }
 
         [Benchmark]
-        public void GetBestMove()
-        {
-
-            e.GetBestMove(BitBoard, BitBoard.PlayerToMove);
-        }
-
-        [Benchmark]
-        public void GetBestMoveFromFen1()
+        public void GetBoardScore_Fen1()
         {
             BitBoard.LoadFen("r4rk1/ppp2p2/7p/2PqPR1P/3Pb3/2P1Q3/P3B3/5RK1 b - - 0 31");
-            e.GetBestMove(BitBoard, BitBoard.PlayerToMove);
+            e.Scorer.GetScore(BitBoard.Board, false, false, false, 5);
         }
     }
 }

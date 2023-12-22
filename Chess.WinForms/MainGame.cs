@@ -1,5 +1,6 @@
 ﻿using ChessLibrary;
 using ChessLibrary.Evaluation;
+using System.Text;
 
 namespace Chess.WinForms
 {
@@ -42,7 +43,7 @@ namespace Chess.WinForms
                 MaxTimeMilliseconds = 300_000, //300_000,// Int32.MaxValue, //10000,
                 QueenValue = 900,
                 RookValue = 600,
-                StartingDepth = 4,
+                StartingDepth = 1,
                 MaxDepth = null
             };
 
@@ -57,10 +58,10 @@ namespace Chess.WinForms
                 CenterBorderValue = 30,
                 PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 100_000, //Int32.MaxValue, //10000,
+                MaxTimeMilliseconds = 1_000, //Int32.MaxValue, //10000,
                 QueenValue = 900,
                 RookValue = 600,
-                StartingDepth = 4,
+                StartingDepth = 1,
                 //MaxDepth == null
             };
             _whiteEngine = new Engine(whiteConfig)
@@ -70,6 +71,10 @@ namespace Chess.WinForms
             _blackEngine = new Engine(blackConfig);
             _game.ResetGame();
             InitializeComponent();
+
+            txtBlackCpuSeconds.Value = _blackEngine.Config.MaxTimeMilliseconds / 1000;
+            txtWhiteCpuSeconds.Value = _whiteEngine.Config.MaxTimeMilliseconds / 1000;
+
             chessBoard.Game = _game;
             chessBoard.BlackEngine = _blackEngine;
             chessBoard.WhiteEngine = _whiteEngine;
@@ -115,6 +120,22 @@ namespace Chess.WinForms
             {
                 chessBoard.ForceRender();
             }
+        }
+
+        private void txtWhiteCpuSeconds_ValueChanged(object sender, EventArgs e)
+        {
+            _whiteEngine!.Config.MaxTimeMilliseconds = (int)(txtWhiteCpuSeconds.Value * 1000);
+        }
+
+        private void txtBlackCpuSeconds_ValueChanged(object sender, EventArgs e)
+        {
+            _blackEngine!.Config.MaxTimeMilliseconds = (int)(txtBlackCpuSeconds.Value * 1000);
+        }
+
+        private void btnCopyPgn_Click(object sender, EventArgs e)
+        {
+            var pgn = PgnGenerator.GeneratePgnFromMoveList(_game.Moves);
+            Clipboard.SetText(pgn);
         }
     }
 }

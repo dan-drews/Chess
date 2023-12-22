@@ -80,6 +80,11 @@ public class ComplexEvaluator : IEvaluator
         }
         bool isOpponentInCheck = color == Colors.White ? isBlackKingInCheck : isWhiteKingInCheck;
         bool isSelfInCheck = color == Colors.White ? isWhiteKingInCheck : isBlackKingInCheck;
+
+        var stackedPawns = MultipledPawnsInFiles(board, color);
+        score += stackedPawns * Config.StackedPawnPenalty; // the penalty is negative, so add it
+
+
         if (isOpponentInCheck)
         {
             score += Config.OpponentInCheckScore;
@@ -89,6 +94,20 @@ public class ComplexEvaluator : IEvaluator
             score += Config.SelfInCheckScore;
         }
         return score;
+    }
+
+    private static int MultipledPawnsInFiles(IBoard board, Colors color)
+    {
+        var result = 0;
+        for(Files f = Files.A; f <= Files.H; f++)
+        {
+            var pawns = board.PawnsInFile(f, color);
+            if(pawns > 1)
+            {
+                result += pawns;
+            }
+        }
+        return result;
     }
 
     private static int GetTableLocationForPosition(int position, Colors color)

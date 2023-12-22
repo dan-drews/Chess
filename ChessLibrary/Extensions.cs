@@ -25,6 +25,12 @@ namespace ChessLibrary
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int CountSetBits(this ulong n)
+        {
+            return System.Numerics.BitOperations.PopCount(n);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int NumberOfTrailingZeros(this ulong n)
         {
             return System.Numerics.BitOperations.TrailingZeroCount(n);

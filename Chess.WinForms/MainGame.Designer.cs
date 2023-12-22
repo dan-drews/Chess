@@ -38,6 +38,13 @@
             chkBlackCpu = new CheckBox();
             timer1 = new System.Windows.Forms.Timer(components);
             lblTimer = new Label();
+            txtBlackCpuSeconds = new NumericUpDown();
+            lblBlackCpuSeconds = new Label();
+            lblWhiteCpuSeconds = new Label();
+            txtWhiteCpuSeconds = new NumericUpDown();
+            btnCopyPgn = new Button();
+            ((System.ComponentModel.ISupportInitialize)txtBlackCpuSeconds).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)txtWhiteCpuSeconds).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -53,6 +60,7 @@
             // chessBoard
             // 
             chessBoard.IsBlackAi = false;
+            chessBoard.IsCalculationg = false;
             chessBoard.IsWhiteAi = false;
             chessBoard.Location = new Point(0, 0);
             chessBoard.MainGame = null;
@@ -83,7 +91,7 @@
             button1.Name = "button1";
             button1.Size = new Size(75, 23);
             button1.TabIndex = 5;
-            button1.Text = "button1";
+            button1.Text = "Compute";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
@@ -123,11 +131,64 @@
             lblTimer.TabIndex = 8;
             lblTimer.Text = "label2";
             // 
+            // txtBlackCpuSeconds
+            // 
+            txtBlackCpuSeconds.DecimalPlaces = 5;
+            txtBlackCpuSeconds.Location = new Point(187, 873);
+            txtBlackCpuSeconds.Maximum = new decimal(new int[] { 1215752192, 23, 0, 0 });
+            txtBlackCpuSeconds.Name = "txtBlackCpuSeconds";
+            txtBlackCpuSeconds.Size = new Size(120, 23);
+            txtBlackCpuSeconds.TabIndex = 9;
+            txtBlackCpuSeconds.ValueChanged += txtBlackCpuSeconds_ValueChanged;
+            // 
+            // lblBlackCpuSeconds
+            // 
+            lblBlackCpuSeconds.AutoSize = true;
+            lblBlackCpuSeconds.Location = new Point(313, 875);
+            lblBlackCpuSeconds.Name = "lblBlackCpuSeconds";
+            lblBlackCpuSeconds.Size = new Size(108, 15);
+            lblBlackCpuSeconds.TabIndex = 10;
+            lblBlackCpuSeconds.Text = "Black CPU Seconds";
+            // 
+            // lblWhiteCpuSeconds
+            // 
+            lblWhiteCpuSeconds.AutoSize = true;
+            lblWhiteCpuSeconds.Location = new Point(553, 875);
+            lblWhiteCpuSeconds.Name = "lblWhiteCpuSeconds";
+            lblWhiteCpuSeconds.Size = new Size(111, 15);
+            lblWhiteCpuSeconds.TabIndex = 12;
+            lblWhiteCpuSeconds.Text = "White CPU Seconds";
+            // 
+            // txtWhiteCpuSeconds
+            // 
+            txtWhiteCpuSeconds.DecimalPlaces = 5;
+            txtWhiteCpuSeconds.Location = new Point(427, 873);
+            txtWhiteCpuSeconds.Maximum = new decimal(new int[] { 1215752192, 23, 0, 0 });
+            txtWhiteCpuSeconds.Name = "txtWhiteCpuSeconds";
+            txtWhiteCpuSeconds.Size = new Size(120, 23);
+            txtWhiteCpuSeconds.TabIndex = 11;
+            txtWhiteCpuSeconds.ValueChanged += txtWhiteCpuSeconds_ValueChanged;
+            // 
+            // btnCopyPgn
+            // 
+            btnCopyPgn.Location = new Point(684, 874);
+            btnCopyPgn.Name = "btnCopyPgn";
+            btnCopyPgn.Size = new Size(75, 23);
+            btnCopyPgn.TabIndex = 13;
+            btnCopyPgn.Text = "Copy PGN";
+            btnCopyPgn.UseVisualStyleBackColor = true;
+            btnCopyPgn.Click += btnCopyPgn_Click;
+            // 
             // MainGame
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(784, 961);
+            Controls.Add(btnCopyPgn);
+            Controls.Add(lblWhiteCpuSeconds);
+            Controls.Add(txtWhiteCpuSeconds);
+            Controls.Add(lblBlackCpuSeconds);
+            Controls.Add(txtBlackCpuSeconds);
             Controls.Add(lblTimer);
             Controls.Add(chkBlackCpu);
             Controls.Add(chkWhiteCpu);
@@ -139,6 +200,8 @@
             Name = "MainGame";
             Text = "MainGame";
             ResizeEnd += MainGame_ResizeEnd;
+            ((System.ComponentModel.ISupportInitialize)txtBlackCpuSeconds).EndInit();
+            ((System.ComponentModel.ISupportInitialize)txtWhiteCpuSeconds).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -154,5 +217,10 @@
         private CheckBox chkBlackCpu;
         private System.Windows.Forms.Timer timer1;
         private Label lblTimer;
+        private NumericUpDown txtBlackCpuSeconds;
+        private Label lblBlackCpuSeconds;
+        private Label lblWhiteCpuSeconds;
+        private NumericUpDown txtWhiteCpuSeconds;
+        private Button btnCopyPgn;
     }
 }
