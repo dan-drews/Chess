@@ -12,7 +12,7 @@ public class ComplexEvaluator : IEvaluator
         Config = config;
     }
 
-    public (int blackScore, int whiteScore) GetScore(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, bool isStalemate, int totalMoveCount)
+    public (int blackScore, int whiteScore) GetScore(BitBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, bool isStalemate, int totalMoveCount)
     {
         return (GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.Black, isStalemate, totalMoveCount), GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.White, isStalemate, totalMoveCount));
     }
@@ -31,7 +31,7 @@ public class ComplexEvaluator : IEvaluator
         };        
     }
 
-    private int GetScoreInternal(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, Colors color, bool isStalemate, int totalMoveCount)
+    private int GetScoreInternal(BitBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, Colors color, bool isStalemate, int totalMoveCount)
     {
         if (isStalemate)
         {
@@ -96,7 +96,7 @@ public class ComplexEvaluator : IEvaluator
         return score;
     }
 
-    private static int MultipledPawnsInFiles(IBoard board, Colors color)
+    private static int MultipledPawnsInFiles(BitBoard board, Colors color)
     {
         var result = 0;
         for(Files f = Files.A; f <= Files.H; f++)

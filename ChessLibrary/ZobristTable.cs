@@ -40,7 +40,7 @@ namespace ChessLibrary
             return BitConverter.ToUInt64(buffer, 0);
         }
 
-        public static ulong CalculateZobristHash(IBoard board)
+        public static ulong CalculateZobristHash(BitBoard board)
         {
             ulong hash = 0;
             int squareIndex = 0;

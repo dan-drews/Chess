@@ -13,7 +13,7 @@ namespace ChessLibrary
     {
         internal ZobristTable ZobristTable { get; set; } = new ZobristTable();
         public IMoveGenerator Evaluator { get; private set; }
-        public IBoard Board { get; private set; }
+        public BitBoard Board { get; private set; }
 
         public bool WhiteCanLongCastle { get; set; } = true;
         public bool BlackCanLongCastle { get; set; } = true;
@@ -35,7 +35,7 @@ namespace ChessLibrary
 
         public Colors StartingColor { get; set; } = Colors.White;
 
-        private Game(IMoveGenerator evaluator, IBoard board)
+        private Game(IMoveGenerator evaluator, BitBoard board)
         {
             Evaluator = evaluator;
             Board = board;
@@ -48,7 +48,7 @@ namespace ChessLibrary
             {
                 case BoardType.BitBoard:
                     Board = new BitBoard();
-                    Evaluator = new BitBoardMoveGenerator();
+                    Evaluator = new MoveGenerator(); //BitBoardMoveGenerator();
                     break;
                 default:
                     throw new Exception("Board Type Not Supported");
@@ -57,7 +57,7 @@ namespace ChessLibrary
 
         public object Clone()
         {
-            return new Game(Evaluator, (IBoard)Board.Clone())
+            return new Game(Evaluator, (BitBoard)Board.Clone())
             {
                 Moves = new List<MoveWithHash>(Moves),
                 WhiteCanLongCastle = WhiteCanLongCastle,
@@ -299,7 +299,7 @@ namespace ChessLibrary
             _legalNonQuietMoves = null;
         }
 
-        public IBoard AddMove(Move move, bool validate = true)
+        public BitBoard AddMove(Move move, bool validate = true)
         {
             if (move == Move.NullMove)
             {
@@ -409,7 +409,7 @@ namespace ChessLibrary
             }
         }
         
-        public IBoard UndoLastMove()
+        public BitBoard UndoLastMove()
         {
             var move = Moves.Last().Move;
             if (move == Move.NullMove)
