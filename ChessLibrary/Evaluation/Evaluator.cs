@@ -12,7 +12,7 @@ namespace ChessLibrary.Evaluation
             Config = config;
         }
 
-        public (int blackScore, int whiteScore) GetScore(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, bool isStalemate, int totalMoveCount)
+        public (int blackScore, int whiteScore) GetScore(BitBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, bool isStalemate, int totalMoveCount)
         {
             return (GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.Black, isStalemate), GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.White, isStalemate));
         }
@@ -44,7 +44,7 @@ namespace ChessLibrary.Evaluation
             }
         }
 
-        private int GetScoreInternal(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, Colors color, bool isStalemate)
+        private int GetScoreInternal(BitBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, Colors color, bool isStalemate)
         {
             if (isStalemate)
             {

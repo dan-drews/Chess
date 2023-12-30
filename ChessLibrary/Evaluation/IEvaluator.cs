@@ -6,6 +6,6 @@
 
         int GetPieceValue(PieceTypes piece);
 
-        (int blackScore, int whiteScore) GetScore(IBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, bool isStalemate, int totalMoveCount);
+        (int blackScore, int whiteScore) GetScore(BitBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, bool isStalemate, int totalMoveCount);
     }
 }

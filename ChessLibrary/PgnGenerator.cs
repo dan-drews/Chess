@@ -7,7 +7,7 @@ namespace ChessLibrary
 {
     public static class PgnGenerator
     {
-        public static string GeneratePgnFromMoveList(List<MoveWithHash> moves)
+        public static string GeneratePgnFromMoveList(List<Move> moves)
         {
             var game = new Game(Enums.BoardType.BitBoard);
             game.ResetGame();
@@ -20,14 +20,14 @@ namespace ChessLibrary
                 {
                     sb.Append($"{counter}. ");
                 }
-                sb.Append(GetMoveAlgebraicNotation(game, move.Move));
+                sb.Append(GetMoveAlgebraicNotation(game, move));
                 sb.Append(" ");
                 if (!firstMoveOfHalf)
                 {
                     counter++;
                 }
                 firstMoveOfHalf = !firstMoveOfHalf;
-                game.AddMove(move.Move, false);
+                game.AddMove(move, false);
             }
             return sb.ToString();
         }

@@ -6,14 +6,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using ChessLibrary.TableStructures;
 
 namespace ChessLibrary
 {
     public class Game : ICloneable
     {
         internal ZobristTable ZobristTable { get; set; } = new ZobristTable();
-        public IMoveGenerator Evaluator { get; private set; }
-        public IBoard Board { get; private set; }
+        internal RepetititionTracker RepetititionTracker { get; set; } = new RepetititionTracker();
+        public IMoveGenerator MoveGenerator { get; private set; }
+        public BitBoard Board { get; private set; }
 
         public bool WhiteCanLongCastle { get; set; } = true;
         public bool BlackCanLongCastle { get; set; } = true;
@@ -35,20 +37,25 @@ namespace ChessLibrary
 
         public Colors StartingColor { get; set; } = Colors.White;
 
-        private Game(IMoveGenerator evaluator, IBoard board)
+        private Game(IMoveGenerator evaluator, BitBoard board)
         {
-            Evaluator = evaluator;
+            MoveGenerator = evaluator;
             Board = board;
+            MagicSlidingImplementation.InitializeMagicSliders();
         }
 
-        public Game(BoardType boardType)
+        public Game(BoardType boardType, bool useOpeningBook = true)
         {
-            OpeningBookMovePicker.Initialize();
+            MagicSlidingImplementation.InitializeMagicSliders();
+            if (useOpeningBook)
+            {
+                OpeningBookMovePicker.Initialize();
+            }
             switch (boardType)
             {
                 case BoardType.BitBoard:
                     Board = new BitBoard();
-                    Evaluator = new BitBoardMoveGenerator();
+                    MoveGenerator = new MoveGenerator(); //BitBoardMoveGenerator();
                     break;
                 default:
                     throw new Exception("Board Type Not Supported");
@@ -57,15 +64,16 @@ namespace ChessLibrary
 
         public object Clone()
         {
-            return new Game(Evaluator, (IBoard)Board.Clone())
+            return new Game(MoveGenerator, (BitBoard)Board.Clone())
             {
-                Moves = new List<MoveWithHash>(Moves),
+                Moves = new List<Move>(Moves),
                 WhiteCanLongCastle = WhiteCanLongCastle,
                 WhiteCanShortCastle = WhiteCanShortCastle,
                 BlackCanLongCastle = BlackCanLongCastle,
                 BlackCanShortCastle = BlackCanShortCastle,
                 StartingColor = StartingColor,
-                EnPassantFile = EnPassantFile
+                EnPassantFile = EnPassantFile,
+                RepetititionTracker = (RepetititionTracker)RepetititionTracker.Clone()
             };
         }
 
@@ -81,7 +89,7 @@ namespace ChessLibrary
             }
         }
 
-        public List<MoveWithHash> Moves { get; private set; } = new List<MoveWithHash>();
+        public List<Move> Moves { get; private set; } = new List<Move>();
 
 
         public bool IsGameOver
@@ -99,18 +107,25 @@ namespace ChessLibrary
             get
             {
                 GetAllLegalMoves();
+                //var hash = ZobristTable.CalculateZobristHash(Board);
+                //if(Moves.Count(x=> x.Hash == hash) >= 3)
+                //{
+                //    return true;
+                //}
+
                 var hash = ZobristTable.CalculateZobristHash(Board);
-                if(Moves.Count(x=> x.Hash == hash) >= 3)
+                if (RepetititionTracker.Count(hash) >= 3)
                 {
                     return true;
                 }
+
                 if (Moves.Count > 50)
                 {
                     bool isFiftyMoveRule = true;
                     for (int i = 1; i <= 50; i++)
                     {
                         var move = Moves.ElementAt(Moves.Count - i);
-                        if (move.Move.Piece == PieceTypes.Pawn || move.Move.CapturedPiece != null)
+                        if (move.Piece == PieceTypes.Pawn || move.CapturedPiece != null)
                         {
                             isFiftyMoveRule = false;
                             break;
@@ -144,14 +159,14 @@ namespace ChessLibrary
             {
                 if (_legalMoves == null)
                 {
-                    _legalMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle, true);
+                    _legalMoves = MoveGenerator.GetAllLegalMoves(Board, PlayerToMove, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle, true);
                 }
                 return _legalMoves;
             }
 
             if (_legalNonQuietMoves == null)
             {
-                _legalNonQuietMoves = Evaluator.GetAllLegalMoves(Board, PlayerToMove, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle, false);
+                _legalNonQuietMoves = MoveGenerator.GetAllLegalMoves(Board, PlayerToMove, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle, false);
             }
 
             return _legalNonQuietMoves;
@@ -166,7 +181,7 @@ namespace ChessLibrary
             {
                 if (_isBlackKingInCheck == null)
                 {
-                    _isBlackKingInCheck = Evaluator.IsKingInCheck(Board, color);
+                    _isBlackKingInCheck = MoveGenerator.IsKingInCheck(Board, color);
                 }
                 return _isBlackKingInCheck.Value;
             }
@@ -174,7 +189,7 @@ namespace ChessLibrary
             {
                 if (_isWhiteKingInCheck == null)
                 {
-                    _isWhiteKingInCheck = Evaluator.IsKingInCheck(Board, color);
+                    _isWhiteKingInCheck = MoveGenerator.IsKingInCheck(Board, color);
                 }
                 return _isWhiteKingInCheck.Value;
             }
@@ -284,7 +299,7 @@ namespace ChessLibrary
 
         public void ResetGame()
         {
-            Moves = new List<MoveWithHash>();
+            Moves = new List<Move>();
 
             // Clear Board
             for (Files f = Files.A; f <= Files.H; f++)
@@ -299,11 +314,11 @@ namespace ChessLibrary
             _legalNonQuietMoves = null;
         }
 
-        public IBoard AddMove(Move move, bool validate = true)
+        public BitBoard AddMove(Move move, bool validate = true)
         {
             if (move == Move.NullMove)
             {
-                Moves.Add(new MoveWithHash() { Move = move });
+                Moves.Add(move);
                 return Board;
             }
             var startingSquare = Board.GetSquare(move.StartingSquare);
@@ -320,7 +335,7 @@ namespace ChessLibrary
             Move[]? legalMoves = null;
             if (validate)
             {
-                legalMoves = Evaluator.GetAllLegalMoves(Board, startingSquare, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle);
+                legalMoves = MoveGenerator.GetAllLegalMoves(Board, startingSquare, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle);
                 if (legalMoves == null)
                 {
                     Debugger.Break();
@@ -390,15 +405,15 @@ namespace ChessLibrary
                 }
                 Board.MovePiece(move);
                 var hash = ZobristTable.CalculateZobristHash(Board);
-
+                RepetititionTracker.AddHash(hash);
                 if (validate)
                 {
-                    var m = new MoveWithHash(legalMoves![Array.IndexOf(legalMoves, move)], hash);
+                    var m = legalMoves![Array.IndexOf(legalMoves, move)];
                     Moves.Add(m);
                 }
                 else
                 {
-                    var m = new MoveWithHash(move, hash);
+                    var m = move;
                     Moves.Add(m);
                 }
                 return Board;
@@ -409,9 +424,9 @@ namespace ChessLibrary
             }
         }
         
-        public IBoard UndoLastMove()
+        public BitBoard UndoLastMove()
         {
-            var move = Moves.Last().Move;
+            var move = Moves.Last();
             if (move == Move.NullMove)
             {
                 Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
@@ -426,7 +441,7 @@ namespace ChessLibrary
             var initialPiece = move.Piece;
             if (move.Flags == Flag.EnPassantCapture)
             {
-                var moveBeforeLast = Moves.ElementAt(Moves.Count - 2).Move;
+                var moveBeforeLast = Moves.ElementAt(Moves.Count - 2);
                 // Yup, it was en passant.
                 Board.SetPiece(moveBeforeLast.TargetSquare, moveBeforeLast.Piece, moveBeforeLast.Color);
                 Board.SetPiece(move.StartingSquare, initialPiece, move.Color);
@@ -467,7 +482,7 @@ namespace ChessLibrary
             _isBlackKingInCheck = null;
             if (Moves.Count >= 2)
             {
-                var moveBeforeLast = Moves.ElementAt(Moves.Count - 2).Move;
+                var moveBeforeLast = Moves.ElementAt(Moves.Count - 2);
                 var previousStarting = Board.GetSquare(moveBeforeLast.StartingSquare);
                 var previousDestination = Board.GetSquare(moveBeforeLast.TargetSquare);
                 if (moveBeforeLast.Piece == PieceTypes.Pawn &&
@@ -486,11 +501,12 @@ namespace ChessLibrary
             }
                 
             Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
+            RepetititionTracker.RemoveHash();
             WhiteCanShortCastle = true;
             WhiteCanLongCastle = true;
             BlackCanShortCastle = true;
             BlackCanLongCastle = true;
-            foreach (var previousMove in Moves.Where(x => x.Move.Piece == PieceTypes.Rook || x.Move.Piece == PieceTypes.King).Select(x=> x.Move))
+            foreach (var previousMove in Moves.Where(x => x.Piece == PieceTypes.Rook || x.Piece == PieceTypes.King))
             {
                 var previousStarting = Board.GetSquare(previousMove.StartingSquare);
                 if (previousMove.Piece == PieceTypes.King)
@@ -532,9 +548,6 @@ namespace ChessLibrary
                     }
                 }
             }
-
-
-
             return Board;
         }
 

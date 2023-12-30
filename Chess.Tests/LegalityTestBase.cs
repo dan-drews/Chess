@@ -17,7 +17,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.ClearPiece(Files.A, 8);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
+            int count = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(20, count);
         }
 
@@ -35,7 +35,7 @@ namespace Chess.Tests
             for (int i = 0; i < 1_000_000; i++)
             {
                 Game.ResetGame();
-                var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true);
+                var moves = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true);
                 count = moves.Length;
             }
             Assert.AreEqual(20, count);
@@ -49,7 +49,7 @@ namespace Chess.Tests
             for (int i = 0; i < 1; i++)
             {
                 Game.ResetGame();
-                var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true);
+                var moves = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true);
                 count = moves.Length;
                 foreach (var move in moves)
                 {
@@ -65,7 +65,7 @@ namespace Chess.Tests
                 return;
             }
             Game.AddMove(move);
-            var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.PlayerToMove, Game.EnPassantFile, Game.BlackCanLongCastle, Game.BlackCanShortCastle, Game.WhiteCanLongCastle, Game.WhiteCanShortCastle);
+            var moves = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Game.PlayerToMove, Game.EnPassantFile, Game.BlackCanLongCastle, Game.BlackCanShortCastle, Game.WhiteCanLongCastle, Game.WhiteCanShortCastle);
             foreach (var move2 in moves)
             {
                 RecurseMoves(g, move2, depth - 1);
@@ -83,7 +83,7 @@ namespace Chess.Tests
             Game.Board.ClearPiece(Files.C, 1);
             Game.Board.ClearPiece(Files.D, 1);
 
-            var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true);
+            var moves = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true);
             Assert.IsTrue(moves.Any(x => x.Piece == PieceTypes.King && new Square(x.TargetSquare).File == Files.G && new Square(x.TargetSquare).Rank == 1));
             Assert.IsTrue(moves.Any(x => x.Piece == PieceTypes.King && new Square(x.TargetSquare).File == Files.C && new Square(x.TargetSquare).Rank == 1));
             Game.AddMove(moves.First(x => x.Piece == PieceTypes.King && new Square(x.TargetSquare).File == Files.G && new Square(x.TargetSquare).Rank == 1));
@@ -97,7 +97,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.ClearPiece(Files.H, 2);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
+            int count = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(24, count);
         }
 
@@ -106,7 +106,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.SetPiece(Files.D, 4, PieceTypes.Rook, Colors.White);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
+            int count = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(30, count);
         }
 
@@ -115,7 +115,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.SetPiece(Files.D, 4, PieceTypes.Queen, Colors.White);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
+            int count = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(38, count);
         }
 
@@ -124,7 +124,7 @@ namespace Chess.Tests
         {
             Game.ResetGame();
             Game.Board.ClearPiece(Files.E, 2);
-            int count = Game.Evaluator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
+            int count = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Colors.White, null, true, true, true, true).Length;
             Assert.AreEqual(29, count);
         }
 
@@ -154,7 +154,7 @@ namespace Chess.Tests
                     var square = Game.Board.GetSquare(file, rank);
                     if (square?.Piece?.Color == Colors.White)
                     {
-                        var legalMoves = Game.Evaluator.GetAllLegalMoves(Game.Board, square, null, true, true, true, true);
+                        var legalMoves = Game.MoveGenerator.GetAllLegalMoves(Game.Board, square, null, true, true, true, true);
                         count += legalMoves?.Length ?? 0;
                     }
                 }
@@ -171,7 +171,7 @@ namespace Chess.Tests
             Game.Board.SetPiece(Files.H, 8, PieceTypes.King, Colors.Black);
 
 
-            var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.B, 5), null, true, true, true, true);
+            var moves = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.B, 5), null, true, true, true, true);
 
             Assert.AreEqual(14, moves.Length);
         }
@@ -186,7 +186,7 @@ namespace Chess.Tests
             Game.Board.SetPiece(Files.H, 8, PieceTypes.King, Colors.Black);
 
 
-            var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.B, 5), null, true, true, true, true);
+            var moves = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.B, 5), null, true, true, true, true);
 
             Assert.AreEqual(10, moves.Length);
         }
@@ -200,7 +200,7 @@ namespace Chess.Tests
             Game.Board.SetPiece(Files.H, 8, PieceTypes.King, Colors.Black);
 
 
-            var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.H, 3), null, true, true, true, true);
+            var moves = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.H, 3), null, true, true, true, true);
 
             Assert.AreEqual(4, moves.Length);
         }
@@ -226,7 +226,7 @@ namespace Chess.Tests
             Game.AddMove(new Move(Game.Board.GetSquare(Files.D, 8).Square.SquareNumber, Game.Board.GetSquare(Files.C, 7).Square.SquareNumber, Colors.Black, Game.Board.GetSquare(Files.D, 8).Piece.Type, Game.Board.GetSquare(Files.C, 7).Piece.Type));
             Game.AddMove(new Move(Game.Board.GetSquare(Files.E, 4).Square.SquareNumber, Game.Board.GetSquare(Files.E, 5).Square.SquareNumber, Colors.White, Game.Board.GetSquare(Files.E, 4).Piece.Type));
 
-            var moves = Game.Evaluator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.D, 7), null, true, true, true, true);
+            var moves = Game.MoveGenerator.GetAllLegalMoves(Game.Board, Game.Board.GetSquare(Files.D, 7), null, true, true, true, true);
 
             Assert.AreEqual(4, moves.Length);
         }
