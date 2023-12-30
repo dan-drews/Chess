@@ -85,4 +85,5 @@ namespace ChessLibrary
             return hash;
         }
     }
+
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChessLibrary.MoveGeneration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -38,11 +39,6 @@ namespace ChessLibrary
             }
         }
 
-        public BitBoard()
-        {
-
-        }
-
         public void SetupBoard()
         {
             WhitePawns = Starting_White_Pawns;
@@ -78,7 +74,6 @@ namespace ChessLibrary
             bb.BlackKing = BlackKing;
             bb._squares = new SquareState[64];
             Array.Copy(_squares, bb._squares, 64);
-            //bb._squares = _squares;
             return bb;
         }
 
@@ -292,7 +287,7 @@ namespace ChessLibrary
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                possibilities = ValidDiagonalMoves(location, OccupiedSquares);
+                possibilities = SlidingMoveUtilities.ValidDiagonalMoves(this, location, OccupiedSquares);
                 unsafeSpaces |= possibilities;
                 queensAndBishops &= ~i;
                 i = queensAndBishops & ~(queensAndBishops - 1);
@@ -304,7 +299,7 @@ namespace ChessLibrary
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                possibilities = ValidHVMoves(location, OccupiedSquares);
+                possibilities = SlidingMoveUtilities.ValidHVMoves(this, location, OccupiedSquares);
                 unsafeSpaces |= possibilities;
                 queensAndRooks &= ~i;
                 i = queensAndRooks & ~(queensAndRooks - 1);
@@ -405,38 +400,7 @@ namespace ChessLibrary
                 _threatenedSquares = knightSquares | pawnSquares | kingSquares | slidingAttacks;
             }
             return _threatenedSquares.Value;
-        }
-
-        public bool IsKingInCheck(Colors color)
-        {
-            return (Unsafe(color) & (color == Colors.White ? WhiteKing : BlackKing)) > 0;
-        }
-
-        public ulong ValidHVMoves(int index, ulong occupied)
-        {
-            var square = GetSquare(index);
-            ulong binaryS = U1 << index;
-            ulong fileMask = BitBoardConstants.FileMasks[(int)square.Square.File - 1];
-            ulong rankMask = BitBoardConstants.RankMasks[square.Square.Rank - 1];
-            ulong possibilitiesHorizontal = ((occupied & rankMask) - (2 * binaryS)) ^ ((occupied & rankMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
-            ulong possibilitiesVertical = ((occupied & fileMask) - (2 * binaryS)) ^ Extensions.ReverseBits(Extensions.ReverseBits(occupied & fileMask) - 2 * Extensions.ReverseBits(binaryS)); // ((occupied & fileMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
-            return (possibilitiesHorizontal & rankMask) | (possibilitiesVertical & fileMask);
-        }
-
-        public ulong ValidDiagonalMoves(int index, ulong occupied)
-        {
-            var square = GetSquare(index);
-            ulong binaryS = U1 << index;
-
-            ulong diagonalMask = BitBoardConstants.DiagonalMasks[((int)square.Square.File - 1) + (8 - (int)square.Square.Rank)];
-            ulong antidiagonalMask = BitBoardConstants.AntiDiagonalMasks[14 - (square.Square.Rank - 1 + (int)square.Square.File - 1)];
-
-            ulong possibilitiesDiagonal = ((occupied & diagonalMask) - (2 * binaryS)) ^ ((occupied & diagonalMask).ReverseBits() - (2 * binaryS.ReverseBits())).ReverseBits();
-            ulong possibilitiesAntidiagonal = ((occupied & antidiagonalMask) - (2 * binaryS)) ^ Extensions.ReverseBits(Extensions.ReverseBits(occupied & antidiagonalMask) - 2 * Extensions.ReverseBits(binaryS));
-
-
-            return (possibilitiesDiagonal & diagonalMask) | (possibilitiesAntidiagonal & antidiagonalMask);
-        }
+        }      
 
         public void ClearPiece(Files f, int rank)
         {

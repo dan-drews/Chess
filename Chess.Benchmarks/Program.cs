@@ -69,13 +69,13 @@ namespace Chess.Benchmarks
         [Benchmark]
         public void Perft1()
         {
-            BitBoard.Evaluator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            BitBoard.MoveGenerator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
         }
 
         [Benchmark]
         public void Perft2()
         {
-            var moves = BitBoard.Evaluator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            var moves = BitBoard.MoveGenerator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
             foreach (var move in moves)
             {
                 RecurseMoves(BitBoard, move, 1);
@@ -85,7 +85,7 @@ namespace Chess.Benchmarks
         [Benchmark]
         public void Perft3()
         {
-            var moves = BitBoard.Evaluator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            var moves = BitBoard.MoveGenerator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
             foreach (var move in moves)
             {
                 RecurseMoves(BitBoard, move, 2);
@@ -95,7 +95,7 @@ namespace Chess.Benchmarks
         [Benchmark]
         public void Perft4()
         {
-            var moves = BitBoard.Evaluator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            var moves = BitBoard.MoveGenerator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
             foreach (var move in moves)
             {
                 RecurseMoves(BitBoard, move, 3);

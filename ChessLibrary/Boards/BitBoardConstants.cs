@@ -38,6 +38,18 @@ namespace ChessLibrary
             0x8040201008L,               0x80402010L,                       0x804020L,                          0x8040L,                        0x80L
         };
 
+        public static ulong GetDiagonalMask(Square square)
+        {
+            return DiagonalMasks[((int)square.File - 1) + (8 - square.Rank)];
+        }
+
+        public static ulong GetAntiDiagonalMask(Square square)
+        {
+            return AntiDiagonalMasks[14 - (square.Rank - 1 + (int)square.File - 1)];
+        }
+
+        public static ulong Edges = Rank1 | Rank8 | FileA | FileH;
+
         public const ulong Rank8 = 0xFF00000000000000;
         public const ulong Rank1 = 0xFF;
         public const ulong Rank4 = 0x00000000FF000000;

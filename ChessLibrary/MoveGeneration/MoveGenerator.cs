@@ -22,12 +22,12 @@ namespace ChessLibrary.MoveGeneration
 
         public bool IsKingInCheck(BitBoard b, Colors color)
         {
-            return b.IsKingInCheck(color);
+            return (b.Unsafe(color) & (color == Colors.White ? b.WhiteKing : b.BlackKing)) > 0;
         }
 
         public Move[] AllValidMoves(BitBoard b, Colors color, Files? enPassantFile, bool blackCanLongCastle, bool blackCanShortCastle, bool whiteCanLongCastle, bool whiteCanShortCastle, bool ignoreCheck = false, bool includeQuietMoves = true)
         {
-            var result = ValidPawnMoves(b,color, enPassantFile, includeQuietMoves, false);
+            var result = ValidPawnMoves(b, color, enPassantFile, includeQuietMoves, false);
             ValidKnightMoves(b, color, includeQuietMoves, result, false);
             ValidRookMoves(b, color, includeQuietMoves, result, false);
             ValidBishopMoves(b, color, includeQuietMoves, result, false);
@@ -76,7 +76,6 @@ namespace ChessLibrary.MoveGeneration
                     resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Flag.PromoteToKnight));
                     resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Flag.PromoteToBishop));
                     resultActual.Add(new Move(m.StartingSquare, m.TargetSquare, color, m.Piece, m.CapturedPiece, Flag.PromoteToRook));
-
                 }
                 else
                 {
@@ -201,7 +200,7 @@ namespace ChessLibrary.MoveGeneration
 
         private static void ValidKnightMoves(BitBoard b, Colors color, bool includeQuietMoves, List<Move> result, bool includeSelfChecks)
         {
-            ulong currentKnights = color == Colors.Black ?b.BlackKnights :b.WhiteKnights;
+            ulong currentKnights = color == Colors.Black ? b.BlackKnights : b.WhiteKnights;
             ulong i = currentKnights & ~(currentKnights - 1);
             var notMyPieces = ~b.GetAllPieces(color);
             ulong possibility;
@@ -250,8 +249,18 @@ namespace ChessLibrary.MoveGeneration
 
         private static void ValidBishopMoves(BitBoard b, Colors color, bool includeQuietMoves, List<Move> result, bool includeSelfChecks)
         {
+#if MAGIC_SLIDING_BITBOARDS
+            var m = MagicSlidingImplementation.ValidBishopMoves(b, color, includeQuietMoves);
+            foreach (var move in m)
+            {
+                if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
+                {
+                    result.Add(move);
+                }
+            }
+#else
             var occupied = b.OccupiedSquares;
-            var currentSquares = color == Colors.White ? b.WhiteBishops :b.BlackBishops;
+            var currentSquares = color == Colors.White ? b.WhiteBishops : b.BlackBishops;
             var notMyPieces = ~b.GetAllPieces(color);
 
             ulong i = currentSquares & ~(currentSquares - 1);
@@ -259,7 +268,7 @@ namespace ChessLibrary.MoveGeneration
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                possibility = b.ValidDiagonalMoves(location, occupied) & notMyPieces;
+                possibility = SlidingMoveUtilities.ValidDiagonalMoves(b, location, occupied) & notMyPieces;
                 ulong j = possibility & ~(possibility - 1);
                 while (j != 0)
                 {
@@ -279,10 +288,23 @@ namespace ChessLibrary.MoveGeneration
                 currentSquares &= ~i;
                 i = currentSquares & ~(currentSquares - 1);
             }
+#endif
         }
 
         private static void ValidRookMoves(BitBoard b, Colors color, bool includeQuietMoves, List<Move> result, bool includeSelfChecks)
         {
+
+#if MAGIC_SLIDING_BITBOARDS
+            var m = MagicSlidingImplementation.ValidRookMoves(b, color, includeQuietMoves);
+            foreach (var move in m)
+            {
+                if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
+                {
+                    result.Add(move);
+                }
+            }
+#else
+
             var occupied = b.OccupiedSquares;
             var currentSquares = color == Colors.White ?b.WhiteRooks :b.BlackRooks;
             var notMyPieces = ~b.GetAllPieces(color);
@@ -292,7 +314,7 @@ namespace ChessLibrary.MoveGeneration
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                possibility = b.ValidHVMoves(location, occupied) & notMyPieces;
+                possibility = SlidingMoveUtilities.ValidHVMoves(b, location, occupied) & notMyPieces;
                 ulong j = possibility & ~(possibility - 1);
                 while (j != 0)
                 {
@@ -312,19 +334,31 @@ namespace ChessLibrary.MoveGeneration
                 currentSquares &= ~i;
                 i = currentSquares & ~(currentSquares - 1);
             }
+#endif
         }
 
         private static void ValidQueenMoves(BitBoard b, Colors color, bool includeQuietMoves, List<Move> result, bool includeSelfChecks)
         {
+#if MAGIC_SLIDING_BITBOARDS
+            var m = MagicSlidingImplementation.ValidQueenMoves(b, color, includeQuietMoves);
+            foreach (var move in m)
+            {
+                if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
+                {
+                    result.Add(move);
+                }
+            }
+#else
+
             var occupied = b.OccupiedSquares;
-            var currentQueen = color == Colors.White ?b.WhiteQueens :b.BlackQueens;
+            var currentQueen = color == Colors.White ? b.WhiteQueens : b.BlackQueens;
             var notMyPieces = ~b.GetAllPieces(color);
             ulong i = currentQueen & ~(currentQueen - 1);
             ulong possibility;
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                possibility = (b.ValidHVMoves(location, occupied) | b.ValidDiagonalMoves(location, occupied)) & notMyPieces;
+                possibility = (SlidingMoveUtilities.ValidHVMoves(b, location, occupied) | SlidingMoveUtilities.ValidDiagonalMoves(b, location, occupied)) & notMyPieces;
                 ulong j = possibility & ~(possibility - 1);
                 while (j != 0)
                 {
@@ -344,11 +378,12 @@ namespace ChessLibrary.MoveGeneration
                 currentQueen &= ~i;
                 i = currentQueen & ~(currentQueen - 1);
             }
+#endif
         }
 
         private static void ValidKingMoves(BitBoard b, Colors color, bool canLongCastle, bool canShortCastle, bool includeQuietMoves, List<Move> result, bool includeSelfChecks)
         {
-            ulong currentKing = color == Colors.Black ?b.BlackKing :b.WhiteKing;
+            ulong currentKing = color == Colors.Black ? b.BlackKing : b.WhiteKing;
             var notMyPieces = ~b.GetAllPieces(color);
             ulong possibility;
             int location = currentKing.NumberOfTrailingZeros();

@@ -164,13 +164,18 @@ namespace ChessLibrary
 
             var isCheckmate = game.IsCheckmate;
             var isStalemate = game.IsStalemate;
+            var isRepetition = game.RepetititionTracker.IsRepetition(hash, true);
 
-
-            if (currentDepth == 0 || isCheckmate || isStalemate)
+            if (currentDepth == 0 || isCheckmate || isStalemate || isRepetition)
             {
-                if (game.Moves.Last().Move != Move.NullMove)
+                if (game.Moves.Last() != Move.NullMove)
                 {
                     nodesEvaluated++;
+                }
+                if (isRepetition)
+                {
+                    zobristTable[currentDepth].TryAdd(hash, 0);
+                    return 0;
                 }
                 if (isStalemate)
                 {

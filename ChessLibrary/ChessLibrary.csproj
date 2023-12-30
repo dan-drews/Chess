@@ -5,7 +5,12 @@
     <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
     <UserSecretsId>a1da7cbd-44c6-4b74-85cd-d81a7bb46d1c</UserSecretsId>
+	  <DefineConstants>$(DefineConstants);MAGIC_SLIDING_BITBOARDS;DEBUG_MOVES;</DefineConstants>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 
   <ItemGroup>
     <PackageReference Include="morelinq" Version="3.3.2" />

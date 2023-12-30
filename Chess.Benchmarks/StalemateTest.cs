@@ -38,7 +38,7 @@ namespace Chess.Benchmarks
             BitBoard.ResetGame();
             for (int i = 0; i < 10; i++)
             {
-                var moves = BitBoard.Evaluator.GetAllLegalMoves(BitBoard.Board, BitBoard.PlayerToMove, null, true, true, true, true);
+                var moves = BitBoard.MoveGenerator.GetAllLegalMoves(BitBoard.Board, BitBoard.PlayerToMove, null, true, true, true, true);
                 BitBoard.AddMove(moves.First(), false);
             }
         }
@@ -47,7 +47,7 @@ namespace Chess.Benchmarks
         [MinIterationTime(500)]
         public void Baseline()
         {
-            var lastMove = BitBoard.Moves.Last().Move;
+            var lastMove = BitBoard.Moves.Last();
             BitBoard.UndoLastMove();
             BitBoard.AddMove(lastMove, false);
         }
@@ -68,7 +68,7 @@ namespace Chess.Benchmarks
         [MinIterationTime(500)]
         public void StalemateDetection()
         {
-            var lastMove = BitBoard.Moves.Last().Move;
+            var lastMove = BitBoard.Moves.Last();
             BitBoard.UndoLastMove();
             BitBoard.AddMove(lastMove, false);
             var a = BitBoard.IsStalemate;
@@ -78,7 +78,7 @@ namespace Chess.Benchmarks
         [MinIterationTime(500)]
         public void CheckmateDetection()
         {
-            var lastMove = BitBoard.Moves.Last().Move;
+            var lastMove = BitBoard.Moves.Last();
             BitBoard.UndoLastMove();
             BitBoard.AddMove(lastMove, false);
             var a = BitBoard.IsCheckmate;

@@ -19,22 +19,6 @@ namespace ChessLibrary
         public const int PawnTwoForward = 8;
     }
 
-    public struct MoveWithHash
-    {
-        public Move Move { get; set; }
-        public ulong Hash { get; set; }
-        public MoveWithHash(Move move, ulong hash)
-        {
-            Move = move;
-            Hash = hash;
-        }
-
-        public MoveWithHash()
-        {
-
-        }
-    }
-
     public struct Move
     {
 

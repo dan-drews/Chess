@@ -7,6 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <DefineConstants>$(DefineConstants);MAGIC_SLIDING_BITBOARDS;DEBUG_MOVES;</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
