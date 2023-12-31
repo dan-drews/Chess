@@ -76,6 +76,8 @@
             };
         }
 
+        private Piece() { }
+
         public PieceTypes Type { get; set; }
         public Colors Color { get; set; }
 

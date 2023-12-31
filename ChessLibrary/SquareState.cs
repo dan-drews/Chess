@@ -29,11 +29,7 @@ namespace ChessLibrary
                     {
                         SquareStateMap[i][(int)c][(int)pieceType - 1] = new SquareState(new Square(i))
                         {
-                            Piece = new Piece()
-                            {
-                                Color = c,
-                                Type = pieceType
-                            }
+                            Piece = Piece.Pieces[(int)c][(int)pieceType - 1]
                         };
                     }
                 }

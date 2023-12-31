@@ -115,18 +115,14 @@ namespace ChessLibrary
         {
             get
             {
-                switch (Flags)
+                return Flags switch
                 {
-                    case Flag.PromoteToQueen:
-                        return PieceTypes.Queen;
-                    case Flag.PromoteToKnight:
-                        return PieceTypes.Knight;
-                    case Flag.PromoteToBishop:
-                        return PieceTypes.Bishop;
-                    case Flag.PromoteToRook:
-                        return PieceTypes.Rook;
-                }
-                return null;
+                    Flag.PromoteToQueen => PieceTypes.Queen,
+                    Flag.PromoteToKnight => PieceTypes.Knight,
+                    Flag.PromoteToBishop => PieceTypes.Bishop,
+                    Flag.PromoteToRook => PieceTypes.Rook,
+                    _ => null
+                };
             }
         }
     }
