@@ -293,9 +293,8 @@ namespace ChessLibrary.MoveGeneration
             return blockerBitboards;
         }
 
-        public static List<Move> ValidBishopMoves(BitBoard b, Colors color, bool includeQuietMoves)
+        public static void ValidBishopMoves(BitBoard b, Colors color, bool includeQuietMoves, List<Move> result)
         {
-            var result = new List<Move>(12 * 4);
             var bishops = color == Colors.White ? b.WhiteBishops : b.BlackBishops;
             ulong i = bishops & ~(bishops - 1);
             while (i != 0)
@@ -308,12 +307,10 @@ namespace ChessLibrary.MoveGeneration
                 bishops &= ~i;
                 i = bishops & ~(bishops - 1);
             }
-            return result;
         }
 
-        public static List<Move> ValidRookMoves(BitBoard b, Colors color, bool includeQuietMoves)
+        public static void ValidRookMoves(BitBoard b, Colors color, bool includeQuietMoves, List<Move> result)
         {
-            var result = new List<Move>(12 * 4);
             var rooks = color == Colors.White ? b.WhiteRooks : b.BlackRooks;
             ulong i = rooks & ~(rooks - 1);
             while (i != 0)
@@ -329,12 +326,10 @@ namespace ChessLibrary.MoveGeneration
                 rooks &= ~i;
                 i = rooks & ~(rooks - 1);
             }
-            return result;
         }
 
-        public static List<Move> ValidQueenMoves(BitBoard b, Colors color, bool includeQuietMoves)
+        public static void ValidQueenMoves(BitBoard b, Colors color, bool includeQuietMoves, List<Move> result)
         {
-            var result = new List<Move>(12 * 4);
             var queens = color == Colors.White ? b.WhiteQueens : b.BlackQueens;
             ulong i = queens & ~(queens - 1);
             while (i != 0)
@@ -354,7 +349,6 @@ namespace ChessLibrary.MoveGeneration
                 queens &= ~i;
                 i = queens & ~(queens - 1);
             }
-            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
