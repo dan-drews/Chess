@@ -7,14 +7,36 @@ namespace ChessLibrary.Evaluation
     public class Evaluator : IEvaluator
     {
         public ScorerConfiguration Config { get; set; }
+
         public Evaluator(ScorerConfiguration config)
         {
             Config = config;
         }
 
-        public (int blackScore, int whiteScore) GetScore(BitBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, bool isStalemate, int totalMoveCount)
+        public (int blackScore, int whiteScore) GetScore(
+            BitBoard board,
+            bool isWhiteKingInCheck,
+            bool isBlackKingInCheck,
+            bool isStalemate,
+            int totalMoveCount
+        )
         {
-            return (GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.Black, isStalemate), GetScoreInternal(board, isWhiteKingInCheck, isBlackKingInCheck, Colors.White, isStalemate));
+            return (
+                GetScoreInternal(
+                    board,
+                    isWhiteKingInCheck,
+                    isBlackKingInCheck,
+                    Colors.Black,
+                    isStalemate
+                ),
+                GetScoreInternal(
+                    board,
+                    isWhiteKingInCheck,
+                    isBlackKingInCheck,
+                    Colors.White,
+                    isStalemate
+                )
+            );
         }
 
         public int GetPieceValue(PieceTypes piece)
@@ -44,7 +66,13 @@ namespace ChessLibrary.Evaluation
             }
         }
 
-        private int GetScoreInternal(BitBoard board, bool isWhiteKingInCheck, bool isBlackKingInCheck, Colors color, bool isStalemate)
+        private int GetScoreInternal(
+            BitBoard board,
+            bool isWhiteKingInCheck,
+            bool isBlackKingInCheck,
+            Colors color,
+            bool isStalemate
+        )
         {
             if (isStalemate)
             {
@@ -64,15 +92,18 @@ namespace ChessLibrary.Evaluation
                         {
                             score += Config.CenterSquareValue;
                         }
-                        else if ((rank == 6 || rank == 3) && f >= Files.C && f <= Files.F ||
-                                 (f == Files.C || f == Files.F) && (rank == 5 || rank == 4))
+                        else if (
+                            (rank == 6 || rank == 3) && f >= Files.C && f <= Files.F
+                            || (f == Files.C || f == Files.F) && (rank == 5 || rank == 4)
+                        )
                         {
                             score += Config.CenterBorderValue;
                         }
                     }
                 }
             }
-            bool isOpponentInCheck = color == Colors.White ? isBlackKingInCheck : isWhiteKingInCheck;
+            bool isOpponentInCheck =
+                color == Colors.White ? isBlackKingInCheck : isWhiteKingInCheck;
             bool isSelfInCheck = color == Colors.White ? isWhiteKingInCheck : isBlackKingInCheck;
             if (isOpponentInCheck)
             {

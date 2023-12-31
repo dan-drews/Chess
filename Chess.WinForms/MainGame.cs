@@ -1,6 +1,6 @@
-﻿using ChessLibrary;
+﻿using System.Text;
+using ChessLibrary;
 using ChessLibrary.Evaluation;
-using System.Text;
 
 namespace Chess.WinForms
 {
@@ -64,10 +64,7 @@ namespace Chess.WinForms
                 StartingDepth = 1,
                 //MaxDepth == null
             };
-            _whiteEngine = new Engine(whiteConfig)
-            {
-                UseNullMovePruning = false,
-            };
+            _whiteEngine = new Engine(whiteConfig) { UseNullMovePruning = false, };
             _blackEngine = new Engine(blackConfig);
             _game.ResetGame();
             InitializeComponent();
@@ -81,7 +78,8 @@ namespace Chess.WinForms
             chessBoard.MainGame = this;
             chessBoard.OnMoveCalculated = (evaluationResult) =>
             {
-                label1.Text = $"Depth: {evaluationResult.depth}, Score: {evaluationResult.node?.Score}, Nodes Evaluated: {Engine.nodesEvaluated}, NonQuiet Nodes Evaulated: {Engine.nonQuietDepthNodesEvaluated}, Zobrist Hash Matches : {Engine.zobristMatches}";
+                label1.Text =
+                    $"Depth: {evaluationResult.depth}, Score: {evaluationResult.node?.Score}, Nodes Evaluated: {Engine.nodesEvaluated}, NonQuiet Nodes Evaulated: {Engine.nonQuietDepthNodesEvaluated}, Zobrist Hash Matches : {Engine.zobristMatches}";
             };
             timer1.Start();
         }

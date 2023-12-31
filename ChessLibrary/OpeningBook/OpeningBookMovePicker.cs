@@ -1,18 +1,19 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace ChessLibrary.OpeningBook
 {
     public class OpeningBookMovePicker
     {
-
-        private static Dictionary<ulong, List<Move>> _zobristMoves = new Dictionary<ulong, List<Move>>();
+        private static Dictionary<ulong, List<Move>> _zobristMoves =
+            new Dictionary<ulong, List<Move>>();
         private static bool _isInitialized = false;
         private static Random _random = new Random(DateTime.Now.Millisecond);
+
         public static void Initialize()
         {
             if (_isInitialized)
@@ -27,8 +28,10 @@ namespace ChessLibrary.OpeningBook
                 Directory.CreateDirectory("book");
             }
             if (File.Exists(filePath))
-            {                
-                _zobristMoves = JsonConvert.DeserializeObject<Dictionary<ulong, List<Move>>>(File.ReadAllText(filePath))!;
+            {
+                _zobristMoves = JsonConvert.DeserializeObject<Dictionary<ulong, List<Move>>>(
+                    File.ReadAllText(filePath)
+                )!;
                 return;
             }
 
@@ -62,7 +65,7 @@ namespace ChessLibrary.OpeningBook
                 return null;
             }
             var moves = _zobristMoves[hash];
-            if(moves.Count == 1)
+            if (moves.Count == 1)
             {
                 return null; // Don't pick it if it's the only variation
             }

@@ -75,9 +75,10 @@ namespace ChessLibrary
         {
             var legalMoves = game.GetAllLegalMoves();
             var targetSquare = new Square(move.TargetSquare);
-            return legalMoves.Where(x => x.Piece == move.Piece)
-                                           .Where(x => x.TargetSquare == move.TargetSquare)
-                                           .Where(x => x.StartingSquare != move.StartingSquare);
+            return legalMoves
+                .Where(x => x.Piece == move.Piece)
+                .Where(x => x.TargetSquare == move.TargetSquare)
+                .Where(x => x.StartingSquare != move.StartingSquare);
         }
 
         private static string GetDuplicateMoveAlgebraicNotation(Game game, Move move)
@@ -91,34 +92,44 @@ namespace ChessLibrary
             var targetFile = targetSquare.File;
             var targetRank = targetSquare.Rank;
 
-            var sameRankMoves = duplicateMoves.Where(x => new Square(x.StartingSquare).Rank == startingRank);
-            var sameFileMoves = duplicateMoves.Where(x => new Square(x.StartingSquare).File == startingFile);
+            var sameRankMoves = duplicateMoves.Where(
+                x => new Square(x.StartingSquare).Rank == startingRank
+            );
+            var sameFileMoves = duplicateMoves.Where(
+                x => new Square(x.StartingSquare).File == startingFile
+            );
 
             if (sameRankMoves.Any())
             {
-                if(!sameFileMoves.Any())
+                if (!sameFileMoves.Any())
                 {
-                    return GetPieceIndentifier(move) + startingFile.ToString().ToLower() + GetTargetSquareFromMove(move);
+                    return GetPieceIndentifier(move)
+                        + startingFile.ToString().ToLower()
+                        + GetTargetSquareFromMove(move);
                 }
-                return GetPieceIndentifier(move) + startingFile.ToString().ToLower() + startingRank.ToString() + GetTargetSquareFromMove(move);                
+                return GetPieceIndentifier(move)
+                    + startingFile.ToString().ToLower()
+                    + startingRank.ToString()
+                    + GetTargetSquareFromMove(move);
             }
-            return GetPieceIndentifier(move) + startingRank.ToString().ToLower() + GetTargetSquareFromMove(move);
+            return GetPieceIndentifier(move)
+                + startingRank.ToString().ToLower()
+                + GetTargetSquareFromMove(move);
         }
 
         private static string GetTargetSquareFromMove(Move move)
         {
             var targetSquare = new Square(move.TargetSquare);
-            if(move.CapturedPiece == null)
+            if (move.CapturedPiece == null)
             {
                 return targetSquare.File.ToString().ToLower() + targetSquare.Rank.ToString();
             }
             return "x" + targetSquare.File.ToString().ToLower() + targetSquare.Rank.ToString();
-
         }
 
         private static string GetStandardNotation(Move move)
         {
-            return GetPieceIndentifier(move) + GetTargetSquareFromMove(move);            
+            return GetPieceIndentifier(move) + GetTargetSquareFromMove(move);
         }
 
         // TODO figure out how to handle check detection in this. Do I need to track it on the move after it's made?
@@ -134,16 +145,26 @@ namespace ChessLibrary
                 {
                     return targetSquare.File.ToString().ToLower() + targetSquare.Rank.ToString();
                 }
-                return targetSquare.File.ToString().ToLower() + targetSquare.Rank.ToString() + "=" + GetPromotedPieceName(move);
+                return targetSquare.File.ToString().ToLower()
+                    + targetSquare.Rank.ToString()
+                    + "="
+                    + GetPromotedPieceName(move);
             }
 
             if (move.PromotedType == null)
             {
-                return startingSquare.File.ToString().ToLower() + "x" + targetSquare.File.ToString().ToLower() + targetSquare.Rank.ToString();
+                return startingSquare.File.ToString().ToLower()
+                    + "x"
+                    + targetSquare.File.ToString().ToLower()
+                    + targetSquare.Rank.ToString();
             }
 
-            return startingSquare.File.ToString().ToLower() + "x" + targetSquare.File.ToString().ToLower() + targetSquare.Rank.ToString() + "=" + GetPromotedPieceName(move);
-
+            return startingSquare.File.ToString().ToLower()
+                + "x"
+                + targetSquare.File.ToString().ToLower()
+                + targetSquare.Rank.ToString()
+                + "="
+                + GetPromotedPieceName(move);
         }
 
         private static string GetPromotedPieceName(Move move)

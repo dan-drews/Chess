@@ -31,7 +31,7 @@ namespace ChessLibrary.MoveGeneration
             var table = new ulong?[(int)Math.Pow(2, magic.Shift)];
             foreach (var value in values)
             {
-                var key = (value.blockers * magic.MagicNumber) >> (64- magic.Shift);
+                var key = (value.blockers * magic.MagicNumber) >> (64 - magic.Shift);
                 if (table[key] == null)
                 {
                     table[key] = value.moves;

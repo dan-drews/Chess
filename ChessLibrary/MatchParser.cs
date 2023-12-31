@@ -62,13 +62,16 @@ namespace ChessLibrary
             var targetSquareString = isCheck || isCheckmate ? move[^3..^1] : move[^2..];
             var targetSquare = GetSquareFromMove(targetSquareString);
             var legalMoves = game.GetAllLegalMoves();
-            IEnumerable<Move> candidateMoves = legalMoves.Where(x => x.Piece == piece)
-                                                         .Where(x => x.TargetSquare == targetSquare)
-                                                         .Where(x => isCapture ? x.CapturedPiece != null : x.CapturedPiece == null);
+            IEnumerable<Move> candidateMoves = legalMoves
+                .Where(x => x.Piece == piece)
+                .Where(x => x.TargetSquare == targetSquare)
+                .Where(x => isCapture ? x.CapturedPiece != null : x.CapturedPiece == null);
 
             if (candidateMoves.Count() > 1)
             {
-                bool hasFullSquareQualifier = isCapture ? move.Split('x').Length == 3 : move.IndexOf(targetSquareString) == 3;
+                bool hasFullSquareQualifier = isCapture
+                    ? move.Split('x').Length == 3
+                    : move.IndexOf(targetSquareString) == 3;
                 if (hasFullSquareQualifier)
                 {
                     var startingSquareString = move[1..2];
@@ -80,17 +83,20 @@ namespace ChessLibrary
                     var rankOrFile = move[1].ToString();
                     if (int.TryParse(rankOrFile, out int rank))
                     {
-                        candidateMoves = candidateMoves.Where(x => new Square(x.StartingSquare).Rank == rank);
+                        candidateMoves = candidateMoves.Where(
+                            x => new Square(x.StartingSquare).Rank == rank
+                        );
                     }
                     else
                     {
                         var file = GetFileFromString(move[1]);
-                        candidateMoves = candidateMoves.Where(x => new Square(x.StartingSquare).File == file);
+                        candidateMoves = candidateMoves.Where(
+                            x => new Square(x.StartingSquare).File == file
+                        );
                     }
                 }
             }
             return candidateMoves.First();
-
         }
 
         private static PieceTypes GetPieceType(char key)
@@ -122,7 +128,6 @@ namespace ChessLibrary
 
             char? startingColumn = null;
 
-
             string targetSquareString;
             if (isPromotion)
             {
@@ -136,47 +141,46 @@ namespace ChessLibrary
             {
                 targetSquareString = move[^2..];
             }
-            
 
             var legalMoves = game.GetAllLegalMoves();
             IEnumerable<Move> candidateMoves = legalMoves.Where(x => x.Piece == PieceTypes.Pawn);
             var destinationSquare = GetSquareFromMove(targetSquareString);
-            candidateMoves = candidateMoves.Where(x => x.TargetSquare == destinationSquare)
-                                           .Where(x => x.PromotedType == promotedPiece)
-                                           .Where(x => isCapture ? x.CapturedPiece != null : x.CapturedPiece == null);
-            
-            if(candidateMoves.Count() > 1)
+            candidateMoves = candidateMoves
+                .Where(x => x.TargetSquare == destinationSquare)
+                .Where(x => x.PromotedType == promotedPiece)
+                .Where(x => isCapture ? x.CapturedPiece != null : x.CapturedPiece == null);
+
+            if (candidateMoves.Count() > 1)
             {
                 startingColumn = move[0];
-                candidateMoves = candidateMoves.Where(x => new Square(x.StartingSquare).File == GetFileFromString(startingColumn));
+                candidateMoves = candidateMoves.Where(
+                    x => new Square(x.StartingSquare).File == GetFileFromString(startingColumn)
+                );
             }
             return candidateMoves.First();
             //throw new Exception("Unable to find proper move");
         }
 
-        private Files GetFileFromString(char? file) => file switch
-        {
-            'a' => Files.A,
-            'b' => Files.B,
-            'c' => Files.C,
-            'd' => Files.D,
-            'e' => Files.E,
-            'f' => Files.F,
-            'g' => Files.G,
-            'h' => Files.H,
-            _ => throw new NotImplementedException()
-        };
+        private Files GetFileFromString(char? file) =>
+            file switch
+            {
+                'a' => Files.A,
+                'b' => Files.B,
+                'c' => Files.C,
+                'd' => Files.D,
+                'e' => Files.E,
+                'f' => Files.F,
+                'g' => Files.G,
+                'h' => Files.H,
+                _ => throw new NotImplementedException()
+            };
 
         private int GetSquareFromMove(string move)
         {
             Files file = GetFileFromString(move[0]);
 
             int rank = int.Parse(move[1].ToString());
-            var sq = new Square
-            {
-                File = file,
-                Rank = rank,
-            };
+            var sq = new Square { File = file, Rank = rank, };
             return sq.SquareNumber;
         }
     }

@@ -6,72 +6,25 @@
 
         static Piece()
         {
-            Pieces = new Piece[][] {
+            Pieces = new Piece[][]
+            {
                 new Piece[]
                 {
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.Pawn
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.Rook
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.Knight
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.Bishop
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.Queen
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.White,
-                        Type = PieceTypes.King
-                    }
+                    new Piece() { Color = Colors.White, Type = PieceTypes.Pawn },
+                    new Piece() { Color = Colors.White, Type = PieceTypes.Rook },
+                    new Piece() { Color = Colors.White, Type = PieceTypes.Knight },
+                    new Piece() { Color = Colors.White, Type = PieceTypes.Bishop },
+                    new Piece() { Color = Colors.White, Type = PieceTypes.Queen },
+                    new Piece() { Color = Colors.White, Type = PieceTypes.King }
                 },
                 new Piece[]
                 {
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Pawn
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Rook
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Knight
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Bishop
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.Queen
-                    },
-                    new Piece()
-                    {
-                        Color = Colors.Black,
-                        Type = PieceTypes.King
-                    }
+                    new Piece() { Color = Colors.Black, Type = PieceTypes.Pawn },
+                    new Piece() { Color = Colors.Black, Type = PieceTypes.Rook },
+                    new Piece() { Color = Colors.Black, Type = PieceTypes.Knight },
+                    new Piece() { Color = Colors.Black, Type = PieceTypes.Bishop },
+                    new Piece() { Color = Colors.Black, Type = PieceTypes.Queen },
+                    new Piece() { Color = Colors.Black, Type = PieceTypes.King }
                 }
             };
         }

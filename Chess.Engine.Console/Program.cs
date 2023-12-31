@@ -1,14 +1,12 @@
-﻿using ChessLibrary;
+﻿using System.Security.Cryptography.X509Certificates;
+using ChessLibrary;
 using ChessLibrary.Evaluation;
-using System.Security.Cryptography.X509Certificates;
 
 public class Program
 {
-
     private static Game _game;
     private static Engine? _whiteEngine;
     private static Engine? _blackEngine;
-
 
     public static void Main(string[] args)
     {
@@ -61,7 +59,7 @@ public class Program
         {
             var command = Console.ReadLine();
             File.AppendAllLines("logs\\args.txt", new[] { command });
-            if(command == "uci")
+            if (command == "uci")
             {
                 Respond("id name DanerdBot");
                 Respond("id author Dan");
@@ -77,7 +75,7 @@ public class Program
                 if (commandParts[1] == "startpos")
                 {
                     _game.ResetGame();
-                    for(int i = 3; i < commandParts.Length; i++)
+                    for (int i = 3; i < commandParts.Length; i++)
                     {
                         var move = commandParts[i];
                         var moves = _game.GetAllLegalMoves();
@@ -86,10 +84,18 @@ public class Program
                         var endingFile = Enum.Parse<Files>(move[2].ToString(), true);
                         var endingRank = int.Parse(move[3].ToString());
 
-                        var startingSquare = new Square { File = startingFile, Rank = startingRank };
+                        var startingSquare = new Square
+                        {
+                            File = startingFile,
+                            Rank = startingRank
+                        };
                         var destinationSquare = new Square { File = endingFile, Rank = endingRank };
 
-                        var moveToMake = moves.First(x=> x.StartingSquare == startingSquare.SquareNumber && x.TargetSquare == destinationSquare.SquareNumber);
+                        var moveToMake = moves.First(
+                            x =>
+                                x.StartingSquare == startingSquare.SquareNumber
+                                && x.TargetSquare == destinationSquare.SquareNumber
+                        );
                         _game.AddMove(moveToMake, false);
                     }
                 }
@@ -98,7 +104,7 @@ public class Program
             if (command!.StartsWith("go"))
             {
                 Engine e;
-                if(_game.PlayerToMove == Colors.White)
+                if (_game.PlayerToMove == Colors.White)
                 {
                     e = _whiteEngine;
                 }
@@ -109,11 +115,11 @@ public class Program
                 var result = e.GetBestMove(_game, _game.PlayerToMove);
                 var startingSquare = new Square(result.node.Move.Value.StartingSquare);
                 var endingSquare = new Square(result.node.Move.Value.TargetSquare);
-                Respond($"bestmove {startingSquare.File.ToString().ToLower()}{startingSquare.Rank}{endingSquare.File.ToString().ToLower()}{endingSquare.Rank}");
+                Respond(
+                    $"bestmove {startingSquare.File.ToString().ToLower()}{startingSquare.Rank}{endingSquare.File.ToString().ToLower()}{endingSquare.Rank}"
+                );
             }
-
         }
-
     }
 
     private static void Respond(string response)
@@ -121,5 +127,4 @@ public class Program
         File.AppendAllLines("logs\\args.txt", new[] { $"     {response}" });
         Console.WriteLine(response);
     }
-
 }

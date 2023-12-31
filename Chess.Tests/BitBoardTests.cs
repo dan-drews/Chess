@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ChessLibrary;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Chess.Tests
 {

@@ -1,12 +1,14 @@
-﻿using ChessLibrary.MoveGeneration;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using ChessLibrary.MoveGeneration;
 using static ChessLibrary.BitBoardConstants;
+
 [assembly: InternalsVisibleTo("Chess.Tests")]
+
 namespace ChessLibrary
 {
     public class BitBoard : ICloneable
@@ -81,16 +83,24 @@ namespace ChessLibrary
         {
             get
             {
-                return WhitePawns | BlackPawns | WhiteRooks | BlackRooks | WhiteKnights | BlackKnights | WhiteBishops | BlackBishops | WhiteQueens | BlackQueens | WhiteKing | BlackKing;
+                return WhitePawns
+                    | BlackPawns
+                    | WhiteRooks
+                    | BlackRooks
+                    | WhiteKnights
+                    | BlackKnights
+                    | WhiteBishops
+                    | BlackBishops
+                    | WhiteQueens
+                    | BlackQueens
+                    | WhiteKing
+                    | BlackKing;
             }
         }
 
         public ulong EmptySquares
         {
-            get
-            {
-                return ~OccupiedSquares;
-            }
+            get { return ~OccupiedSquares; }
         }
 
         internal int GetPositionFromFileAndRank(Files file, int rank)
@@ -121,13 +131,12 @@ namespace ChessLibrary
         {
             ulong squareMask = (U1 << position);
             ulong occupiedSquares = OccupiedSquares;
-            
 
             if ((occupiedSquares & squareMask) == 0)
             {
                 return _emptySquareStates[position];
             }
-            
+
             // Casting from enum to int is taking a lot of CPU power
             // So we are avoiding using enum values here
 
@@ -187,13 +196,13 @@ namespace ChessLibrary
             }
 
             // Castle
-            if(move.Flags == Flag.ShortCastle)
+            if (move.Flags == Flag.ShortCastle)
             {
                 var targetSquare = new Square(move.TargetSquare);
-                ClearPiece(Files.H, targetSquare.Rank);                
+                ClearPiece(Files.H, targetSquare.Rank);
                 SetPiece(Files.F, targetSquare.Rank, PieceTypes.Rook, move.Color);
             }
-            if(move.Flags == Flag.LongCastle)
+            if (move.Flags == Flag.LongCastle)
             {
                 // Long Castle
                 var targetSquare = new Square(move.TargetSquare);
@@ -220,9 +229,19 @@ namespace ChessLibrary
             switch (color)
             {
                 case Colors.Black:
-                    return BlackPawns | BlackRooks | BlackKnights | BlackBishops | BlackQueens | BlackKing;
+                    return BlackPawns
+                        | BlackRooks
+                        | BlackKnights
+                        | BlackBishops
+                        | BlackQueens
+                        | BlackKing;
                 case Colors.White:
-                    return WhitePawns | WhiteRooks | WhiteKnights | WhiteBishops | WhiteQueens | WhiteKing;
+                    return WhitePawns
+                        | WhiteRooks
+                        | WhiteKnights
+                        | WhiteBishops
+                        | WhiteQueens
+                        | WhiteKing;
                 default:
                     throw new Exception("");
             }
@@ -230,6 +249,7 @@ namespace ChessLibrary
 
         private ulong? _whiteUnsafe = null;
         private ulong? _blackUnsafe = null;
+
         public ulong Unsafe(Colors color)
         {
             if (color == Colors.White && _whiteUnsafe != null)
@@ -282,19 +302,25 @@ namespace ChessLibrary
             }
 
             // Bishop/queen
-            ulong queensAndBishops = color == Colors.White ? BlackBishops | BlackQueens : WhiteBishops | WhiteQueens;
+            ulong queensAndBishops =
+                color == Colors.White ? BlackBishops | BlackQueens : WhiteBishops | WhiteQueens;
             i = queensAndBishops & ~(queensAndBishops - 1);
             while (i != 0)
             {
                 int location = i.NumberOfTrailingZeros();
-                possibilities = SlidingMoveUtilities.ValidDiagonalMoves(this, location, OccupiedSquares);
+                possibilities = SlidingMoveUtilities.ValidDiagonalMoves(
+                    this,
+                    location,
+                    OccupiedSquares
+                );
                 unsafeSpaces |= possibilities;
                 queensAndBishops &= ~i;
                 i = queensAndBishops & ~(queensAndBishops - 1);
             }
 
             // Rook Queen
-            ulong queensAndRooks = color == Colors.White ? BlackRooks | BlackQueens : WhiteRooks | WhiteQueens;
+            ulong queensAndRooks =
+                color == Colors.White ? BlackRooks | BlackQueens : WhiteRooks | WhiteQueens;
             i = queensAndRooks & ~(queensAndRooks - 1);
             while (i != 0)
             {
@@ -337,9 +363,10 @@ namespace ChessLibrary
             }
 
             return unsafeSpaces;
-        }        
+        }
 
         private ulong? _threatenedSquares = null;
+
         public ulong GetThreatenedSquares(Colors color)
         {
             if (_threatenedSquares == null)
@@ -353,18 +380,30 @@ namespace ChessLibrary
                 var enemyRooks = color == Colors.White ? BlackRooks : WhiteRooks;
                 var enemyKnights = color == Colors.White ? BlackKnights : WhiteKnights;
 
-                var knightSquares = enemyKnights << 6 | enemyKnights >> 6 |
-                                    enemyKnights << 10 | enemyKnights >> 10 |
-                                    enemyKnights << 15 | enemyKnights >> 15 |
-                                    enemyKnights << 17 | enemyKnights >> 17;
+                var knightSquares =
+                    enemyKnights << 6
+                    | enemyKnights >> 6
+                    | enemyKnights << 10
+                    | enemyKnights >> 10
+                    | enemyKnights << 15
+                    | enemyKnights >> 15
+                    | enemyKnights << 17
+                    | enemyKnights >> 17;
 
-                var pawnSquares = color == Colors.White ? enemyPawns >> 9 | enemyPawns >> 7
-                                                        : enemyPawns << 9 | enemyPawns << 7;
+                var pawnSquares =
+                    color == Colors.White
+                        ? enemyPawns >> 9 | enemyPawns >> 7
+                        : enemyPawns << 9 | enemyPawns << 7;
 
-                var kingSquares = enemyKings >> 1 | enemyKings << 1 |
-                                  enemyKings >> 7 | enemyKings << 7 |
-                                  enemyKings >> 8 | enemyKings << 8 |
-                                  enemyKings >> 9 | enemyKings << 9;
+                var kingSquares =
+                    enemyKings >> 1
+                    | enemyKings << 1
+                    | enemyKings >> 7
+                    | enemyKings << 7
+                    | enemyKings >> 8
+                    | enemyKings << 8
+                    | enemyKings >> 9
+                    | enemyKings << 9;
 
                 var slidingAttacks = (ulong)0;
                 foreach (var rank in BitBoardConstants.RankMasks)
@@ -400,7 +439,7 @@ namespace ChessLibrary
                 _threatenedSquares = knightSquares | pawnSquares | kingSquares | slidingAttacks;
             }
             return _threatenedSquares.Value;
-        }      
+        }
 
         public void ClearPiece(Files f, int rank)
         {
@@ -505,8 +544,6 @@ namespace ChessLibrary
                     }
                     break;
             }
-
         }
-
     }
 }

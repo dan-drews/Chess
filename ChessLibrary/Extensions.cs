@@ -21,7 +21,7 @@ namespace ChessLibrary
                 PieceTypes.Queen => "Q",
                 PieceTypes.Rook => "R",
                 _ => ""
-            };            
+            };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -36,7 +36,6 @@ namespace ChessLibrary
             return System.Numerics.BitOperations.TrailingZeroCount(n);
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ReverseBits(this ulong i)
         {
@@ -48,6 +47,5 @@ namespace ChessLibrary
             i = (i << 48) | ((i & 0xffff0000L) << 16) | ((i >> 16) & 0xffff0000L) | (i >> 48);
             return i;
         }
-
     }
 }

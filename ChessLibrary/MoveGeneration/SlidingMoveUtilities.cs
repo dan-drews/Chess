@@ -14,8 +14,15 @@ namespace ChessLibrary.MoveGeneration
             ulong binaryS = BitBoardConstants.U1 << index;
             ulong fileMask = BitBoardConstants.FileMasks[(int)square.Square.File - 1];
             ulong rankMask = BitBoardConstants.RankMasks[square.Square.Rank - 1];
-            ulong possibilitiesHorizontal = ((occupied & rankMask) - (2 * binaryS)) ^ ((occupied & rankMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
-            ulong possibilitiesVertical = ((occupied & fileMask) - (2 * binaryS)) ^ Extensions.ReverseBits(Extensions.ReverseBits(occupied & fileMask) - 2 * Extensions.ReverseBits(binaryS)); // ((occupied & fileMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
+            ulong possibilitiesHorizontal =
+                ((occupied & rankMask) - (2 * binaryS))
+                ^ ((occupied & rankMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
+            ulong possibilitiesVertical =
+                ((occupied & fileMask) - (2 * binaryS))
+                ^ Extensions.ReverseBits(
+                    Extensions.ReverseBits(occupied & fileMask)
+                        - 2 * Extensions.ReverseBits(binaryS)
+                ); // ((occupied & fileMask).ReverseBits() - 2 * binaryS.ReverseBits()).ReverseBits();
             return (possibilitiesHorizontal & rankMask) | (possibilitiesVertical & fileMask);
         }
 
@@ -28,10 +35,20 @@ namespace ChessLibrary.MoveGeneration
             ulong diagonalMask = BitBoardConstants.GetDiagonalMask(square.Square);
             ulong antidiagonalMask = BitBoardConstants.GetAntiDiagonalMask(square.Square);
 
-            ulong possibilitiesDiagonal = ((occupied & diagonalMask) - (2 * binaryS)) ^ ((occupied & diagonalMask).ReverseBits() - (2 * binaryS.ReverseBits())).ReverseBits();
-            ulong possibilitiesAntidiagonal = ((occupied & antidiagonalMask) - (2 * binaryS)) ^ Extensions.ReverseBits(Extensions.ReverseBits(occupied & antidiagonalMask) - 2 * Extensions.ReverseBits(binaryS));
+            ulong possibilitiesDiagonal =
+                ((occupied & diagonalMask) - (2 * binaryS))
+                ^ (
+                    (occupied & diagonalMask).ReverseBits() - (2 * binaryS.ReverseBits())
+                ).ReverseBits();
+            ulong possibilitiesAntidiagonal =
+                ((occupied & antidiagonalMask) - (2 * binaryS))
+                ^ Extensions.ReverseBits(
+                    Extensions.ReverseBits(occupied & antidiagonalMask)
+                        - 2 * Extensions.ReverseBits(binaryS)
+                );
 
-            return (possibilitiesDiagonal & diagonalMask) | (possibilitiesAntidiagonal & antidiagonalMask);
+            return (possibilitiesDiagonal & diagonalMask)
+                | (possibilitiesAntidiagonal & antidiagonalMask);
         }
     }
 }

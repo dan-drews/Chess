@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace ChessLibrary
 {
@@ -21,26 +21,23 @@ namespace ChessLibrary
 
     public struct Move
     {
-
         public static Move NullMove = new Move(0);
         public static Move EmptyMove = new Move(uint.MaxValue);
 
         private uint _moveValue;
 
-        public uint MoveValue { get { return _moveValue; }  set { _moveValue = value; } }
+        public uint MoveValue
+        {
+            get { return _moveValue; }
+            set { _moveValue = value; }
+        }
 
-        const uint COLOR_MASK =
-            0b00000000010000000000000000000000;
-        const uint FLAG_MASK =
-            0b00000000001111000000000000000000;
-        const uint START_SQUARE_MASK =
-            0b00000000000000111111000000000000;
-        const uint DEST_SQUARE_MASK =
-            0b00000000000000000000111111000000;
-        const uint PIECE_MASK =
-            0b00000000000000000000000000111000;
-        const uint CAPTURE_PIECE_MASK =
-            0b00000000000000000000000000000111;
+        const uint COLOR_MASK = 0b00000000010000000000000000000000;
+        const uint FLAG_MASK = 0b00000000001111000000000000000000;
+        const uint START_SQUARE_MASK = 0b00000000000000111111000000000000;
+        const uint DEST_SQUARE_MASK = 0b00000000000000000000111111000000;
+        const uint PIECE_MASK = 0b00000000000000000000000000111000;
+        const uint CAPTURE_PIECE_MASK = 0b00000000000000000000000000000111;
 
         const int COLOR_SHIFT = 22;
         const int FLAG_SHIFT = 18;
@@ -88,26 +85,32 @@ namespace ChessLibrary
 
         [JsonIgnore]
         public int TargetSquare => (int)((_moveValue & DEST_SQUARE_MASK) >> DEST_SHIFT);
+
         [JsonIgnore]
         public int StartingSquare => (int)((_moveValue & START_SQUARE_MASK) >> START_SHIFT);
+
         [JsonIgnore]
         public int Flags => (int)((_moveValue & FLAG_MASK) >> FLAG_SHIFT);
+
         [JsonIgnore]
         public Colors Color => (Colors)((_moveValue & COLOR_MASK) >> COLOR_SHIFT);
+
         [JsonIgnore]
         public PieceTypes Piece => (PieceTypes)((_moveValue & PIECE_MASK) >> PIECE_SHIFT);
+
         [JsonIgnore]
         public PieceTypes? CapturedPiece =>
             (_moveValue & CAPTURE_PIECE_MASK) == 0
                 ? null
                 : (PieceTypes)(_moveValue & CAPTURE_PIECE_MASK);
 
-        public static bool SameMove(Move a, Move b) 
+        public static bool SameMove(Move a, Move b)
         {
             return a._moveValue == b._moveValue;
         }
 
         public static bool operator ==(Move lhs, Move rhs) => lhs._moveValue == rhs._moveValue;
+
         public static bool operator !=(Move lhs, Move rhs) => lhs._moveValue != rhs._moveValue;
 
         [JsonIgnore]

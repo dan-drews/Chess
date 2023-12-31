@@ -1,16 +1,16 @@
-﻿using ChessLibrary;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ChessLibrary;
 
 namespace Chess.Perft
 {
     class Program
     {
         const string path = @"C:\Users\dandr\Documents\peft.txt";
+
         static void Main(string[] args)
         {
-
             for (int depth = 0; depth <= 8; depth++)
             {
                 var g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
@@ -20,7 +20,10 @@ namespace Chess.Perft
                     var result = new PerftResult();
                     long count = GetData(g, depth);
                     Console.WriteLine($"Depth: {depth}, Count; {count}");
-                    System.IO.File.AppendAllLines(path, new string[] { $"Depth: {depth}, Count; {count}" });
+                    System.IO.File.AppendAllLines(
+                        path,
+                        new string[] { $"Depth: {depth}, Count; {count}" }
+                    );
                 }
                 catch (Exception ex)
                 {
@@ -30,12 +33,10 @@ namespace Chess.Perft
                 }
             }
             Console.ReadLine();
-
         }
 
         static long GetData(Game g, int depth)
         {
-
             if (depth == 0)
             {
                 return 1;
@@ -85,7 +86,6 @@ namespace Chess.Perft
                 //}
             }
             return result;
-
         }
 
         public class PerftResult

@@ -1,15 +1,14 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using ChessLibrary;
 using ChessLibrary.Evaluation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Chess.Benchmarks
 {
-
     [SimpleJob(RuntimeMoniker.Net80)]
     [RPlotExporter]
     [MemoryDiagnoser(true)]
@@ -69,13 +68,29 @@ namespace Chess.Benchmarks
         [Benchmark]
         public void Perft1()
         {
-            BitBoard.MoveGenerator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            BitBoard.MoveGenerator.GetAllLegalMoves(
+                BitBoard.Board,
+                Colors.White,
+                null,
+                true,
+                true,
+                true,
+                true
+            );
         }
 
         [Benchmark]
         public void Perft2()
         {
-            var moves = BitBoard.MoveGenerator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            var moves = BitBoard.MoveGenerator.GetAllLegalMoves(
+                BitBoard.Board,
+                Colors.White,
+                null,
+                true,
+                true,
+                true,
+                true
+            );
             foreach (var move in moves)
             {
                 RecurseMoves(BitBoard, move, 1);
@@ -85,7 +100,15 @@ namespace Chess.Benchmarks
         [Benchmark]
         public void Perft3()
         {
-            var moves = BitBoard.MoveGenerator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            var moves = BitBoard.MoveGenerator.GetAllLegalMoves(
+                BitBoard.Board,
+                Colors.White,
+                null,
+                true,
+                true,
+                true,
+                true
+            );
             foreach (var move in moves)
             {
                 RecurseMoves(BitBoard, move, 2);
@@ -95,14 +118,20 @@ namespace Chess.Benchmarks
         [Benchmark]
         public void Perft4()
         {
-            var moves = BitBoard.MoveGenerator.GetAllLegalMoves(BitBoard.Board, Colors.White, null, true, true, true, true);
+            var moves = BitBoard.MoveGenerator.GetAllLegalMoves(
+                BitBoard.Board,
+                Colors.White,
+                null,
+                true,
+                true,
+                true,
+                true
+            );
             foreach (var move in moves)
             {
                 RecurseMoves(BitBoard, move, 3);
             }
         }
-
-
 
         [Benchmark]
         public void ZobristHash()
@@ -113,7 +142,9 @@ namespace Chess.Benchmarks
         [Benchmark]
         public void LoadFen()
         {
-            BitBoard.LoadFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+            BitBoard.LoadFen(
+                "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
+            );
         }
 
         void RecurseMoves(Game g, Move move, int depth)
@@ -131,11 +162,11 @@ namespace Chess.Benchmarks
             BitBoard.UndoLastMove();
         }
         //public List<Move> GetAllMovesBitBoard() => BitBoard.GetAllLegalMoves();
-
     }
 
     public class Program
     {
-        public static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+        public static void Main(string[] args) =>
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
     }
 }

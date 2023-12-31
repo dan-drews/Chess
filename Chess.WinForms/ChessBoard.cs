@@ -1,5 +1,4 @@
-﻿using ChessLibrary;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,6 +8,7 @@ using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ChessLibrary;
 using static ChessLibrary.Engine;
 
 namespace Chess.WinForms
@@ -102,11 +102,15 @@ namespace Chess.WinForms
                 ForceRender();
                 if (_moves != null)
                 {
-                    var matchingMoveQuery = _moves.Where(x => x.TargetSquare == squareTarget.SquareNumber);
+                    var matchingMoveQuery = _moves.Where(
+                        x => x.TargetSquare == squareTarget.SquareNumber
+                    );
                     if (matchingMoveQuery.Any())
                     {
                         Game.AddMove(matchingMoveQuery.First());
-                        SoundPlayer sound = new SoundPlayer(Path.Combine("Assets","move-self.wav"));
+                        SoundPlayer sound = new SoundPlayer(
+                            Path.Combine("Assets", "move-self.wav")
+                        );
                         sound.Play();
                         if (this.MainGame != null)
                         {
@@ -139,12 +143,13 @@ namespace Chess.WinForms
                     ForceRender();
                 }
             }
-
         }
 
         private void RenderMovesForSelectedSquare(Square squareTarget)
         {
-            var moves = Game.GetAllLegalMoves().Where(x => x.StartingSquare == squareTarget.SquareNumber).ToList();
+            var moves = Game.GetAllLegalMoves()
+                .Where(x => x.StartingSquare == squareTarget.SquareNumber)
+                .ToList();
             if (moves.Any())
             {
                 RenderMoves(moves);
@@ -192,11 +197,15 @@ namespace Chess.WinForms
             FillCircle(formGraphics, brush, x, y, 10);
         }
 
-        public void FillCircle(Graphics g, Brush brush,
-                                  float centerX, float centerY, float radius)
+        public void FillCircle(Graphics g, Brush brush, float centerX, float centerY, float radius)
         {
-            g.FillEllipse(brush, centerX - radius, centerY - radius,
-                          radius + radius, radius + radius);
+            g.FillEllipse(
+                brush,
+                centerX - radius,
+                centerY - radius,
+                radius + radius,
+                radius + radius
+            );
         }
 
         private void ChessBoard_OnPaint(object sender, PaintEventArgs e)
@@ -222,11 +231,7 @@ namespace Chess.WinForms
 
                     var squareColor = isLightSquare ? _whiteColor : _blackColor;
 
-                    var sq = new Square()
-                    {
-                        File = (Files)file,
-                        Rank = rank,
-                    };
+                    var sq = new Square() { File = (Files)file, Rank = rank, };
 
                     if (Game.Moves.Any())
                     {
@@ -251,7 +256,15 @@ namespace Chess.WinForms
 
             var transposedFile = file - 1;
             var transposedRank = 8 - rank;
-            formGraphics.FillRectangle(brush, new Rectangle(transposedFile * SQUARE_SIZE, transposedRank * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE));
+            formGraphics.FillRectangle(
+                brush,
+                new Rectangle(
+                    transposedFile * SQUARE_SIZE,
+                    transposedRank * SQUARE_SIZE,
+                    SQUARE_SIZE,
+                    SQUARE_SIZE
+                )
+            );
         }
 
         private void RenderPieces(PaintEventArgs e)
@@ -270,11 +283,13 @@ namespace Chess.WinForms
                         pictureBox.ClientSize = bitmapSize;
                         pictureBox.BackColor = Color.Transparent;
 
-
                         var transposedFile = file - 1;
                         var transposedRank = 8 - rank;
 
-                        var location = new Point((transposedFile * SQUARE_SIZE) + (SQUARE_SIZE / 4), (transposedRank * SQUARE_SIZE) + (SQUARE_SIZE / 4));
+                        var location = new Point(
+                            (transposedFile * SQUARE_SIZE) + (SQUARE_SIZE / 4),
+                            (transposedRank * SQUARE_SIZE) + (SQUARE_SIZE / 4)
+                        );
 
                         e.Graphics.DrawImage(image, location);
 
@@ -310,7 +325,7 @@ namespace Chess.WinForms
             var position = e.Location;
             var rank = 8 - (position.Y / SQUARE_SIZE);
             var file = position.X / SQUARE_SIZE + 1;
-            return new Square() { File = (Files)file, Rank = rank };// ((Files)file, rank);
+            return new Square() { File = (Files)file, Rank = rank }; // ((Files)file, rank);
         }
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
@@ -320,7 +335,10 @@ namespace Chess.WinForms
             e.Result = result;
         }
 
-        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void backgroundWorker1_RunWorkerCompleted(
+            object sender,
+            RunWorkerCompletedEventArgs e
+        )
         {
             IsCalculationg = false;
             (NodeInfo? node, int Depth) result = ((NodeInfo?, int))e.Result;
@@ -330,7 +348,6 @@ namespace Chess.WinForms
                 var move = result.node.Move;
                 if (!Game.IsGameOver)
                 {
-
                     Game.AddMove(move!.Value);
                     SoundPlayer sound = new SoundPlayer(Path.Combine("Assets", "move-self.wav"));
                     sound.Play();
@@ -353,8 +370,8 @@ namespace Chess.WinForms
 
         private bool IsCurrentPlayerAnAi()
         {
-            return (Game.PlayerToMove == Colors.White && IsWhiteAi) || (Game.PlayerToMove == Colors.Black && IsBlackAi);
+            return (Game.PlayerToMove == Colors.White && IsWhiteAi)
+                || (Game.PlayerToMove == Colors.Black && IsBlackAi);
         }
-
     }
 }

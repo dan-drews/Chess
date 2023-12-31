@@ -14,7 +14,7 @@ namespace ChessLibrary.TableStructures
         public bool IsRepetition(ulong hash, bool hasMoveBeenMade)
         {
             var starting = hasMoveBeenMade ? Index - 2 : Index - 1;
-            for(int i = starting; i >= 0; i--)
+            for (int i = starting; i >= 0; i--)
             {
                 if (Hashes[i] == hash)
                 {

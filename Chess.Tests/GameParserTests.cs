@@ -1,10 +1,10 @@
-﻿using ChessLibrary;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ChessLibrary;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Chess.Tests
 {
@@ -16,7 +16,7 @@ namespace Chess.Tests
         {
             var games = System.IO.File.ReadAllText(System.IO.Path.Combine("GameList", "Games.txt"));
             var parser = new MatchParser();
-            foreach (var game in games.Split("\n").Where(x=> x.Length > 0))
+            foreach (var game in games.Split("\n").Where(x => x.Length > 0))
             {
                 Game g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
                 g.ResetGame();
@@ -32,6 +32,5 @@ namespace Chess.Tests
                 //}
             }
         }
-
     }
 }

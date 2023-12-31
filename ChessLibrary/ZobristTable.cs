@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace ChessLibrary
 {
@@ -23,7 +23,7 @@ namespace ChessLibrary
                 return;
             }
             Random r = new Random();
-            for(int i = 0; i < 12; i++)
+            for (int i = 0; i < 12; i++)
             {
                 for (int j = 0; j < 64; j++)
                 {
@@ -73,7 +73,7 @@ namespace ChessLibrary
                                 pieceIndex = 5;
                                 break;
                         }
-                        if(piece.Color == Colors.Black)
+                        if (piece.Color == Colors.Black)
                         {
                             pieceIndex += 6;
                         }
@@ -85,5 +85,4 @@ namespace ChessLibrary
             return hash;
         }
     }
-
 }

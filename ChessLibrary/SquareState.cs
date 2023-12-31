@@ -8,7 +8,6 @@ namespace ChessLibrary
 {
     public class SquareState
     {
-
         public static SquareState[][][] SquareStateMap;
 
         private SquareState() { }
@@ -25,9 +24,11 @@ namespace ChessLibrary
                 {
                     SquareStateMap[i][(int)c] = new SquareState[6];
                     Array pieces = Enum.GetValues(typeof(PieceTypes));
-                    foreach(PieceTypes pieceType in pieces)
+                    foreach (PieceTypes pieceType in pieces)
                     {
-                        SquareStateMap[i][(int)c][(int)pieceType - 1] = new SquareState(new Square(i))
+                        SquareStateMap[i][(int)c][(int)pieceType - 1] = new SquareState(
+                            new Square(i)
+                        )
                         {
                             Piece = Piece.Pieces[(int)c][(int)pieceType - 1]
                         };
@@ -38,14 +39,8 @@ namespace ChessLibrary
 
         public Square Square
         {
-            get
-            {
-                return GetSquare(_valueInternal);
-            }
-            set
-            {
-                _valueInternal = (ushort)((~(63 << 6) & _valueInternal) | GetSquare(value));
-            }
+            get { return GetSquare(_valueInternal); }
+            set { _valueInternal = (ushort)((~(63 << 6) & _valueInternal) | GetSquare(value)); }
         }
         public Piece? Piece
         {
@@ -57,7 +52,8 @@ namespace ChessLibrary
                 }
                 var color = (_valueInternal & 0b1000) == 0 ? 0 : 1;
                 var piece = (_valueInternal & 0b111) - 1;
-                return Piece.Pieces[color][piece]; ;
+                return Piece.Pieces[color][piece];
+                ;
             }
             set
             {
