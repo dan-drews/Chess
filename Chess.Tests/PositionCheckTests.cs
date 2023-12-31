@@ -130,7 +130,7 @@ namespace Chess.Tests
                 var result = RecurseMoves(depth - 1, false);//, depth == 3 && move.StartingSquare == 7 && move.TargetSquare == 4);
                 if (isDebugging)
                 {
-                    Console.WriteLine($"{_game.Board.GetSquare(move.StartingSquare).Square.File}{_game.Board.GetSquare(move.StartingSquare).Square.Rank}{_game.Board.GetSquare(move.TargetSquare).Square.File}{_game.Board.GetSquare(move.TargetSquare).Square.Rank} {result.moves}");
+                   // Console.WriteLine($"{_game.Board.GetSquare(move.StartingSquare).Square.File}{_game.Board.GetSquare(move.StartingSquare).Square.Rank}{_game.Board.GetSquare(move.TargetSquare).Square.File}{_game.Board.GetSquare(move.TargetSquare).Square.Rank} {result.moves}");
                 }
                 total.moves += result.moves;
                 total.caputres += result.caputres;

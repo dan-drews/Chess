@@ -91,7 +91,7 @@ namespace ChessLibrary
                     }
                     else if (_wasEvaluationCancelled)
                     {
-                        Console.Write("Cancelled");
+                        //Console.Write("Cancelled");
                         //result = previousResult;
                     }
 

@@ -250,12 +250,14 @@ namespace ChessLibrary.MoveGeneration
         private static void ValidBishopMoves(BitBoard b, Colors color, bool includeQuietMoves, List<Move> result, bool includeSelfChecks)
         {
 #if MAGIC_SLIDING_BITBOARDS
-            var m = MagicSlidingImplementation.ValidBishopMoves(b, color, includeQuietMoves);
-            foreach (var move in m)
+            var existingMoveCount = result.Count;
+            MagicSlidingImplementation.ValidBishopMoves(b, color, includeQuietMoves, result);
+            for(int i = result.Count - 1; i >= existingMoveCount; i--)
             {
-                if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
+                var move = result[i];
+                if (!includeSelfChecks && ResultsInOwnCheck(b, move, color))
                 {
-                    result.Add(move);
+                    result.RemoveAt(i);
                 }
             }
 #else
@@ -295,12 +297,14 @@ namespace ChessLibrary.MoveGeneration
         {
 
 #if MAGIC_SLIDING_BITBOARDS
-            var m = MagicSlidingImplementation.ValidRookMoves(b, color, includeQuietMoves);
-            foreach (var move in m)
+            var existingMoveCount = result.Count;
+            MagicSlidingImplementation.ValidRookMoves(b, color, includeQuietMoves, result);
+            for (int i = result.Count - 1; i >= existingMoveCount; i--)
             {
-                if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
+                var move = result[i];
+                if (!includeSelfChecks && ResultsInOwnCheck(b, move, color))
                 {
-                    result.Add(move);
+                    result.RemoveAt(i);
                 }
             }
 #else
@@ -340,12 +344,14 @@ namespace ChessLibrary.MoveGeneration
         private static void ValidQueenMoves(BitBoard b, Colors color, bool includeQuietMoves, List<Move> result, bool includeSelfChecks)
         {
 #if MAGIC_SLIDING_BITBOARDS
-            var m = MagicSlidingImplementation.ValidQueenMoves(b, color, includeQuietMoves);
-            foreach (var move in m)
+            var existingMoveCount = result.Count;
+            MagicSlidingImplementation.ValidQueenMoves(b, color, includeQuietMoves, result);
+            for (int i = result.Count - 1; i >= existingMoveCount; i--)
             {
-                if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
+                var move = result[i];
+                if (!includeSelfChecks && ResultsInOwnCheck(b, move, color))
                 {
-                    result.Add(move);
+                    result.RemoveAt(i);
                 }
             }
 #else
