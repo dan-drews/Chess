@@ -11,28 +11,42 @@ namespace Chess.Perft
 
         static void Main(string[] args)
         {
-            for (int depth = 0; depth <= 8; depth++)
+            //for (int depth = 0; depth <= 8; depth++)
+            //{
+            //    var g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
+            //    try
+            //    {
+            //        g.ResetGame();
+            //        var result = new PerftResult();
+            //        long count = GetData(g, depth);
+            //        Console.WriteLine($"Depth: {depth}, Count; {count}");
+            //        System.IO.File.AppendAllLines(
+            //            path,
+            //            new string[] { $"Depth: {depth}, Count; {count}" }
+            //        );
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        //var moves = g.Moves.Select(x => $"{x.StartingSquare.File} {x.StartingSquare.Rank} {x.DestinationSquare.File} {x.DestinationSquare.Rank}\r\n").ToList();
+            //        //moves.Add($"Exception: {ex}");
+            //        //System.IO.File.AppendAllLines(path, moves);
+            //    }
+            //}
+            //Console.ReadLine();
+            while (true)
             {
+                Console.WriteLine("Provide Depth: ");
+                var command = Console.ReadLine();
+                if (command == "clear")
+                {
+                    ChessLibrary.Perft.ClearPerftTable();
+                    continue;
+                }
+                int depth = int.Parse(command);
                 var g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
-                try
-                {
-                    g.ResetGame();
-                    var result = new PerftResult();
-                    long count = GetData(g, depth);
-                    Console.WriteLine($"Depth: {depth}, Count; {count}");
-                    System.IO.File.AppendAllLines(
-                        path,
-                        new string[] { $"Depth: {depth}, Count; {count}" }
-                    );
-                }
-                catch (Exception ex)
-                {
-                    //var moves = g.Moves.Select(x => $"{x.StartingSquare.File} {x.StartingSquare.Rank} {x.DestinationSquare.File} {x.DestinationSquare.Rank}\r\n").ToList();
-                    //moves.Add($"Exception: {ex}");
-                    //System.IO.File.AppendAllLines(path, moves);
-                }
+                g.ResetGame();
+                Console.WriteLine(ChessLibrary.Perft.ExecutePerft(g, depth, true));
             }
-            Console.ReadLine();
         }
 
         static long GetData(Game g, int depth)

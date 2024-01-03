@@ -8,10 +8,15 @@ namespace ChessLibrary
 {
     public class ZobristTable
     {
-        private static ulong[,] _table = new ulong[12, 64];
+        private static ulong[,] _table = new ulong[20, 64];
+        const int COLOR_TO_MOVE_INDEX = 12;
+        const int EN_PASSANT_INDEX = 13;
+        const int CASTLING_INDEX = 14;
 
         static ZobristTable()
         {
+            // Generating a zobrist table is very fast, so we could easily do it at runtime.
+            // However, that breaks the opening book moveset since they're hash based
             var filePath = Path.Combine("zobrist", "zobrist.json");
             if (!Directory.Exists("zobrist"))
             {
@@ -23,7 +28,7 @@ namespace ChessLibrary
                 return;
             }
             Random r = new Random();
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < 20; i++)
             {
                 for (int j = 0; j < 64; j++)
                 {
@@ -40,7 +45,7 @@ namespace ChessLibrary
             return BitConverter.ToUInt64(buffer, 0);
         }
 
-        public static ulong CalculateZobristHash(BitBoard board)
+        public static ulong CalculateZobristHash(Game game)
         {
             ulong hash = 0;
             int squareIndex = 0;
@@ -48,7 +53,7 @@ namespace ChessLibrary
             {
                 for (int r = 1; r <= 8; r++)
                 {
-                    var piece = board.GetSquare(f, r).Piece;
+                    var piece = game.Board.GetSquare(f, r).Piece;
                     if (piece != null)
                     {
                         int pieceIndex = 0;
@@ -82,6 +87,20 @@ namespace ChessLibrary
                     squareIndex++;
                 }
             }
+            if (game.PlayerToMove == Colors.Black)
+            {
+                hash ^= _table[COLOR_TO_MOVE_INDEX, 0];
+            }
+            if (game.EnPassantFile != null)
+            {
+                hash ^= _table[EN_PASSANT_INDEX, (int)game.EnPassantFile - 1];
+            }
+            int castle = 0;
+            castle |= game.WhiteCanLongCastle ? 0b0001 : 0;
+            castle |= game.WhiteCanShortCastle ? 0b0010 : 0;
+            castle |= game.BlackCanLongCastle ? 0b0100 : 0;
+            castle |= game.BlackCanShortCastle ? 0b1000 : 0;
+            hash ^= _table[CASTLING_INDEX, castle];
             return hash;
         }
     }

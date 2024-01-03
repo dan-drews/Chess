@@ -7,11 +7,14 @@ using ChessLibrary.Enums;
 using ChessLibrary.MoveGeneration;
 using ChessLibrary.OpeningBook;
 using ChessLibrary.TableStructures;
+using ChessLibrary.TranspositionTables;
 
 namespace ChessLibrary
 {
     public class Game : ICloneable
     {
+        internal static TranspositionTable TranspositionTable { get; set; } =
+            new TranspositionTable();
         internal ZobristTable ZobristTable { get; set; } = new ZobristTable();
         internal RepetititionTracker RepetititionTracker { get; set; } = new RepetititionTracker();
         public IMoveGenerator MoveGenerator { get; private set; }
@@ -103,7 +106,7 @@ namespace ChessLibrary
                 //    return true;
                 //}
 
-                var hash = ZobristTable.CalculateZobristHash(Board);
+                var hash = ZobristTable.CalculateZobristHash(this);
                 if (RepetititionTracker.Count(hash) >= 3)
                 {
                     return true;
@@ -424,7 +427,7 @@ namespace ChessLibrary
                     }
                 }
                 Board.MovePiece(move);
-                var hash = ZobristTable.CalculateZobristHash(Board);
+                var hash = ZobristTable.CalculateZobristHash(this);
                 RepetititionTracker.AddHash(hash);
                 if (validate)
                 {

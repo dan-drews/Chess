@@ -136,7 +136,7 @@ namespace Chess.Benchmarks
         [Benchmark]
         public void ZobristHash()
         {
-            ZobristTable.CalculateZobristHash(BitBoard.Board);
+            ZobristTable.CalculateZobristHash(BitBoard);
         }
 
         [Benchmark]
