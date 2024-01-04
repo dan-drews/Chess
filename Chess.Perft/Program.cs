@@ -46,6 +46,9 @@ namespace Chess.Perft
                 var g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
                 g.ResetGame();
                 Console.WriteLine(ChessLibrary.Perft.ExecutePerft(g, depth, true));
+                Console.WriteLine($"Hits: {ChessLibrary.Perft._perftTable.HitCount}");
+                Console.WriteLine($"Misses: {ChessLibrary.Perft._perftTable.MissCount}");
+                Console.WriteLine($"Collissions: {ChessLibrary.Perft._perftTable.CollissionCount}");
             }
         }
 

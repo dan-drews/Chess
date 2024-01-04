@@ -10,20 +10,20 @@ namespace ChessLibrary
 {
     public static class Perft
     {
-        private static TranspositionTable _perftTable = new TranspositionTable();
+        public static TranspositionTable _perftTable = new TranspositionTable();
 
         public static void ClearPerftTable() => _perftTable = new TranspositionTable();
 
         public static int ExecutePerft(Game game, int depth, bool isFirstMove)
         {
+            if (depth == 0)
+            {
+                return 1;
+            }
             var hash = ZobristTable.CalculateZobristHash(game);
             if (_perftTable.IsHashPopulatedForDepth(hash, depth))
             {
                 return _perftTable[hash, depth];
-            }
-            if (depth == 0)
-            {
-                return 1;
             }
             int count = 0;
             var moves = game.GetAllLegalMoves().OrderBy(x => x.StartingSquare);

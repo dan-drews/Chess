@@ -1,24 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ChessLibrary.TranspositionTables
 {
     public class TranspositionTableEntry
     {
-        public bool Set { get; set; }
-        public ulong ZobristHash { get; set; }
-        public bool[] DepthSet { get; set; }
-        public int[] Scores { get; set; }
+        public bool Set;
+        public ulong ZobristHash;
+
+        public bool[] DepthSet;
+        public int[] Scores;
 
         public TranspositionTableEntry(int maxDepth)
         {
             DepthSet = new bool[maxDepth];
-            for (int i = 0; i < maxDepth; i++)
-            {
-                DepthSet[i] = false;
-            }
             Scores = new int[maxDepth];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetHash(ulong hash)
+        {
+            ZobristHash = hash;
+            Set = true;
         }
 
         public int this[int depth]
@@ -27,19 +32,19 @@ namespace ChessLibrary.TranspositionTables
             {
                 lock (this)
                 {
-                    return Scores[depth];
+                    return Scores[depth - 1];
                 }
             }
             set
             {
+                if (depth >= Scores.Length)
+                {
+                    return;
+                }
                 lock (this)
                 {
-                    if (depth >= Scores.Length)
-                    {
-                        return;
-                    }
-                    Scores[depth] = value;
-                    DepthSet[depth] = true;
+                    Scores[depth - 1] = value;
+                    DepthSet[depth - 1] = true;
                 }
             }
         }
@@ -52,7 +57,7 @@ namespace ChessLibrary.TranspositionTables
             }
             lock (this)
             {
-                return DepthSet[depth];
+                return DepthSet[depth-1];
             }
         }
     }
