@@ -9,7 +9,7 @@ namespace ChessLibrary.MoveGeneration
     // For The mapping on the magic bitboards, the least significant bit will be the right-most
     // We will move from right to left, then bottom to top.
 
-    internal static class MagicSlidingImplementation
+    public static class MagicSlidingImplementation
     {
         public static void InitializeMagicSliders() { }
 

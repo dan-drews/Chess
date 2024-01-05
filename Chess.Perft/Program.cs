@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ChessLibrary;
 
@@ -11,28 +12,23 @@ namespace Chess.Perft
 
         static void Main(string[] args)
         {
-            for (int depth = 0; depth <= 8; depth++)
-            {
-                var g = new Game(ChessLibrary.Enums.BoardType.BitBoard);
-                try
-                {
-                    g.ResetGame();
-                    var result = new PerftResult();
-                    long count = GetData(g, depth);
-                    Console.WriteLine($"Depth: {depth}, Count; {count}");
-                    System.IO.File.AppendAllLines(
-                        path,
-                        new string[] { $"Depth: {depth}, Count; {count}" }
-                    );
-                }
-                catch (Exception ex)
-                {
-                    //var moves = g.Moves.Select(x => $"{x.StartingSquare.File} {x.StartingSquare.Rank} {x.DestinationSquare.File} {x.DestinationSquare.Rank}\r\n").ToList();
-                    //moves.Add($"Exception: {ex}");
-                    //System.IO.File.AppendAllLines(path, moves);
-                }
+            ChessLibrary.MoveGeneration.MagicSlidingImplementation.InitializeMagicSliders();
+            var stopwatch = new Stopwatch();
+            while (true)
+            {                
+                Console.WriteLine("Provide Depth: ");
+                var command = Console.ReadLine();
+                int depth = int.Parse(command);
+                var g = new Game(ChessLibrary.Enums.BoardType.BitBoard, false);
+                g.ResetGame();
+                Console.WriteLine($"Running PERFT @ depth {depth}");
+                stopwatch.Start();
+                var numberOfNodes = ChessLibrary.Perft.ExecutePerft(g, depth, true);
+                stopwatch.Stop();
+                Console.WriteLine($"Searched {numberOfNodes:n0} nodes ({stopwatch.ElapsedMilliseconds} ms).");
+                stopwatch.Reset();
+
             }
-            Console.ReadLine();
         }
 
         static long GetData(Game g, int depth)
@@ -80,7 +76,7 @@ namespace Chess.Perft
                 //}
                 //else
                 //{
-                g.AddMove(m);
+                g.AddMove(m, false);
                 result += GetData(g, depth - 1);
                 g.UndoLastMove();
                 //}

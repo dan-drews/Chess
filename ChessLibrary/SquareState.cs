@@ -53,7 +53,6 @@ namespace ChessLibrary
                 var color = (_valueInternal & 0b1000) == 0 ? 0 : 1;
                 var piece = (_valueInternal & 0b111) - 1;
                 return Piece.Pieces[color][piece];
-                ;
             }
             set
             {

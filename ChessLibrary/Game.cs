@@ -103,7 +103,7 @@ namespace ChessLibrary
                 //    return true;
                 //}
 
-                var hash = ZobristTable.CalculateZobristHash(Board);
+                var hash = ZobristTable.CalculateZobristHash(this);
                 if (RepetititionTracker.Count(hash) >= 3)
                 {
                     return true;
@@ -424,7 +424,7 @@ namespace ChessLibrary
                     }
                 }
                 Board.MovePiece(move);
-                var hash = ZobristTable.CalculateZobristHash(Board);
+                var hash = ZobristTable.CalculateZobristHash(this);
                 RepetititionTracker.AddHash(hash);
                 if (validate)
                 {

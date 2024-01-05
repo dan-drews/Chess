@@ -32,7 +32,7 @@ namespace Chess.Tests
         [TestMethod]
         public void CanCalculateHash()
         {
-            ulong hash = ZobristTable.CalculateZobristHash(Game.Board);
+            ulong hash = ZobristTable.CalculateZobristHash(Game);
             Assert.AreNotEqual(0, hash);
         }
 
@@ -88,7 +88,7 @@ namespace Chess.Tests
             {
                 return;
             }
-            Game.AddMove(move);
+            Game.AddMove(move, false);
             var moves = Game.MoveGenerator.GetAllLegalMoves(
                 Game.Board,
                 Game.PlayerToMove,

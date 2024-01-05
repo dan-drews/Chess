@@ -41,6 +41,14 @@ namespace ChessLibrary
             }
         }
 
+        public void ClearCache()
+        {
+            for (int i = 0; i < _squares.Length; i++)
+            {
+                _squares[i] = null;
+            }
+        }
+
         public void SetupBoard()
         {
             WhitePawns = Starting_White_Pawns;
@@ -103,6 +111,7 @@ namespace ChessLibrary
             get { return ~OccupiedSquares; }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int GetPositionFromFileAndRank(Files file, int rank)
         {
             // In our bitboard, A8 == 63 H1 == 0.
@@ -487,13 +496,6 @@ namespace ChessLibrary
 
         public void SetPiece(int position, PieceTypes type, Colors color)
         {
-            for (int i = 0; i < _squares.Length; i++)
-            {
-                _squares[i] = null;
-            }
-            _threatenedSquares = null;
-            _whiteUnsafe = null;
-            _blackUnsafe = null;
             ClearPiece(position); // Clear the piece first.
             switch (color)
             {

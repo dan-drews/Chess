@@ -67,7 +67,7 @@ namespace ChessLibrary
             {
                 if (Config.UseOpeningBook && game.Moves.Count < 8)
                 {
-                    var hash = ZobristTable.CalculateZobristHash(game.Board);
+                    var hash = ZobristTable.CalculateZobristHash(game);
                     var pickedMove = OpeningBookMovePicker.GetMoveForZobrist(hash);
                     if (pickedMove != null)
                     {
@@ -205,7 +205,7 @@ namespace ChessLibrary
             {
                 zobristTable.TryAdd(currentDepth, new ConcurrentDictionary<ulong, int?>());
             }
-            ulong hash = ZobristTable.CalculateZobristHash(game.Board);
+            ulong hash = ZobristTable.CalculateZobristHash(game);
             if (zobristTable[currentDepth].ContainsKey(hash))
             {
                 zobristMatches++;

@@ -44,14 +44,16 @@ namespace Chess.Benchmarks
         {
             e = new Engine(config);
             BitBoard.ResetGame();
+            //BitBoard.Board.ClearCache();
         }
 
         [GlobalSetup]
         public void Setup()
         {
             BitBoard.ResetGame();
+            //BitBoard.Board.ClearCache();
         }
-
+        /*
         [Benchmark]
         public void GetAllLegalMoveBaseline()
         {
@@ -131,21 +133,21 @@ namespace Chess.Benchmarks
             {
                 RecurseMoves(BitBoard, move, 3);
             }
-        }
+        }*/
 
         [Benchmark]
         public void ZobristHash()
         {
-            ZobristTable.CalculateZobristHash(BitBoard.Board);
+            ZobristTable.CalculateZobristHash(BitBoard);
         }
 
-        [Benchmark]
-        public void LoadFen()
-        {
-            BitBoard.LoadFen(
-                "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-            );
-        }
+        //[Benchmark]
+        //public void LoadFen()
+        //{
+        //    BitBoard.LoadFen(
+        //        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
+        //    );
+        //}
 
         void RecurseMoves(Game g, Move move, int depth)
         {
@@ -153,7 +155,7 @@ namespace Chess.Benchmarks
             {
                 return;
             }
-            BitBoard.AddMove(move);
+            BitBoard.AddMove(move, false);
             var moves = BitBoard.GetAllLegalMoves();
             foreach (var move2 in moves)
             {

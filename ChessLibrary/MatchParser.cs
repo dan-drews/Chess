@@ -13,7 +13,7 @@ namespace ChessLibrary
             var gameMoves = chessNotation.Split(' ');
             foreach (var move in gameMoves[0..^2])
             {
-                game.AddMove(GetMoveFromChessNotation(game, move));
+                game.AddMove(GetMoveFromChessNotation(game, move), false);
             }
         }
 

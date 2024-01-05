@@ -45,9 +45,9 @@ namespace ChessLibrary.OpeningBook
                 int movesToPerform = Math.Min(moves.Length, 8);
                 foreach (var move in moves)
                 {
-                    var hash = ZobristTable.CalculateZobristHash(g.Board);
+                    var hash = ZobristTable.CalculateZobristHash(g);
                     var m = parser.GetMoveFromChessNotation(g, move);
-                    g.AddMove(m);
+                    g.AddMove(m, false);
                     if (!_zobristMoves.ContainsKey(hash))
                     {
                         _zobristMoves.Add(hash, new List<Move>());
