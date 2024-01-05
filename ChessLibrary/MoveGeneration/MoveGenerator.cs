@@ -425,13 +425,13 @@ namespace ChessLibrary.MoveGeneration
             bool includeSelfChecks
         )
         {
-            ulong currentKnights = color == Colors.Black ? b.BlackKnights : b.WhiteKnights;
-            ulong i = currentKnights & ~(currentKnights - 1);
+            BitBoard currentKnights = color == Colors.Black ? b.BlackKnights : b.WhiteKnights;
+            var enumerator = currentKnights.GetEnumerator();
             var notMyPieces = ~b.GetAllPieces(color);
-            ulong possibility;
-            while (i != 0)
+            while (enumerator.MoveNext())
             {
-                int location = i.NumberOfTrailingZeros();
+                BitBoard possibility;
+                int location = enumerator.Current;
                 if (location > KnightRangeBaseSquare)
                 {
                     possibility = KnightSpan << (location - KnightRangeBaseSquare);
@@ -450,10 +450,10 @@ namespace ChessLibrary.MoveGeneration
                     possibility &=
                         ~(BitBoardConstants.FileA | BitBoardConstants.FileB) & notMyPieces;
                 }
-                ulong j = possibility & ~(possibility - 1);
-                while (j != 0)
+                var possibleMoveEnumerator = possibility.GetEnumerator();
+                while (possibleMoveEnumerator.MoveNext())
                 {
-                    int index = j.NumberOfTrailingZeros();
+                    int index = possibleMoveEnumerator.Current;
                     var destinationSquare = b.GetSquare(index);
                     if (destinationSquare.Piece != null || includeQuietMoves)
                     {
@@ -470,12 +470,7 @@ namespace ChessLibrary.MoveGeneration
                             result.Add(move);
                         }
                     }
-                    possibility &= ~j;
-                    j = possibility & ~(possibility - 1);
                 }
-
-                currentKnights &= ~i;
-                i = currentKnights & ~(currentKnights - 1);
             }
         }
 

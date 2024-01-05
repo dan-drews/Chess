@@ -305,32 +305,6 @@ namespace ChessLibrary
                 unsafeSpaces |= possibilities;
             }
 
-            //ulong i = knight & ~(knight - 1);
-            //while (i != 0)
-            //{
-            //    int location = i.NumberOfTrailingZeros();
-            //    if (location > KnightRangeBaseSquare)
-            //    {
-            //        possibilities = KnightSpan << (location - KnightRangeBaseSquare);
-            //    }
-            //    else
-            //    {
-            //        possibilities = KnightSpan >> (KnightRangeBaseSquare - location);
-            //    }
-
-            //    if (location % 8 >= 4)
-            //    {
-            //        possibilities &= ~(BitBoardConstants.FileG | BitBoardConstants.FileH);
-            //    }
-            //    else
-            //    {
-            //        possibilities &= ~(BitBoardConstants.FileA | BitBoardConstants.FileB);
-            //    }
-            //    unsafeSpaces |= possibilities;
-            //    knight &= ~i;
-            //    i = knight & ~(knight - 1);
-            //}
-
             // Bishop/queen
             var queensAndBishops =
                 color == Colors.White ? BlackBishops | BlackQueens : WhiteBishops | WhiteQueens;
@@ -343,20 +317,6 @@ namespace ChessLibrary
                 unsafeSpaces |= possibilities;
             }
 
-            //i = queensAndBishops & ~(queensAndBishops - 1);
-            //while (i != 0)
-            //{
-            //    int location = i.NumberOfTrailingZeros();
-            //    possibilities = SlidingMoveUtilities.ValidDiagonalMoves(
-            //        this,
-            //        location,
-            //        OccupiedSquares
-            //    );
-            //    unsafeSpaces |= possibilities;
-            //    queensAndBishops &= ~i;
-            //    i = queensAndBishops & ~(queensAndBishops - 1);
-            //}
-
             // Rook Queen
             BitBoard queensAndRooks =
                 color == Colors.White ? BlackRooks | BlackQueens : WhiteRooks | WhiteQueens;
@@ -367,15 +327,6 @@ namespace ChessLibrary
                 possibilities = SlidingMoveUtilities.ValidHVMoves(this, location, OccupiedSquares);
                 unsafeSpaces |= possibilities;
             }
-            //i = queensAndRooks & ~(queensAndRooks - 1);
-            //while (i != 0)
-            //{
-            //    int location = i.NumberOfTrailingZeros();
-            //    possibilities = SlidingMoveUtilities.ValidHVMoves(this, location, OccupiedSquares);
-            //    unsafeSpaces |= possibilities;
-            //    queensAndRooks &= ~i;
-            //    i = queensAndRooks & ~(queensAndRooks - 1);
-            //}
 
             // king
             ulong king = color == Colors.White ? BlackKing : WhiteKing;
