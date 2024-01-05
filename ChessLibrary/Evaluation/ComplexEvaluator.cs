@@ -14,7 +14,7 @@ public class ComplexEvaluator : IEvaluator
     }
 
     public (int blackScore, int whiteScore) GetScore(
-        BitBoard board,
+        FullBitBoard board,
         bool isWhiteKingInCheck,
         bool isBlackKingInCheck,
         bool isStalemate,
@@ -56,7 +56,7 @@ public class ComplexEvaluator : IEvaluator
     }
 
     private int GetScoreInternal(
-        BitBoard board,
+        FullBitBoard board,
         bool isWhiteKingInCheck,
         bool isBlackKingInCheck,
         Colors color,
@@ -160,7 +160,7 @@ public class ComplexEvaluator : IEvaluator
         return score;
     }
 
-    private static int MultipledPawnsInFiles(BitBoard board, Colors color)
+    private static int MultipledPawnsInFiles(FullBitBoard board, Colors color)
     {
         var result = 0;
         for (Files f = Files.A; f <= Files.H; f++)

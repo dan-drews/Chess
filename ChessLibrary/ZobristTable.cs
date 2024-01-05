@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using ChessLibrary.Boards;
 using Newtonsoft.Json;
 
 namespace ChessLibrary
@@ -76,60 +77,17 @@ namespace ChessLibrary
             castle |= game.BlackCanShortCastle ? 0b1000 : 0;
             hash ^= _table[CASTLING_INDEX, castle];
             return hash;
-
-            //int squareIndex = 0;
-            //for (var f = Files.A; f <= Files.H; f++)
-            //{
-            //    for (int r = 1; r <= 8; r++)
-            //    {
-            //        var piece = board.GetSquare(f, r).Piece;
-            //        if (piece != null)
-            //        {
-            //            int pieceIndex = 0;
-            //            switch (piece.Type)
-            //            {
-            //                case PieceTypes.Pawn:
-            //                    pieceIndex = 0;
-            //                    break;
-            //                case PieceTypes.Bishop:
-            //                    pieceIndex = 1;
-            //                    break;
-            //                case PieceTypes.Knight:
-            //                    pieceIndex = 2;
-            //                    break;
-            //                case PieceTypes.Rook:
-            //                    pieceIndex = 3;
-            //                    break;
-            //                case PieceTypes.Queen:
-            //                    pieceIndex = 4;
-            //                    break;
-            //                case PieceTypes.King:
-            //                    pieceIndex = 5;
-            //                    break;
-            //            }
-            //            if (piece.Color == Colors.Black)
-            //            {
-            //                pieceIndex += 6;
-            //            }
-            //            hash ^= _table[pieceIndex, squareIndex];
-            //        }
-            //        squareIndex++;
-            //    }
-            //}
-            //return hash;
-
         }
 
-        private static ulong GetPieceHash(ulong pieces, int pieceIndex)
+        private static ulong GetPieceHash(BitBoard pieces, int pieceIndex)
         {
             ulong hash = 0;
-            while (pieces != 0)
+            var enumerator = pieces.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                int position = pieces.NumberOfTrailingZeros();
+                int position = enumerator.Current;
                 hash ^= _table[pieceIndex, position];
-                pieces &= pieces - 1;
             }
-
             return hash;
         }
     }

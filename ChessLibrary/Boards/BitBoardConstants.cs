@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChessLibrary.Boards;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +7,7 @@ namespace ChessLibrary
 {
     public static class BitBoardConstants
     {
-        public static ulong[] FileMasks = new ulong[]
+        public static BitBoard[] FileMasks = new BitBoard[]
         {
             0x8080808080808080,
             0x4040404040404040,
@@ -18,7 +19,7 @@ namespace ChessLibrary
             0x0101010101010101
         };
 
-        public static ulong[] RankMasks = new ulong[]
+        public static BitBoard[] RankMasks = new BitBoard[]
         {
             0x00000000000000FF,
             0x000000000000FF00,
@@ -30,7 +31,7 @@ namespace ChessLibrary
             0xFF00000000000000
         };
 
-        public static ulong[] DiagonalMasks = new ulong[]
+        public static BitBoard[] DiagonalMasks = new BitBoard[]
         {
             // A8                        // A7, B8                          // A6, B7, C8                       // A5, B6, C7, D8               // A4, B5, C6, D7, E8
             0x8000000000000000L,
@@ -52,7 +53,7 @@ namespace ChessLibrary
             0x1L
         };
 
-        public static ulong[] AntiDiagonalMasks = new ulong[]
+        public static BitBoard[] AntiDiagonalMasks = new BitBoard[]
         {
             // H8                        // G8, H7                          // F8, G7, H6                       // E8, F7, G6, H5               // D8, E7, F6, G5, H4
             0x100000000000000L,
@@ -74,48 +75,48 @@ namespace ChessLibrary
             0x80L
         };
 
-        public static ulong GetDiagonalMask(Square square)
+        public static BitBoard GetDiagonalMask(Square square)
         {
             return DiagonalMasks[((int)square.File - 1) + (8 - square.Rank)];
         }
 
-        public static ulong GetAntiDiagonalMask(Square square)
+        public static BitBoard GetAntiDiagonalMask(Square square)
         {
             return AntiDiagonalMasks[14 - (square.Rank - 1 + (int)square.File - 1)];
         }
 
-        public static ulong Edges = Rank1 | Rank8 | FileA | FileH;
+        public static BitBoard Rank8 = 0xFF00000000000000;
+        public static BitBoard Rank1 = 0xFF;
+        public static BitBoard Rank4 = 0x00000000FF000000;
+        public static BitBoard Rank5 = 0x000000FF00000000;
 
-        public const ulong Rank8 = 0xFF00000000000000;
-        public const ulong Rank1 = 0xFF;
-        public const ulong Rank4 = 0x00000000FF000000;
-        public const ulong Rank5 = 0x000000FF00000000;
+        public static BitBoard FileA = 0x8080808080808080;
+        public static BitBoard FileB = 0x4040404040404040;
+        public static BitBoard FileH = 0x0101010101010101;
+        public static BitBoard FileG = 0x0202020202020202;
 
-        public const ulong FileA = 0x8080808080808080;
-        public const ulong FileB = 0x4040404040404040;
-        public const ulong FileH = 0x0101010101010101;
-        public const ulong FileG = 0x0202020202020202;
+        public static readonly BitBoard Edges = (Rank1 | Rank8 | FileA | FileH);
 
         public const int KnightRangeBaseSquare = 18;
-        public const ulong KnightSpan = 0x0000000A1100110A;
+        public static BitBoard KnightSpan = 0x0000000A1100110A;
 
         public const int KingRangeBaseSquare = 9;
-        public const ulong KingSpan = 0x0000000000070507;
+        public static BitBoard KingSpan = 0x0000000000070507;
 
-        public const ulong U1 = (ulong)1;
+        public static BitBoard U1 = (BitBoard)1;
 
-        public const ulong Starting_White_Pawns = 0xFF00;
-        public const ulong Starting_White_Rooks = 0x81;
-        public const ulong Starting_White_Knights = 0x42;
-        public const ulong Starting_White_Bishops = 0x24;
-        public const ulong Starting_White_Queens = 0x10;
-        public const ulong Starting_White_King = 0x8;
+        public static BitBoard Starting_White_Pawns = 0xFF00;
+        public static BitBoard Starting_White_Rooks = 0x81;
+        public static BitBoard Starting_White_Knights = 0x42;
+        public static BitBoard Starting_White_Bishops = 0x24;
+        public static BitBoard Starting_White_Queens = 0x10;
+        public static BitBoard Starting_White_King = 0x8;
 
-        public const ulong Starting_Black_Pawns = 0xFF000000000000;
-        public const ulong Starting_Black_Rooks = 0x8100000000000000;
-        public const ulong Starting_Black_Knights = 0x4200000000000000;
-        public const ulong Starting_Black_Bishops = 0x2400000000000000;
-        public const ulong Starting_Black_Queens = 0x1000000000000000;
-        public const ulong Starting_Black_King = 0x800000000000000;
+        public static BitBoard Starting_Black_Pawns = 0xFF000000000000;
+        public static BitBoard Starting_Black_Rooks = 0x8100000000000000;
+        public static BitBoard Starting_Black_Knights = 0x4200000000000000;
+        public static BitBoard Starting_Black_Bishops = 0x2400000000000000;
+        public static BitBoard Starting_Black_Queens = 0x1000000000000000;
+        public static BitBoard Starting_Black_King = 0x800000000000000;
     }
 }

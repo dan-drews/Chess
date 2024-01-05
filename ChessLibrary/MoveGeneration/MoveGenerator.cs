@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChessLibrary.Boards;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace ChessLibrary.MoveGeneration
     public class MoveGenerator : IMoveGenerator
     {
         public Move[] GetAllLegalMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             Files? enPassantFile,
             bool blackCanLongCastle,
@@ -34,7 +35,7 @@ namespace ChessLibrary.MoveGeneration
         }
 
         public Move[]? GetAllLegalMoves(
-            BitBoard b,
+            FullBitBoard b,
             SquareState squareState,
             Files? enPassantFile,
             bool blackCanLongCastle,
@@ -60,13 +61,13 @@ namespace ChessLibrary.MoveGeneration
                 .ToArray();
         }
 
-        public bool IsKingInCheck(BitBoard b, Colors color)
+        public bool IsKingInCheck(FullBitBoard b, Colors color)
         {
             return (b.Unsafe(color) & (color == Colors.White ? b.WhiteKing : b.BlackKing)) > 0;
         }
 
         public Move[] AllValidMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             Files? enPassantFile,
             bool blackCanLongCastle,
@@ -111,7 +112,7 @@ namespace ChessLibrary.MoveGeneration
         }
 
         private static List<Move> ValidPawnMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             Files? enPassantFile,
             bool includeQuietMoves,
@@ -227,7 +228,7 @@ namespace ChessLibrary.MoveGeneration
         }
 
         private static List<Move> GetPawnMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             ulong pawns,
             ulong opposingPawns,
@@ -245,11 +246,11 @@ namespace ChessLibrary.MoveGeneration
         )
         {
             var result = new List<Move>();
-            ulong pawnMoves = shiftOperation(pawns, leftShiftAmount) & opposingPieces & ~FileA; // Capture Right
-            ulong possibility = pawnMoves & ~(pawnMoves - 1);
-            while (possibility != 0)
+            BitBoard pawnMoves = shiftOperation(pawns, leftShiftAmount) & opposingPieces & ~FileA; // Capture Right
+            var enumerator = pawnMoves.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                int index = possibility.NumberOfTrailingZeros();
+                int index = enumerator.Current;
                 var destinationSquare = b.GetSquare(index);
                 var startingSquare = b.GetSquare(
                     destinationSquare.Square.File - 1,
@@ -266,15 +267,13 @@ namespace ChessLibrary.MoveGeneration
                 {
                     result.Add(move);
                 }
-                pawnMoves &= ~possibility;
-                possibility = pawnMoves & ~(pawnMoves - 1);
             }
 
             pawnMoves = shiftOperation(pawns, rightShiftAmount) & opposingPieces & ~FileH; // Capture Left
-            possibility = pawnMoves & ~(pawnMoves - 1);
-            while (possibility != 0)
+            enumerator = pawnMoves.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                int index = possibility.NumberOfTrailingZeros();
+                int index = enumerator.Current;
                 var destinationSquare = b.GetSquare(index);
                 var startingSquare = b.GetSquare(
                     destinationSquare.Square.File + 1,
@@ -292,18 +291,15 @@ namespace ChessLibrary.MoveGeneration
                 {
                     result.Add(move);
                 }
-
-                pawnMoves &= ~possibility;
-                possibility = pawnMoves & ~(pawnMoves - 1);
             }
 
             if (includeQuietMoves)
             {
                 pawnMoves = shiftOperation(pawns, 8) & b.EmptySquares; // Move Forward 1
-                possibility = pawnMoves & ~(pawnMoves - 1);
-                while (possibility != 0)
+                enumerator = pawnMoves.GetEnumerator();
+                while (enumerator.MoveNext())
                 {
-                    int index = possibility.NumberOfTrailingZeros();
+                    int index = enumerator.Current;
                     var destinationSquare = b.GetSquare(index);
                     var startingSquare = b.GetSquare(
                         destinationSquare.Square.File,
@@ -320,9 +316,6 @@ namespace ChessLibrary.MoveGeneration
                     {
                         result.Add(move);
                     }
-
-                    pawnMoves &= ~possibility;
-                    possibility = pawnMoves & ~(pawnMoves - 1);
                 }
 
                 pawnMoves =
@@ -330,10 +323,11 @@ namespace ChessLibrary.MoveGeneration
                     & shiftOperation(b.EmptySquares, 8)
                     & b.EmptySquares
                     & doublePawnRank; // Move Forward 2
-                possibility = pawnMoves & ~(pawnMoves - 1);
-                while (possibility != 0)
+
+                enumerator = pawnMoves.GetEnumerator();
+                while (enumerator.MoveNext())
                 {
-                    int index = possibility.NumberOfTrailingZeros();
+                    int index = enumerator.Current;
                     var destinationSquare = b.GetSquare(index);
                     var startingSquare = b.GetSquare(
                         destinationSquare.Square.File,
@@ -351,8 +345,6 @@ namespace ChessLibrary.MoveGeneration
                     {
                         result.Add(move);
                     }
-                    pawnMoves &= ~possibility;
-                    possibility = pawnMoves & ~(pawnMoves - 1);
                 }
             }
 
@@ -370,7 +362,7 @@ namespace ChessLibrary.MoveGeneration
                 if (captureLeftOperation != 0)
                 {
                     var destinationSquare = b.GetSquare(
-                        captureLeftOperation.NumberOfTrailingZeros()
+                        captureLeftOperation.FirstBit()
                     ); // b.GetSquare(enPassantFile.Value, square.Square.Rank + pawnDirection);
                     var startingSquare = b.GetSquare(
                         reverseShiftOperation(captureLeftOperation, rightShiftAmount)
@@ -398,7 +390,7 @@ namespace ChessLibrary.MoveGeneration
                 if (captureRightOperation != 0)
                 {
                     var destinationSquare = b.GetSquare(
-                        captureRightOperation.NumberOfTrailingZeros()
+                        captureRightOperation.FirstBit()
                     ); // b.GetSquare(enPassantFile.Value, square.Square.Rank + pawnDirection);
                     var startingSquare = b.GetSquare(
                         reverseShiftOperation(captureRightOperation, leftShiftAmount)
@@ -426,7 +418,7 @@ namespace ChessLibrary.MoveGeneration
         }
 
         private static void ValidKnightMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             bool includeQuietMoves,
             List<Move> result,
@@ -488,14 +480,13 @@ namespace ChessLibrary.MoveGeneration
         }
 
         private static void ValidBishopMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             bool includeQuietMoves,
             List<Move> result,
             bool includeSelfChecks
         )
         {
-#if MAGIC_SLIDING_BITBOARDS
             var existingMoveCount = result.Count;
             MagicSlidingImplementation.ValidBishopMoves(b, color, includeQuietMoves, result);
             for (int i = result.Count - 1; i >= existingMoveCount; i--)
@@ -506,55 +497,16 @@ namespace ChessLibrary.MoveGeneration
                     result.RemoveAt(i);
                 }
             }
-#else
-            var occupied = b.OccupiedSquares;
-            var currentSquares = color == Colors.White ? b.WhiteBishops : b.BlackBishops;
-            var notMyPieces = ~b.GetAllPieces(color);
-
-            ulong i = currentSquares & ~(currentSquares - 1);
-            ulong possibility;
-            while (i != 0)
-            {
-                int location = i.NumberOfTrailingZeros();
-                possibility =
-                    SlidingMoveUtilities.ValidDiagonalMoves(b, location, occupied) & notMyPieces;
-                ulong j = possibility & ~(possibility - 1);
-                while (j != 0)
-                {
-                    var index = possibility.NumberOfTrailingZeros();
-                    var destinationSquare = b.GetSquare(index);
-                    if (destinationSquare.Piece != null || includeQuietMoves)
-                    {
-                        var move = new Move(
-                            location,
-                            index,
-                            color,
-                            PieceTypes.Bishop,
-                            destinationSquare.Piece?.Type
-                        );
-                        if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
-                        {
-                            result.Add(move);
-                        }
-                    }
-                    possibility &= ~j;
-                    j = possibility & ~(possibility - 1);
-                }
-                currentSquares &= ~i;
-                i = currentSquares & ~(currentSquares - 1);
-            }
-#endif
         }
 
         private static void ValidRookMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             bool includeQuietMoves,
             List<Move> result,
             bool includeSelfChecks
         )
         {
-#if MAGIC_SLIDING_BITBOARDS
             var existingMoveCount = result.Count;
             MagicSlidingImplementation.ValidRookMoves(b, color, includeQuietMoves, result);
             for (int i = result.Count - 1; i >= existingMoveCount; i--)
@@ -565,56 +517,16 @@ namespace ChessLibrary.MoveGeneration
                     result.RemoveAt(i);
                 }
             }
-#else
-
-            var occupied = b.OccupiedSquares;
-            var currentSquares = color == Colors.White ? b.WhiteRooks : b.BlackRooks;
-            var notMyPieces = ~b.GetAllPieces(color);
-
-            ulong i = currentSquares & ~(currentSquares - 1);
-            ulong possibility;
-            while (i != 0)
-            {
-                int location = i.NumberOfTrailingZeros();
-                possibility =
-                    SlidingMoveUtilities.ValidHVMoves(b, location, occupied) & notMyPieces;
-                ulong j = possibility & ~(possibility - 1);
-                while (j != 0)
-                {
-                    var index = possibility.NumberOfTrailingZeros();
-                    var destinationSquare = b.GetSquare(index);
-                    if (destinationSquare.Piece != null || includeQuietMoves)
-                    {
-                        var move = new Move(
-                            location,
-                            index,
-                            color,
-                            PieceTypes.Rook,
-                            destinationSquare?.Piece?.Type
-                        );
-                        if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
-                        {
-                            result.Add(move);
-                        }
-                    }
-                    possibility &= ~j;
-                    j = possibility & ~(possibility - 1);
-                }
-                currentSquares &= ~i;
-                i = currentSquares & ~(currentSquares - 1);
-            }
-#endif
         }
 
         private static void ValidQueenMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             bool includeQuietMoves,
             List<Move> result,
             bool includeSelfChecks
         )
         {
-#if MAGIC_SLIDING_BITBOARDS
             var existingMoveCount = result.Count;
             MagicSlidingImplementation.ValidQueenMoves(b, color, includeQuietMoves, result);
             for (int i = result.Count - 1; i >= existingMoveCount; i--)
@@ -625,51 +537,10 @@ namespace ChessLibrary.MoveGeneration
                     result.RemoveAt(i);
                 }
             }
-#else
-
-            var occupied = b.OccupiedSquares;
-            var currentQueen = color == Colors.White ? b.WhiteQueens : b.BlackQueens;
-            var notMyPieces = ~b.GetAllPieces(color);
-            ulong i = currentQueen & ~(currentQueen - 1);
-            ulong possibility;
-            while (i != 0)
-            {
-                int location = i.NumberOfTrailingZeros();
-                possibility =
-                    (
-                        SlidingMoveUtilities.ValidHVMoves(b, location, occupied)
-                        | SlidingMoveUtilities.ValidDiagonalMoves(b, location, occupied)
-                    ) & notMyPieces;
-                ulong j = possibility & ~(possibility - 1);
-                while (j != 0)
-                {
-                    int index = j.NumberOfTrailingZeros();
-                    var destinationSquare = b.GetSquare(index);
-                    if (destinationSquare.Piece != null || includeQuietMoves)
-                    {
-                        var move = new Move(
-                            location,
-                            index,
-                            color,
-                            PieceTypes.Queen,
-                            destinationSquare?.Piece?.Type
-                        );
-                        if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
-                        {
-                            result.Add(move);
-                        }
-                    }
-                    possibility &= ~j;
-                    j = possibility & ~(possibility - 1);
-                }
-                currentQueen &= ~i;
-                i = currentQueen & ~(currentQueen - 1);
-            }
-#endif
         }
 
         private static void ValidKingMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             bool canLongCastle,
             bool canShortCastle,
@@ -678,10 +549,10 @@ namespace ChessLibrary.MoveGeneration
             bool includeSelfChecks
         )
         {
-            ulong currentKing = color == Colors.Black ? b.BlackKing : b.WhiteKing;
+            BitBoard currentKing = color == Colors.Black ? b.BlackKing : b.WhiteKing;
             var notMyPieces = ~b.GetAllPieces(color);
-            ulong possibility;
-            int location = currentKing.NumberOfTrailingZeros();
+            BitBoard possibility;
+            int location = currentKing.FirstBit();
 
             if (location > KingRangeBaseSquare)
             {
@@ -700,10 +571,11 @@ namespace ChessLibrary.MoveGeneration
                 possibility &= ~(BitBoardConstants.FileA | BitBoardConstants.FileB) & notMyPieces;
             }
             var startingSquare = b.GetSquare(location);
-            ulong j = possibility & ~(possibility - 1);
-            while (j != 0)
+
+            var enumerator = possibility.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                int index = j.NumberOfTrailingZeros();
+                int index = enumerator.Current;
                 var destinationSquare = b.GetSquare(index);
                 if (destinationSquare.Piece != null || includeQuietMoves)
                 {
@@ -719,8 +591,6 @@ namespace ChessLibrary.MoveGeneration
                         result.Add(move);
                     }
                 }
-                possibility &= ~j;
-                j = possibility & ~(possibility - 1);
             }
 
             var startingKing = color == Colors.Black ? Starting_Black_King : Starting_White_King;
@@ -818,7 +688,7 @@ namespace ChessLibrary.MoveGeneration
             }
         }
 
-        public static bool ResultsInOwnCheck(BitBoard b, Move move, Colors color)
+        public static bool ResultsInOwnCheck(FullBitBoard b, Move move, Colors color)
         {
             var king = color == Colors.White ? b.WhiteKing : b.BlackKing;
             ulong kingBoard;
@@ -832,7 +702,7 @@ namespace ChessLibrary.MoveGeneration
             }
             if ((b.GetThreatenedSquares(color) & kingBoard) > 0)
             {
-                var clonedBoard = (BitBoard)b.Clone();
+                var clonedBoard = (FullBitBoard)b.Clone();
                 // ToDo: Apply Move
                 clonedBoard.MovePiece(move);
                 return (

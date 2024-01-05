@@ -8,7 +8,7 @@ namespace ChessLibrary.MoveGeneration
     public static class SlidingMoveUtilities
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong ValidHVMoves(BitBoard b, int index, ulong occupied)
+        public static ulong ValidHVMoves(FullBitBoard b, int index, ulong occupied)
         {
             var square = b.GetSquare(index);
             ulong binaryS = BitBoardConstants.U1 << index;
@@ -27,7 +27,7 @@ namespace ChessLibrary.MoveGeneration
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong ValidDiagonalMoves(BitBoard b, int index, ulong occupied)
+        public static ulong ValidDiagonalMoves(FullBitBoard b, int index, ulong occupied)
         {
             var square = b.GetSquare(index);
             ulong binaryS = BitBoardConstants.U1 << index;

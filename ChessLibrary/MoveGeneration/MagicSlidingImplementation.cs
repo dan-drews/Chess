@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using ChessLibrary.Boards;
 using Newtonsoft.Json.Linq;
 
 namespace ChessLibrary.MoveGeneration
@@ -307,17 +308,18 @@ namespace ChessLibrary.MoveGeneration
         }
 
         public static void ValidBishopMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             bool includeQuietMoves,
             List<Move> result
         )
         {
             var bishops = color == Colors.White ? b.WhiteBishops : b.BlackBishops;
-            ulong i = bishops & ~(bishops - 1);
-            while (i != 0)
+
+            var enumerator = bishops.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                int location = i.NumberOfTrailingZeros();
+                int location = enumerator.Current;
                 var square = b.GetSquare(location).Square;
                 ulong diagonalMask = BitBoardConstants.GetDiagonalMask(square);
                 ulong antidiagonalMask = BitBoardConstants.GetAntiDiagonalMask(square);
@@ -332,23 +334,22 @@ namespace ChessLibrary.MoveGeneration
                     _bishopMoves,
                     PieceTypes.Bishop
                 );
-                bishops &= ~i;
-                i = bishops & ~(bishops - 1);
             }
         }
 
         public static void ValidRookMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             bool includeQuietMoves,
             List<Move> result
         )
         {
             var rooks = color == Colors.White ? b.WhiteRooks : b.BlackRooks;
-            ulong i = rooks & ~(rooks - 1);
-            while (i != 0)
+
+            var enumerator = rooks.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                int location = i.NumberOfTrailingZeros();
+                int location = enumerator.Current;
                 var square = b.GetSquare(location).Square;
                 var rank = square.Rank;
                 var file = square.File;
@@ -366,23 +367,22 @@ namespace ChessLibrary.MoveGeneration
                     _rookMoves,
                     PieceTypes.Rook
                 );
-                rooks &= ~i;
-                i = rooks & ~(rooks - 1);
             }
         }
 
         public static void ValidQueenMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             bool includeQuietMoves,
             List<Move> result
         )
         {
             var queens = color == Colors.White ? b.WhiteQueens : b.BlackQueens;
-            ulong i = queens & ~(queens - 1);
-            while (i != 0)
+
+            var enumerator = queens.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                int location = i.NumberOfTrailingZeros();
+                int location = enumerator.Current;
                 var square = b.GetSquare(location).Square;
                 var rank = square.Rank;
                 var file = square.File;
@@ -414,14 +414,12 @@ namespace ChessLibrary.MoveGeneration
                     _bishopMoves,
                     PieceTypes.Queen
                 );
-                queens &= ~i;
-                i = queens & ~(queens - 1);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void GetMovesFromMasksAndSquare(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             bool includeQuietMoves,
             List<Move> result,
@@ -441,12 +439,12 @@ namespace ChessLibrary.MoveGeneration
 
             var magic = magics[location];
             var key = (blockers * magic.MagicNumber) >> (64 - magic.Shift);
-            var validMoves = moves[location][key];
-
+            BitBoard validMoves = moves[location][key];
             validMoves = validMoves & ~b.GetAllPieces(color);
-            while (validMoves != 0)
+            var enumerator = validMoves.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                var index = validMoves.NumberOfTrailingZeros();
+                var index = enumerator.Current;
                 var destinationSquare = b.GetSquare(index);
                 if (destinationSquare.Piece != null || includeQuietMoves)
                 {
@@ -459,7 +457,6 @@ namespace ChessLibrary.MoveGeneration
                     );
                     result.Add(move);
                 }
-                validMoves &= ~(BitBoardConstants.U1 << index);
             }
         }
 
@@ -467,11 +464,7 @@ namespace ChessLibrary.MoveGeneration
         private static ulong GetEdgesForSquare(int square)
         {
             ulong pieceBitBoard = 1UL << square;
-            var edgeSquares =
-                BitBoardConstants.FileA
-                | BitBoardConstants.FileH
-                | BitBoardConstants.Rank1
-                | BitBoardConstants.Rank8;
+            var edgeSquares = BitBoardConstants.Edges;
             if ((pieceBitBoard & BitBoardConstants.FileA) > 0)
             {
                 if ((pieceBitBoard & BitBoardConstants.Rank1) > 0)

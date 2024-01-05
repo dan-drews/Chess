@@ -5,7 +5,7 @@ namespace ChessLibrary
     public interface IMoveGenerator
     {
         Move[] GetAllLegalMoves(
-            BitBoard b,
+            FullBitBoard b,
             Colors color,
             Files? enPassantFile,
             bool blackCanLongCastle,
@@ -15,7 +15,7 @@ namespace ChessLibrary
             bool includeQuietMoves = true
         );
         Move[]? GetAllLegalMoves(
-            BitBoard b,
+            FullBitBoard b,
             SquareState squareState,
             Files? enPassantFile,
             bool blackCanLongCastle,
@@ -25,6 +25,6 @@ namespace ChessLibrary
             bool ignoreCheck = false,
             bool includeQuietMoves = true
         );
-        bool IsKingInCheck(BitBoard b, Colors color);
+        bool IsKingInCheck(FullBitBoard b, Colors color);
     }
 }

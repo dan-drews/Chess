@@ -7,7 +7,7 @@
         int GetPieceValue(PieceTypes piece);
 
         (int blackScore, int whiteScore) GetScore(
-            BitBoard board,
+            FullBitBoard board,
             bool isWhiteKingInCheck,
             bool isBlackKingInCheck,
             bool isStalemate,

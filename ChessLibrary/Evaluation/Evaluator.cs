@@ -14,7 +14,7 @@ namespace ChessLibrary.Evaluation
         }
 
         public (int blackScore, int whiteScore) GetScore(
-            BitBoard board,
+            FullBitBoard board,
             bool isWhiteKingInCheck,
             bool isBlackKingInCheck,
             bool isStalemate,
@@ -67,7 +67,7 @@ namespace ChessLibrary.Evaluation
         }
 
         private int GetScoreInternal(
-            BitBoard board,
+            FullBitBoard board,
             bool isWhiteKingInCheck,
             bool isBlackKingInCheck,
             Colors color,

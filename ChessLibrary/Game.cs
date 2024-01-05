@@ -15,7 +15,7 @@ namespace ChessLibrary
         internal ZobristTable ZobristTable { get; set; } = new ZobristTable();
         internal RepetititionTracker RepetititionTracker { get; set; } = new RepetititionTracker();
         public IMoveGenerator MoveGenerator { get; private set; }
-        public BitBoard Board { get; private set; }
+        public FullBitBoard Board { get; private set; }
 
         public bool WhiteCanLongCastle { get; set; } = true;
         public bool BlackCanLongCastle { get; set; } = true;
@@ -31,7 +31,7 @@ namespace ChessLibrary
 
         public Colors StartingColor { get; set; } = Colors.White;
 
-        private Game(IMoveGenerator evaluator, BitBoard board)
+        private Game(IMoveGenerator evaluator, FullBitBoard board)
         {
             MoveGenerator = evaluator;
             Board = board;
@@ -48,7 +48,7 @@ namespace ChessLibrary
             switch (boardType)
             {
                 case BoardType.BitBoard:
-                    Board = new BitBoard();
+                    Board = new FullBitBoard();
                     MoveGenerator = new MoveGenerator(); //BitBoardMoveGenerator();
                     break;
                 default:
@@ -58,7 +58,7 @@ namespace ChessLibrary
 
         public object Clone()
         {
-            return new Game(MoveGenerator, (BitBoard)Board.Clone())
+            return new Game(MoveGenerator, (FullBitBoard)Board.Clone())
             {
                 Moves = new List<Move>(Moves),
                 WhiteCanLongCastle = WhiteCanLongCastle,
@@ -323,7 +323,7 @@ namespace ChessLibrary
             _legalNonQuietMoves = null;
         }
 
-        public BitBoard AddMove(Move move, bool validate = true)
+        public FullBitBoard AddMove(Move move, bool validate = true)
         {
             if (move == Move.NullMove)
             {
@@ -444,7 +444,7 @@ namespace ChessLibrary
             }
         }
 
-        public BitBoard UndoLastMove()
+        public FullBitBoard UndoLastMove()
         {
             var move = Moves.Last();
             if (move == Move.NullMove)
