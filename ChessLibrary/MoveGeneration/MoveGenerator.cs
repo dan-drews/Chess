@@ -1,9 +1,7 @@
 ﻿using ChessLibrary.Boards;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using static ChessLibrary.BitBoardConstants;
 
 namespace ChessLibrary.MoveGeneration
@@ -46,7 +44,7 @@ namespace ChessLibrary.MoveGeneration
         )
         {
             var result = ValidPawnMoves(b, color, enPassantFile, true, false);
-            if(result.Any())
+            if (result.Any())
             {
                 return true;
             }
@@ -311,7 +309,7 @@ namespace ChessLibrary.MoveGeneration
         )
         {
             var result = new List<Move>();
-           ulong pawnMoves = shiftOperation(pawns, leftShiftAmount) & opposingPieces & ~FileA; // Capture Right
+            ulong pawnMoves = shiftOperation(pawns, leftShiftAmount) & opposingPieces & ~FileA; // Capture Right
             var enumerator = pawnMoves.GetEnumerator();
             while (enumerator.MoveNext())
             {
@@ -490,31 +488,13 @@ namespace ChessLibrary.MoveGeneration
             bool includeSelfChecks
         )
         {
-           ulong currentKnights = color == Colors.Black ? b.BlackKnights : b.WhiteKnights;
+            ulong currentKnights = color == Colors.Black ? b.BlackKnights : b.WhiteKnights;
             var enumerator = currentKnights.GetEnumerator();
             var notMyPieces = ~b.GetAllPieces(color);
             while (enumerator.MoveNext())
             {
-               ulong possibility;
                 int location = enumerator.Current;
-                if (location > KnightRangeBaseSquare)
-                {
-                    possibility = KnightSpan << (location - KnightRangeBaseSquare);
-                }
-                else
-                {
-                    possibility = KnightSpan >> (KnightRangeBaseSquare - location);
-                }
-                if (location % 8 >= 4)
-                {
-                    possibility &=
-                        ~(BitBoardConstants.FileG | BitBoardConstants.FileH) & notMyPieces;
-                }
-                else
-                {
-                    possibility &=
-                        ~(BitBoardConstants.FileA | BitBoardConstants.FileB) & notMyPieces;
-                }
+                ulong possibility = AttackTables.KnightAttacks[location] & notMyPieces;
                 var possibleMoveEnumerator = possibility.GetEnumerator();
                 while (possibleMoveEnumerator.MoveNext())
                 {
@@ -610,29 +590,11 @@ namespace ChessLibrary.MoveGeneration
             bool includeSelfChecks
         )
         {
-           ulong currentKing = color == Colors.Black ? b.BlackKing : b.WhiteKing;
+            ulong currentKing = color == Colors.Black ? b.BlackKing : b.WhiteKing;
             var notMyPieces = ~b.GetAllPieces(color);
-           ulong possibility;
             int location = currentKing.FirstBit();
-
-            if (location > KingRangeBaseSquare)
-            {
-                possibility = KingSpan << (location - KingRangeBaseSquare);
-            }
-            else
-            {
-                possibility = KingSpan >> (KingRangeBaseSquare - location);
-            }
-            if (location % 8 >= 4)
-            {
-                possibility &= ~(BitBoardConstants.FileG | BitBoardConstants.FileH) & notMyPieces;
-            }
-            else
-            {
-                possibility &= ~(BitBoardConstants.FileA | BitBoardConstants.FileB) & notMyPieces;
-            }
+            ulong possibility = AttackTables.KingAttacks[location] & notMyPieces;
             var startingSquare = b.GetSquare(location);
-
             var enumerator = possibility.GetEnumerator();
             while (enumerator.MoveNext())
             {

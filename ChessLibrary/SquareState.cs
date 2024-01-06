@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -39,11 +40,14 @@ namespace ChessLibrary
 
         public Square Square
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return GetSquare(_valueInternal); }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { _valueInternal = (ushort)((~(63 << 6) & _valueInternal) | GetSquare(value)); }
         }
         public Piece? Piece
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if ((_valueInternal & 0b10000) == 0)
@@ -54,6 +58,7 @@ namespace ChessLibrary
                 var piece = (_valueInternal & 0b111) - 1;
                 return Piece.Pieces[color][piece];
             }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 if (value == null)
@@ -77,6 +82,7 @@ namespace ChessLibrary
             Square = square;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ushort GetSquare(Square square)
         {
             ushort squareNumber = (ushort)(((square.Rank - 1) * 8) + (8 - (int)square.File));
@@ -86,6 +92,7 @@ namespace ChessLibrary
 
         private static Square[] _squares = Enumerable.Range(0, 64).Select(i => new Square(i)).ToArray();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Square GetSquare(ushort value)
         {
             //if (!_squaresInitialized)

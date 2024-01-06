@@ -98,7 +98,7 @@ namespace Chess.Tests
         [DataRow(3, 2812, 209, 2, 0)]
         [DataRow(4, 43238, 3348, 123, 0)]
         [DataRow(5, 674624, 52051, 1165, 0)]
-        //[DataRow(6, 11030083, 940350, 33325, 0)]
+        [DataRow(6, 11030083, 940350, 33325, 0)]
         //[DataRow(7, 178633661, 14519036, 294874, 0)]
         [DataTestMethod]
         public void ComputeMovesPosition3(

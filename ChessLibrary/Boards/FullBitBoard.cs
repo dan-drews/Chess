@@ -280,23 +280,7 @@ namespace ChessLibrary
             while (enumerator.MoveNext())
             {
                 int location = enumerator.Current;
-                if (location > KnightRangeBaseSquare)
-                {
-                    possibilities = KnightSpan << (location - KnightRangeBaseSquare);
-                }
-                else
-                {
-                    possibilities = KnightSpan >> (KnightRangeBaseSquare - location);
-                }
-
-                if (location % 8 >= 4)
-                {
-                    possibilities &= ~(FileG | FileH);
-                }
-                else
-                {
-                    possibilities &= ~(FileA | FileB);
-                }
+                possibilities = AttackTables.KnightAttacks[location];
                 unsafeSpaces |= possibilities;
             }
 
@@ -308,22 +292,7 @@ namespace ChessLibrary
             // king
             ulong king = color == Colors.White ? BlackKing : WhiteKing;
             int kingLocation = king.NumberOfTrailingZeros();
-            if (kingLocation > KingRangeBaseSquare)
-            {
-                possibilities = KingSpan << (kingLocation - KingRangeBaseSquare);
-            }
-            else
-            {
-                possibilities = KingSpan >> (KingRangeBaseSquare - kingLocation);
-            }
-            if (kingLocation % 8 >= 4)
-            {
-                possibilities &= ~(FileG | FileH);
-            }
-            else
-            {
-                possibilities &= ~(FileA | FileB);
-            }
+            possibilities = AttackTables.KingAttacks[kingLocation];
             unsafeSpaces |= possibilities;
 
             if (color == Colors.White)
@@ -369,15 +338,7 @@ namespace ChessLibrary
                         ? enemyPawns >> 9 | enemyPawns >> 7
                         : enemyPawns << 9 | enemyPawns << 7;
 
-                var kingSquares =
-                    enemyKings >> 1
-                    | enemyKings << 1
-                    | enemyKings >> 7
-                    | enemyKings << 7
-                    | enemyKings >> 8
-                    | enemyKings << 8
-                    | enemyKings >> 9
-                    | enemyKings << 9;
+                var kingSquares = AttackTables.KingAttacks[enemyKings.NumberOfTrailingZeros()];
 
                 var slidingAttacks = (ulong)0;
                 foreach (var rank in RankMasks)
