@@ -10,13 +10,18 @@ namespace ChessLibrary
     public static class Perft
     {
 
-        public static int ExecutePerft(Game game, int depth, bool isFirstMove)
+        private static readonly ParallelOptions ParallelOptions = new()
+        {
+            MaxDegreeOfParallelism = 10
+        };
+
+        public static ulong ExecutePerft(Game game, int depth, bool isFirstMove)
         {
             if (depth == 0)
             {
                 return 1;
             }
-            int count = 0;
+            ulong count = 0;
             var moves = game.GetAllLegalMoves().OrderBy(x => x.StartingSquare);
             if (isFirstMove)
             {

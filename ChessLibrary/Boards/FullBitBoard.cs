@@ -10,19 +10,19 @@ namespace ChessLibrary
 {
     public class FullBitBoard : ICloneable
     {
-        public BitBoard WhitePawns;
-        public BitBoard WhiteRooks;
-        public BitBoard WhiteKnights;
-        public BitBoard WhiteBishops;
-        public BitBoard WhiteQueens;
-        public BitBoard WhiteKing;
+        public ulong WhitePawns;
+        public ulong WhiteRooks;
+        public ulong WhiteKnights;
+        public ulong WhiteBishops;
+        public ulong WhiteQueens;
+        public ulong WhiteKing;
 
-        public BitBoard BlackPawns;
-        public BitBoard BlackRooks;
-        public BitBoard BlackKnights;
-        public BitBoard BlackBishops;
-        public BitBoard BlackQueens;
-        public BitBoard BlackKing;
+        public ulong BlackPawns;
+        public ulong BlackRooks;
+        public ulong BlackKnights;
+        public ulong BlackBishops;
+        public ulong BlackQueens;
+        public ulong BlackKing;
 
         private static SquareState[] _emptySquareStates;
         private static Square[] _emptySquares;
@@ -35,14 +35,6 @@ namespace ChessLibrary
             {
                 _emptySquares[i] = new Square(i);
                 _emptySquareStates[i] = new SquareState(_emptySquares[i]);
-            }
-        }
-
-        public void ClearCache()
-        {
-            for (int i = 0; i < _squares.Length; i++)
-            {
-                _squares[i] = null;
             }
         }
 
@@ -61,6 +53,11 @@ namespace ChessLibrary
             BlackBishops = Starting_Black_Bishops;
             BlackQueens = Starting_Black_Queens;
             BlackKing = Starting_Black_King;
+
+            for(int i = 0; i < 64; i++)
+            {
+                _setPieces[i] = true;
+            }
         }
 
         public object Clone()
@@ -79,8 +76,8 @@ namespace ChessLibrary
             bb.BlackBishops = BlackBishops;
             bb.BlackQueens = BlackQueens;
             bb.BlackKing = BlackKing;
-            bb._squares = new SquareState[64];
             Array.Copy(_squares, bb._squares, 64);
+            Array.Copy(_setPieces, bb._setPieces, 64);
             return bb;
         }
 
@@ -125,12 +122,15 @@ namespace ChessLibrary
 
         public SquareState GetSquare(int position)
         {
-            if (_squares[position] != null)
+            var square = _squares.UnsafeArrayAccess(position);
+            if (square != null)
             {
-                return _squares[position]!;
+                return square;
+                //return _squares[position]!;
             }
-            _squares[position] = GetSquareInternal(position);
-            return _squares[position]!;
+            square = GetSquareInternal(position);
+            _squares[position] = square;
+            return square;
         }
 
         private SquareState GetSquareInternal(int position)
@@ -140,7 +140,7 @@ namespace ChessLibrary
 
             if ((occupiedSquares & squareMask) == 0)
             {
-                return _emptySquareStates[position];
+                return _emptySquareStates.UnsafeArrayAccess(position);
             }
 
             // Casting from enum to int is taking a lot of CPU power
@@ -148,9 +148,11 @@ namespace ChessLibrary
 
             if ((WhitePawns & squareMask) != 0)
                 return SquareState.SquareStateMap[position][0][0]; // White Pawn
+                //return SquareState.SquareStateMap.UnsafeArrayAccess(position).UnsafeArrayAccess(0).UnsafeArrayAccess(0); // White Pawn
 
             if ((BlackPawns & squareMask) != 0)
-                return SquareState.SquareStateMap[position][1][0]; // Black Pawn
+                return SquareState.SquareStateMap[position][1][0]; // White Pawn
+                //return SquareState.SquareStateMap.UnsafeArrayAccess(position).UnsafeArrayAccess(1).UnsafeArrayAccess(0); // Black Pawn
 
             if ((WhiteRooks & squareMask) != 0)
                 return SquareState.SquareStateMap[position][0][1]; // White Rook
@@ -221,13 +223,6 @@ namespace ChessLibrary
 
             SetPiece(move.TargetSquare, newPiece, move.Color);
             ClearPiece(move.StartingSquare);
-            _threatenedSquares = null;
-            _whiteUnsafe = null;
-            _blackUnsafe = null;
-            for (int i = 0; i < _squares.Length; i++)
-            {
-                _squares[i] = null;
-            }
         }
 
         public ulong GetAllPieces(Colors color)
@@ -269,13 +264,13 @@ namespace ChessLibrary
             ulong unsafeSpaces;
             if (color == Colors.White)
             {
-                unsafeSpaces = (BlackPawns >> 7) & ~BitBoardConstants.FileH; // Pawn Capture Left
-                unsafeSpaces |= (BlackPawns >> 9) & ~BitBoardConstants.FileA; // Pawn Capture Right
+                unsafeSpaces = (BlackPawns >> 7) & ~FileH; // Pawn Capture Left
+                unsafeSpaces |= (BlackPawns >> 9) & ~FileA; // Pawn Capture Right
             }
             else
             {
-                unsafeSpaces = (WhitePawns << 7) & ~BitBoardConstants.FileA; // Pawn Capture Left
-                unsafeSpaces |= (WhitePawns << 9) & ~BitBoardConstants.FileH; // Pawn Capture Right
+                unsafeSpaces = (WhitePawns << 7) & ~FileA; // Pawn Capture Left
+                unsafeSpaces |= (WhitePawns << 9) & ~FileH; // Pawn Capture Right
             }
 
             ulong possibilities;
@@ -296,37 +291,19 @@ namespace ChessLibrary
 
                 if (location % 8 >= 4)
                 {
-                    possibilities &= ~(BitBoardConstants.FileG | BitBoardConstants.FileH);
+                    possibilities &= ~(FileG | FileH);
                 }
                 else
                 {
-                    possibilities &= ~(BitBoardConstants.FileA | BitBoardConstants.FileB);
+                    possibilities &= ~(FileA | FileB);
                 }
                 unsafeSpaces |= possibilities;
             }
 
-            // Bishop/queen
-            var queensAndBishops =
-                color == Colors.White ? BlackBishops | BlackQueens : WhiteBishops | WhiteQueens;
-
-            enumerator = queensAndBishops.GetEnumerator();
-            while (enumerator.MoveNext())
-            {
-                int location = enumerator.Current;
-                possibilities = SlidingMoveUtilities.ValidDiagonalMoves(this,location,OccupiedSquares);
-                unsafeSpaces |= possibilities;
-            }
-
-            // Rook Queen
-            BitBoard queensAndRooks =
-                color == Colors.White ? BlackRooks | BlackQueens : WhiteRooks | WhiteQueens;
-            enumerator = queensAndRooks.GetEnumerator();
-            while (enumerator.MoveNext())
-            {
-                int location = enumerator.Current;
-                possibilities = SlidingMoveUtilities.ValidHVMoves(this, location, OccupiedSquares);
-                unsafeSpaces |= possibilities;
-            }
+            var opposingColor = color == Colors.White ? Colors.Black : Colors.White;
+            unsafeSpaces |= MagicSlidingImplementation.ValidBishopMoveBitBoard(this, opposingColor);
+            unsafeSpaces |= MagicSlidingImplementation.ValidRookMoveBitBoard(this, opposingColor);
+            unsafeSpaces |= MagicSlidingImplementation.ValidQueenMoveBitBoard(this, opposingColor);
 
             // king
             ulong king = color == Colors.White ? BlackKing : WhiteKing;
@@ -341,11 +318,11 @@ namespace ChessLibrary
             }
             if (kingLocation % 8 >= 4)
             {
-                possibilities &= ~(BitBoardConstants.FileG | BitBoardConstants.FileH);
+                possibilities &= ~(FileG | FileH);
             }
             else
             {
-                possibilities &= ~(BitBoardConstants.FileA | BitBoardConstants.FileB);
+                possibilities &= ~(FileA | FileB);
             }
             unsafeSpaces |= possibilities;
 
@@ -403,14 +380,14 @@ namespace ChessLibrary
                     | enemyKings << 9;
 
                 var slidingAttacks = (ulong)0;
-                foreach (var rank in BitBoardConstants.RankMasks)
+                foreach (var rank in RankMasks)
                 {
                     if ((rank & enemyRooks) > 0 || (rank & enemyQueens) > 0)
                     {
                         slidingAttacks |= rank;
                     }
                 }
-                foreach (var file in BitBoardConstants.FileMasks)
+                foreach (var file in FileMasks)
                 {
                     if ((file & enemyRooks) > 0 || (file & enemyQueens) > 0)
                     {
@@ -418,7 +395,7 @@ namespace ChessLibrary
                     }
                 }
 
-                foreach (var diagonal in BitBoardConstants.DiagonalMasks)
+                foreach (var diagonal in DiagonalMasks)
                 {
                     if ((diagonal & enemyBishops) > 0 || (diagonal & enemyQueens) > 0)
                     {
@@ -426,7 +403,7 @@ namespace ChessLibrary
                     }
                 }
 
-                foreach (var diagonal in BitBoardConstants.AntiDiagonalMasks)
+                foreach (var diagonal in AntiDiagonalMasks)
                 {
                     if ((diagonal & enemyBishops) > 0 || (diagonal & enemyQueens) > 0)
                     {
@@ -446,10 +423,11 @@ namespace ChessLibrary
 
         public void ClearPiece(int position)
         {
-            for (int i = 0; i < _squares.Length; i++)
+            if (!_setPieces.UnsafeArrayAccess(position))
             {
-                _squares[i] = null;
+                return;
             }
+            Array.Clear(_squares);
             _threatenedSquares = null;
             _whiteUnsafe = null;
             _blackUnsafe = null;
@@ -467,6 +445,7 @@ namespace ChessLibrary
             BlackBishops &= mask;
             BlackQueens &= mask;
             BlackKing &= mask;
+            _setPieces[position] = false;
         }
 
         public void SetPiece(Files f, int rank, PieceTypes type, Colors color)
@@ -478,13 +457,16 @@ namespace ChessLibrary
         public int PawnsInFile(Files file, Colors color)
         {
             var pawns = color == Colors.White ? WhitePawns : BlackPawns;
-            var fileMask = BitBoardConstants.FileMasks[(int)file - 1];
-            return (pawns & fileMask).Count;
+            var fileMask = FileMasks[(int)file - 1];
+            return (pawns & fileMask).Count();
         }
+
+        private bool[] _setPieces = new bool[64];
 
         public void SetPiece(int position, PieceTypes type, Colors color)
         {
             ClearPiece(position); // Clear the piece first.
+            _setPieces[position] = true;
             switch (color)
             {
                 case Colors.White:

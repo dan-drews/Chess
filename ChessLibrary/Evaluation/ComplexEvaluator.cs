@@ -74,70 +74,71 @@ public class ComplexEvaluator : IEvaluator
             for (int rank = 1; rank <= 8; rank++)
             {
                 var square = board.GetSquare(f, rank);
-                if (square.Piece?.Type != null && square.Piece.Color == color)
+                var piece = square.Piece;
+                if (piece?.Type != null && piece.Color == color)
                 {
-                    score += GetPieceValue(square.Piece.Type);
-                    switch (square.Piece.Type)
+                    score += GetPieceValue(piece.Type);
+                    switch (piece.Type)
                     {
                         case PieceTypes.Knight:
-                            score += _knightSquareTable[
+                            score += _knightSquareTable.UnsafeArrayAccess(
                                 GetTableLocationForPosition(
                                     square.Square.SquareNumber,
-                                    square.Piece.Color
+                                    piece.Color
                                 )
-                            ];
+                            );
                             break;
                         case PieceTypes.King:
-                            score += _kingSquareTable[
+                            score += _kingSquareTable.UnsafeArrayAccess(
                                 GetTableLocationForPosition(
                                     square.Square.SquareNumber,
-                                    square.Piece.Color
+                                    piece.Color
                                 )
-                            ];
+                            );
                             break;
                         case PieceTypes.Bishop:
-                            score += _bishopSquareTable[
+                            score += _bishopSquareTable.UnsafeArrayAccess(
                                 GetTableLocationForPosition(
                                     square.Square.SquareNumber,
-                                    square.Piece.Color
+                                    piece.Color
                                 )
-                            ];
+                            );
                             break;
                         case PieceTypes.Queen:
                             if (totalMoveCount < 12)
                             {
-                                score += _queenEarlyGameSquareTable[
+                                score += _queenEarlyGameSquareTable.UnsafeArrayAccess(
                                     GetTableLocationForPosition(
                                         square.Square.SquareNumber,
-                                        square.Piece.Color
+                                        piece.Color
                                     )
-                                ];
+                                );
                             }
                             else
                             {
-                                score += _queenSquareTable[
+                                score += _queenSquareTable.UnsafeArrayAccess(
                                     GetTableLocationForPosition(
                                         square.Square.SquareNumber,
-                                        square.Piece.Color
+                                        piece.Color
                                     )
-                                ];
+                                );
                             }
                             break;
                         case PieceTypes.Rook:
-                            score += _rookSquareTable[
+                            score += _rookSquareTable.UnsafeArrayAccess(
                                 GetTableLocationForPosition(
                                     square.Square.SquareNumber,
-                                    square.Piece.Color
+                                    piece.Color
                                 )
-                            ];
+                            );
                             break;
                         case PieceTypes.Pawn:
-                            score += _pawnSquareTable[
+                            score += _pawnSquareTable.UnsafeArrayAccess(
                                 GetTableLocationForPosition(
                                     square.Square.SquareNumber,
-                                    square.Piece.Color
+                                    piece.Color
                                 )
-                            ];
+                            );
                             break;
                     }
                 }
@@ -181,7 +182,7 @@ public class ComplexEvaluator : IEvaluator
             case Colors.White:
                 return 63 - position;
             case Colors.Black:
-                return _blackPieceMapping[position];
+                return _blackPieceMapping.UnsafeArrayAccess(position);
         }
         throw new NotImplementedException();
     }

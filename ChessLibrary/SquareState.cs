@@ -83,21 +83,24 @@ namespace ChessLibrary
             return (ushort)(squareNumber << 6);
         }
 
+
+        private static Square[] _squares = Enumerable.Range(0, 64).Select(i => new Square(i)).ToArray();
+
         private static Square GetSquare(ushort value)
         {
-            if (!_squaresInitialized)
-            {
-                for (int i = 0; i <= 63; i++)
-                {
-                    _squares[i] = new Square(i);
-                }
-                _squaresInitialized = true;
-            }
+            //if (!_squaresInitialized)
+            //{
+            //    for (int i = 0; i <= 63; i++)
+            //    {
+            //        _squares[i] = new Square(i);
+            //    }
+            //    _squaresInitialized = true;
+            //}
             ushort squareNumber = (ushort)(value >> 6);
             return _squares[squareNumber];
         }
 
-        private static Square[] _squares = new Square[64];
-        private static bool _squaresInitialized = false;
+        //private static Square[] _squares = new Square[64];
+        //private static bool _squaresInitialized = false;
     }
 }

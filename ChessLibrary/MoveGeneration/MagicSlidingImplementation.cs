@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ChessLibrary.Boards;
@@ -307,6 +308,78 @@ namespace ChessLibrary.MoveGeneration
             return blockerBitboards;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong ValidBishopMoveBitBoard(
+            FullBitBoard b,
+            Colors color)
+        {
+            var bishops = color == Colors.White ? b.WhiteBishops : b.BlackBishops;
+            ulong result = 0;
+            var enumerator = bishops.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                int location = enumerator.Current;
+                result |= GetBishopValidMoveBitboard(b, color, location);
+            }
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong ValidRookMoveBitBoard(
+            FullBitBoard b,
+            Colors color)
+        {
+            var rooks = color == Colors.White ? b.WhiteRooks : b.BlackRooks;
+            ulong result = 0;
+            var enumerator = rooks.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                int location = enumerator.Current;
+                result |= GetRookValidMoveBitboard(b, color, location);
+            }
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong ValidQueenMoveBitBoard(
+            FullBitBoard b,
+            Colors color)
+        {
+            var rooks = color == Colors.White ? b.WhiteQueens : b.BlackQueens;
+            ulong result = 0;
+            var enumerator = rooks.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                int location = enumerator.Current;
+                result |= GetRookValidMoveBitboard(b, color, location) | GetBishopValidMoveBitboard(b, color, location);
+            }
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong GetBishopValidMoveBitboard(FullBitBoard b, Colors color, int location)
+        {
+            var square = b.GetSquare(location).Square;
+            ulong diagonalMask = BitBoardConstants.GetDiagonalMask(square);
+            ulong antidiagonalMask = BitBoardConstants.GetAntiDiagonalMask(square);
+
+            return GetMoveBitBoardFromMasksAndSquare(b, location, color, diagonalMask | antidiagonalMask, _bishopMagics, _bishopMoves);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong GetRookValidMoveBitboard(FullBitBoard b, Colors color, int location)
+        {
+            var square = b.GetSquare(location).Square;
+            var rank = square.Rank;
+            var file = square.File;
+
+            var rankMask = BitBoardConstants.RankMasks[rank - 1];
+            var fileMask = BitBoardConstants.FileMasks[(int)file - 1];
+
+            return GetMoveBitBoardFromMasksAndSquare(b, location, color, rankMask | fileMask, _rookMagics, _rookMoves);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidBishopMoves(
             FullBitBoard b,
             Colors color,
@@ -320,20 +393,9 @@ namespace ChessLibrary.MoveGeneration
             while (enumerator.MoveNext())
             {
                 int location = enumerator.Current;
-                var square = b.GetSquare(location).Square;
-                ulong diagonalMask = BitBoardConstants.GetDiagonalMask(square);
-                ulong antidiagonalMask = BitBoardConstants.GetAntiDiagonalMask(square);
-                GetMovesFromMasksAndSquare(
-                    b,
-                    color,
-                    includeQuietMoves,
-                    result,
-                    location,
-                    diagonalMask | antidiagonalMask,
-                    _bishopMagics,
-                    _bishopMoves,
-                    PieceTypes.Bishop
-                );
+
+                var moves = GetBishopValidMoveBitboard(b, color, location);
+                GetMovesFromMoveBitBoard(b, color, includeQuietMoves, result, location, PieceTypes.Bishop, moves);
             }
         }
 
@@ -350,23 +412,25 @@ namespace ChessLibrary.MoveGeneration
             while (enumerator.MoveNext())
             {
                 int location = enumerator.Current;
-                var square = b.GetSquare(location).Square;
-                var rank = square.Rank;
-                var file = square.File;
+                var moves = GetRookValidMoveBitboard(b, color, location);
+                GetMovesFromMoveBitBoard(b, color, includeQuietMoves, result, location, PieceTypes.Rook, moves);
+                //var square = b.GetSquare(location).Square;
+                //var rank = square.Rank;
+                //var file = square.File;
 
-                var rankMask = BitBoardConstants.RankMasks[rank - 1];
-                var fileMask = BitBoardConstants.FileMasks[(int)file - 1];
-                GetMovesFromMasksAndSquare(
-                    b,
-                    color,
-                    includeQuietMoves,
-                    result,
-                    location,
-                    rankMask | fileMask,
-                    _rookMagics,
-                    _rookMoves,
-                    PieceTypes.Rook
-                );
+                //var rankMask = BitBoardConstants.RankMasks[rank - 1];
+                //var fileMask = BitBoardConstants.FileMasks[(int)file - 1];
+                //GetMovesFromMasksAndSquare(
+                //    b,
+                //    color,
+                //    includeQuietMoves,
+                //    result,
+                //    location,
+                //    rankMask | fileMask,
+                //    _rookMagics,
+                //    _rookMoves,
+                //    PieceTypes.Rook
+                //);
             }
         }
 
@@ -383,51 +447,49 @@ namespace ChessLibrary.MoveGeneration
             while (enumerator.MoveNext())
             {
                 int location = enumerator.Current;
-                var square = b.GetSquare(location).Square;
-                var rank = square.Rank;
-                var file = square.File;
 
-                var rankMask = BitBoardConstants.RankMasks[rank - 1];
-                var fileMask = BitBoardConstants.FileMasks[(int)file - 1];
-                ulong diagonalMask = BitBoardConstants.GetDiagonalMask(square);
-                ulong antidiagonalMask = BitBoardConstants.GetAntiDiagonalMask(square);
+                var moves = GetBishopValidMoveBitboard(b, color, location) | GetRookValidMoveBitboard(b, color, location);
+                GetMovesFromMoveBitBoard(b, color, includeQuietMoves, result, location, PieceTypes.Queen, moves);
+                //var square = b.GetSquare(location).Square;
+                //var rank = square.Rank;
+                //var file = square.File;
 
-                GetMovesFromMasksAndSquare(
-                    b,
-                    color,
-                    includeQuietMoves,
-                    result,
-                    location,
-                    rankMask | fileMask,
-                    _rookMagics,
-                    _rookMoves,
-                    PieceTypes.Queen
-                );
-                GetMovesFromMasksAndSquare(
-                    b,
-                    color,
-                    includeQuietMoves,
-                    result,
-                    location,
-                    diagonalMask | antidiagonalMask,
-                    _bishopMagics,
-                    _bishopMoves,
-                    PieceTypes.Queen
-                );
+                //var rankMask = BitBoardConstants.RankMasks[rank - 1];
+                //var fileMask = BitBoardConstants.FileMasks[(int)file - 1];
+                //ulong diagonalMask = BitBoardConstants.GetDiagonalMask(square);
+                //ulong antidiagonalMask = BitBoardConstants.GetAntiDiagonalMask(square);
+
+                //GetMovesFromMasksAndSquare(
+                //    b,
+                //    color,
+                //    includeQuietMoves,
+                //    result,
+                //    location,
+                //    rankMask | fileMask,
+                //    _rookMagics,
+                //    _rookMoves,
+                //    PieceTypes.Queen
+                //);
+                //GetMovesFromMasksAndSquare(
+                //    b,
+                //    color,
+                //    includeQuietMoves,
+                //    result,
+                //    location,
+                //    diagonalMask | antidiagonalMask,
+                //    _bishopMagics,
+                //    _bishopMoves,
+                //    PieceTypes.Queen
+                //);
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void GetMovesFromMasksAndSquare(
-            FullBitBoard b,
-            Colors color,
-            bool includeQuietMoves,
-            List<Move> result,
+        public static ulong GetMoveBitBoardFromMasksAndSquare(FullBitBoard b,
             int location,
+            Colors color,
             ulong masks,
             Magic[] magics,
-            ulong[][] moves,
-            PieceTypes pieceType
+            ulong[][] moves
         )
         {
             ulong edges = GetEdgesForSquare(location);
@@ -439,21 +501,44 @@ namespace ChessLibrary.MoveGeneration
 
             var magic = magics[location];
             var key = (blockers * magic.MagicNumber) >> (64 - magic.Shift);
-            BitBoard validMoves = moves[location][key];
-            validMoves = validMoves & ~b.GetAllPieces(color);
+            ulong validMoves = moves[location][key];
+            return validMoves & ~b.GetAllPieces(color);
+        }
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private static void GetMovesFromMasksAndSquare(
+        //    FullBitBoard b,
+        //    Colors color,
+        //    bool includeQuietMoves,
+        //    List<Move> result,
+        //    int location,
+        //    ulong masks,
+        //    Magic[] magics,
+        //    ulong[][] moves,
+        //    PieceTypes pieceType
+        //)
+        //{
+        //    var validMoves = GetMoveBitBoardFromMasksAndSquare(b, location, color, masks, magics, moves);
+        //    GetMovesFromMoveBitBoard(b, color, includeQuietMoves, result, location, pieceType, validMoves);
+        //}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void GetMovesFromMoveBitBoard(FullBitBoard b, Colors color, bool includeQuietMoves, List<Move> result, int location, PieceTypes pieceType, ulong validMoves)
+        {
             var enumerator = validMoves.GetEnumerator();
             while (enumerator.MoveNext())
             {
                 var index = enumerator.Current;
                 var destinationSquare = b.GetSquare(index);
-                if (destinationSquare.Piece != null || includeQuietMoves)
+                var piece = destinationSquare.Piece;
+                if (piece != null || includeQuietMoves)
                 {
                     var move = new Move(
                         location,
                         index,
                         color,
                         pieceType,
-                        destinationSquare.Piece?.Type
+                        piece?.Type
                     );
                     result.Add(move);
                 }

@@ -96,23 +96,16 @@ namespace ChessLibrary
         {
             get
             {
-                GetAllLegalMoves();
-                //var hash = ZobristTable.CalculateZobristHash(Board);
-                //if(Moves.Count(x=> x.Hash == hash) >= 3)
-                //{
-                //    return true;
-                //}
-
                 var hash = ZobristTable.CalculateZobristHash(this);
                 if (RepetititionTracker.Count(hash) >= 3)
                 {
                     return true;
                 }
 
-                if (Moves.Count > 50)
+                if (Moves.Count > 100)
                 {
                     bool isFiftyMoveRule = true;
-                    for (int i = 1; i <= 50; i++)
+                    for (int i = 1; i <= 100; i++)
                     {
                         var move = Moves.ElementAt(Moves.Count - i);
                         if (move.Piece == PieceTypes.Pawn || move.CapturedPiece != null)
@@ -126,7 +119,7 @@ namespace ChessLibrary
                         return true;
                     }
                 }
-                return !GetAllLegalMoves().Any() && !IsKingInCheck(PlayerToMove);
+                return !HasAnyLegalMoves() && !IsKingInCheck(PlayerToMove);
             }
         }
 
@@ -143,6 +136,11 @@ namespace ChessLibrary
         }
 
         private Move[]? _legalNonQuietMoves = null;
+
+        public bool HasAnyLegalMoves()
+        {
+            return MoveGenerator.HasAnyLegalMoves(Board, PlayerToMove, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle);
+        }
 
         public Move[] GetAllLegalMoves(bool includeQuietMoves = true)
         {

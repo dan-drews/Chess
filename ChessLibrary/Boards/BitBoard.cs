@@ -1,51 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ChessLibrary.Boards
 {
-    public readonly struct BitBoard
+    public static class ULongExtensions
+    //public readonly struct BitBoard
     {
-        private readonly ulong _valueInternal;
+        //private readonly ulong _valueInternal;
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private BitBoard(ulong value)
+        //{
+        //    _valueInternal = value;
+        //}
+
+        //public static implicit operator ulong(BitBoard b) => b._valueInternal;
+        //public static implicit operator BitBoard(ulong u) => new BitBoard(u);
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static BitBoard operator &(BitBoard a, BitBoard b) => a._valueInternal & b._valueInternal;
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static BitBoard operator |(BitBoard a, BitBoard b) => a._valueInternal | b._valueInternal;
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static BitBoard operator ~(BitBoard a) => ~a._valueInternal;
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static BitBoard operator ^(BitBoard a, BitBoard b) => a._valueInternal ^ b._valueInternal;
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static BitBoard operator <<(BitBoard a, int b) => a._valueInternal << b;
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static BitBoard operator >>(BitBoard a, int b) => a._valueInternal >> b;
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static bool operator ==(BitBoard a, BitBoard b) => a._valueInternal == b._valueInternal;
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public static bool operator !=(BitBoard a, BitBoard b) => a._valueInternal != b._valueInternal;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private BitBoard(ulong value)
-        {
-            _valueInternal = value;
-        }
+        public static int FirstBit(this ulong value) => value.NumberOfTrailingZeros();
 
-        public static implicit operator ulong(BitBoard b) => b._valueInternal;
-        public static implicit operator BitBoard(ulong u) => new BitBoard(u);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard operator &(BitBoard a, BitBoard b) => a._valueInternal & b._valueInternal;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard operator |(BitBoard a, BitBoard b) => a._valueInternal | b._valueInternal;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard operator ~(BitBoard a) => ~a._valueInternal;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard operator ^(BitBoard a, BitBoard b) => a._valueInternal ^ b._valueInternal;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard operator <<(BitBoard a, int b) => a._valueInternal << b;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard operator >>(BitBoard a, int b) => a._valueInternal >> b;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(BitBoard a, BitBoard b) => a._valueInternal == b._valueInternal;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(BitBoard a, BitBoard b) => a._valueInternal != b._valueInternal;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int FirstBit() => _valueInternal.NumberOfTrailingZeros();
-
-        public int Count => _valueInternal.CountSetBits();
+        public static int Count(this ulong value) => value.CountSetBits();
+        //public int Count => _valueInternal.CountSetBits();
 
         //public bool this[int index]
         //{
@@ -65,20 +68,21 @@ namespace ChessLibrary.Boards
         //    }
         //}
 
-        public override bool Equals(object? obj)
-        {
-            return obj is BitBoard board &&
-                   _valueInternal == board._valueInternal;
-        }
+        //public override bool Equals(object? obj)
+        //{
+        //    return obj is BitBoard board &&
+        //           _valueInternal == board._valueInternal;
+        //}
 
-        public override int GetHashCode()
-        {
-            return _valueInternal.GetHashCode();
-        }
+        //public override int GetHashCode()
+        //{
+        //    return _valueInternal.GetHashCode();
+        //}
 
-        public BitBoardIterator GetEnumerator()
+        public static BitBoardIterator GetEnumerator(this ulong value)
         {
-            return new BitBoardIterator(_valueInternal, Count);
+            var count = value.Count();
+            return new BitBoardIterator(value, count);
         }
     }
 
@@ -95,10 +99,19 @@ namespace ChessLibrary.Boards
             Index = 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext()
         {
+            if(Index >= Count)
+            {
+                return false;
+            }
+            if (Index > 0)
+            {
+                Value &= ~(1UL << Value.NumberOfTrailingZeros());
+            }
             Index++;
-            return Index <= Count;
+            return true;
         }
 
         public int Current
@@ -106,9 +119,7 @@ namespace ChessLibrary.Boards
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                int i = Value.NumberOfTrailingZeros();
-                Value &= ~(1UL << i);
-                return i;
+                return Value.NumberOfTrailingZeros();
             }
         }
     }

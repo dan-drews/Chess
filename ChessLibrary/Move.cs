@@ -19,18 +19,12 @@ namespace ChessLibrary
         public const int PawnTwoForward = 8;
     }
 
-    public struct Move
+    public readonly struct Move
     {
         public static Move NullMove = new Move(0);
         public static Move EmptyMove = new Move(uint.MaxValue);
 
-        private uint _moveValue;
-
-        public uint MoveValue
-        {
-            get { return _moveValue; }
-            set { _moveValue = value; }
-        }
+        private readonly uint _moveValue;
 
         const uint COLOR_MASK = 0b00000000010000000000000000000000;
         const uint FLAG_MASK = 0b00000000001111000000000000000000;

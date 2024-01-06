@@ -1,6 +1,7 @@
 ﻿using ChessLibrary.Boards;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using static ChessLibrary.BitBoardConstants;
@@ -32,6 +33,70 @@ namespace ChessLibrary.MoveGeneration
                 includeQuietMoves
             );
             throw new NotImplementedException();
+        }
+
+        public bool HasAnyLegalMoves(
+            FullBitBoard b,
+            Colors color,
+            Files? enPassantFile,
+            bool blackCanLongCastle,
+            bool blackCanShortCastle,
+            bool whiteCanLongCastle,
+            bool whiteCanShortCastle
+        )
+        {
+            var result = ValidPawnMoves(b, color, enPassantFile, true, false);
+            if(result.Any())
+            {
+                return true;
+            }
+            ValidKnightMoves(b, color, true, result, false);
+            if (result.Any())
+            {
+                return true;
+            }
+            ValidQueenMoves(b, color, true, result, false);
+            if (result.Any())
+            {
+                return true;
+            }
+            ValidRookMoves(b, color, true, result, false);
+            if (result.Any())
+            {
+                return true;
+            }
+            ValidBishopMoves(b, color, true, result, false);
+            if (result.Any())
+            {
+                return true;
+            }
+
+            if (color == Colors.White)
+            {
+                ValidKingMoves(
+                    b,
+                    color,
+                    whiteCanLongCastle,
+                    whiteCanShortCastle,
+                    true,
+                    result,
+                    false
+                );
+            }
+            else
+            {
+                ValidKingMoves(
+                    b,
+                    color,
+                    blackCanLongCastle,
+                    blackCanShortCastle,
+                    true,
+                    result,
+                    false
+                );
+            }
+            return result.Count > 0;
+
         }
 
         public Move[]? GetAllLegalMoves(
@@ -246,7 +311,7 @@ namespace ChessLibrary.MoveGeneration
         )
         {
             var result = new List<Move>();
-            BitBoard pawnMoves = shiftOperation(pawns, leftShiftAmount) & opposingPieces & ~FileA; // Capture Right
+           ulong pawnMoves = shiftOperation(pawns, leftShiftAmount) & opposingPieces & ~FileA; // Capture Right
             var enumerator = pawnMoves.GetEnumerator();
             while (enumerator.MoveNext())
             {
@@ -425,12 +490,12 @@ namespace ChessLibrary.MoveGeneration
             bool includeSelfChecks
         )
         {
-            BitBoard currentKnights = color == Colors.Black ? b.BlackKnights : b.WhiteKnights;
+           ulong currentKnights = color == Colors.Black ? b.BlackKnights : b.WhiteKnights;
             var enumerator = currentKnights.GetEnumerator();
             var notMyPieces = ~b.GetAllPieces(color);
             while (enumerator.MoveNext())
             {
-                BitBoard possibility;
+               ulong possibility;
                 int location = enumerator.Current;
                 if (location > KnightRangeBaseSquare)
                 {
@@ -455,14 +520,15 @@ namespace ChessLibrary.MoveGeneration
                 {
                     int index = possibleMoveEnumerator.Current;
                     var destinationSquare = b.GetSquare(index);
-                    if (destinationSquare.Piece != null || includeQuietMoves)
+                    var destinationPiece = destinationSquare.Piece;
+                    if (destinationPiece != null || includeQuietMoves)
                     {
                         var move = new Move(
                             location,
                             index,
                             color,
                             PieceTypes.Knight,
-                            destinationSquare.Piece?.Type
+                            destinationPiece?.Type
                         );
 
                         if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
@@ -544,9 +610,9 @@ namespace ChessLibrary.MoveGeneration
             bool includeSelfChecks
         )
         {
-            BitBoard currentKing = color == Colors.Black ? b.BlackKing : b.WhiteKing;
+           ulong currentKing = color == Colors.Black ? b.BlackKing : b.WhiteKing;
             var notMyPieces = ~b.GetAllPieces(color);
-            BitBoard possibility;
+           ulong possibility;
             int location = currentKing.FirstBit();
 
             if (location > KingRangeBaseSquare)
@@ -572,14 +638,15 @@ namespace ChessLibrary.MoveGeneration
             {
                 int index = enumerator.Current;
                 var destinationSquare = b.GetSquare(index);
-                if (destinationSquare.Piece != null || includeQuietMoves)
+                var destinationPiece = destinationSquare.Piece;
+                if (destinationPiece != null || includeQuietMoves)
                 {
                     var move = new Move(
                         location,
                         index,
                         color,
                         PieceTypes.King,
-                        destinationSquare.Piece?.Type
+                        destinationPiece?.Type
                     );
                     if (includeSelfChecks || !ResultsInOwnCheck(b, move, color))
                     {
@@ -698,7 +765,6 @@ namespace ChessLibrary.MoveGeneration
             if ((b.GetThreatenedSquares(color) & kingBoard) > 0)
             {
                 var clonedBoard = (FullBitBoard)b.Clone();
-                // ToDo: Apply Move
                 clonedBoard.MovePiece(move);
                 return (
                         clonedBoard.Unsafe(color)

@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using ChessLibrary.Boards;
 using Newtonsoft.Json;
+
 
 namespace ChessLibrary
 {
     public class ZobristTable
     {
-        private static ulong[,] _table = new ulong[20, 64];
+        private static ulong[] _table = new ulong[15 * 64];
         const int COLOR_TO_MOVE_INDEX = 12;
         const int EN_PASSANT_INDEX = 13;
         const int CASTLING_INDEX = 14;
@@ -23,15 +26,16 @@ namespace ChessLibrary
             }
             if (File.Exists(filePath))
             {
-                _table = JsonConvert.DeserializeObject<ulong[,]>(File.ReadAllText(filePath))!;
+                _table = JsonConvert.DeserializeObject<ulong[]>(File.ReadAllText(filePath))!;
                 return;
             }
             Random r = new Random();
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < 15; i++)
             {
                 for (int j = 0; j < 64; j++)
                 {
-                    _table[i, j] = GetRandomLong(r);
+                    int index = 64 * i + j;
+                    _table[index] = GetRandomLong(r);
                 }
             }
             File.WriteAllText(filePath, JsonConvert.SerializeObject(_table));
@@ -48,6 +52,7 @@ namespace ChessLibrary
         {
             ulong hash = 0;
             var board = game.Board;
+
             hash ^= GetPieceHash(board.WhitePawns, 0);
             hash ^= GetPieceHash(board.WhiteBishops, 1);
             hash ^= GetPieceHash(board.WhiteKnights, 2);
@@ -64,29 +69,29 @@ namespace ChessLibrary
 
             if (game.PlayerToMove == Colors.Black)
             {
-                hash ^= _table[COLOR_TO_MOVE_INDEX, 0];
+                hash ^= _table.UnsafeArrayAccess(64 * COLOR_TO_MOVE_INDEX);
             }
             if (game.EnPassantFile != null)
             {
-                hash ^= _table[EN_PASSANT_INDEX, (int)game.EnPassantFile - 1];
+                hash ^= _table.UnsafeArrayAccess(64 * EN_PASSANT_INDEX + (int)game.EnPassantFile - 1);
             }
-            int castle = 0;
-            castle |= game.WhiteCanLongCastle ? 0b0001 : 0;
-            castle |= game.WhiteCanShortCastle ? 0b0010 : 0;
-            castle |= game.BlackCanLongCastle ? 0b0100 : 0;
-            castle |= game.BlackCanShortCastle ? 0b1000 : 0;
-            hash ^= _table[CASTLING_INDEX, castle];
+            int castle = (game.WhiteCanLongCastle ? 0b0001 : 0) |
+                         (game.WhiteCanShortCastle ? 0b0010 : 0) |
+                         (game.BlackCanLongCastle ? 0b0100 : 0) |
+                         (game.BlackCanShortCastle ? 0b1000 : 0);
+            hash ^= _table.UnsafeArrayAccess(64 * CASTLING_INDEX + castle);
             return hash;
         }
 
-        private static ulong GetPieceHash(BitBoard pieces, int pieceIndex)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong GetPieceHash(ulong pieces, int pieceIndex)
         {
             ulong hash = 0;
             var enumerator = pieces.GetEnumerator();
             while (enumerator.MoveNext())
             {
                 int position = enumerator.Current;
-                hash ^= _table[pieceIndex, position];
+                hash ^= _table.UnsafeArrayAccess(64 * pieceIndex + position);
             }
             return hash;
         }

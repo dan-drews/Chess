@@ -25,6 +25,15 @@ namespace ChessLibrary
             bool ignoreCheck = false,
             bool includeQuietMoves = true
         );
+        public bool HasAnyLegalMoves(
+            FullBitBoard b,
+            Colors color,
+            Files? enPassantFile,
+            bool blackCanLongCastle,
+            bool blackCanShortCastle,
+            bool whiteCanLongCastle,
+            bool whiteCanShortCastle
+        );
         bool IsKingInCheck(FullBitBoard b, Colors color);
     }
 }
