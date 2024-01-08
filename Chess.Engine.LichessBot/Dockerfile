@@ -20,5 +20,6 @@ RUN dotnet publish "./Chess.Engine.LichessBot.csproj" -c $BUILD_CONFIGURATION -o
 
 FROM base AS final
 WORKDIR /app
+ENV LICHESSAPIKEY=notset
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Chess.Engine.LichessBot.dll"]
