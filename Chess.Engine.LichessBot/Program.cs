@@ -11,6 +11,7 @@ var builder = new ConfigurationBuilder()
 var configurationRoot = builder.Build();
 
 var apiKey = configurationRoot["lichess_api_key"];
+Console.WriteLine(apiKey);
 var client = new HttpClient();
 var request = new HttpRequestMessage(HttpMethod.Get, "https://lichess.org/api/stream/event");
 request.Headers.Add("Authorization", $"Bearer {apiKey}");
