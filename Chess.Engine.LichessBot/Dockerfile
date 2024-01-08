@@ -19,7 +19,8 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./Chess.Engine.LichessBot.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+ARG key=notset
 WORKDIR /app
-ENV LICHESSAPIKEY=notset
+ENV LICHESSAPIKEY=$key
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Chess.Engine.LichessBot.dll"]
