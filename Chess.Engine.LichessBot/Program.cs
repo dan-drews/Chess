@@ -10,7 +10,7 @@ var builder = new ConfigurationBuilder()
                     .AddEnvironmentVariables();
 var configurationRoot = builder.Build();
 
-var apiKey = configurationRoot["LICHESSAPIKEY"];
+var apiKey = Environment.GetEnvironmentVariable("LICHESSAPIKEY") ?? configurationRoot["LICHESSAPIKEY"];
 Console.WriteLine(apiKey);
 var client = new HttpClient();
 var request = new HttpRequestMessage(HttpMethod.Get, "https://lichess.org/api/stream/event");
