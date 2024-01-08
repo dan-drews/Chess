@@ -306,6 +306,11 @@ namespace ChessLibrary
 
         public void ResetGame()
         {
+            BlackCanLongCastle = true;
+            WhiteCanLongCastle = true;
+            BlackCanShortCastle = true;
+            WhiteCanShortCastle = true;
+            RepetititionTracker.Index = 0;
             Moves = new List<Move>();
 
             // Clear Board
@@ -423,7 +428,6 @@ namespace ChessLibrary
                 }
                 Board.MovePiece(move);
                 var hash = ZobristTable.CalculateZobristHash(this);
-                RepetititionTracker.AddHash(hash);
                 if (validate)
                 {
                     var m = legalMoves![Array.IndexOf(legalMoves, move)];
@@ -434,6 +438,7 @@ namespace ChessLibrary
                     var m = move;
                     Moves.Add(m);
                 }
+                RepetititionTracker.AddHash(hash);
                 return Board;
             }
             else
@@ -450,6 +455,7 @@ namespace ChessLibrary
                 Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
                 return Board;
             }
+            RepetititionTracker.RemoveHash();
             var startingSquare = Board.GetSquare(move.TargetSquare);
             var moveStartingSquare = Board.GetSquare(move.StartingSquare);
             if (startingSquare.Piece == null)
@@ -529,7 +535,6 @@ namespace ChessLibrary
             }
 
             Moves.RemoveAt(Moves.Count - 1); // can't just remove "Move" because the move equality kicks in.
-            RepetititionTracker.RemoveHash();
             WhiteCanShortCastle = true;
             WhiteCanLongCastle = true;
             BlackCanShortCastle = true;

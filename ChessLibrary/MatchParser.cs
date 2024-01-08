@@ -8,9 +8,24 @@ namespace ChessLibrary
 {
     public class MatchParser
     {
+
+        public void LoadGameFromPgn(Game game, string pgn)
+        {
+            // TODO: handle variant from position w/ initial fen
+            game.ResetGame();
+            var moves = pgn.Split(' ').Where(x => x.Length > 0).ToList();
+            foreach (var move in moves)
+            {
+                var legalMoves = game.GetAllLegalMoves();
+                var m = legalMoves.First(x => x.ToString() == move);
+                game.AddMove(m, false);
+            }
+        }
+
         public void LoadGameFromChessNotation(Game game, string chessNotation)
         {
             var gameMoves = chessNotation.Split(' ');
+
             foreach (var move in gameMoves[0..^2])
             {
                 game.AddMove(GetMoveFromChessNotation(game, move), false);

@@ -103,6 +103,36 @@ namespace ChessLibrary
             return a._moveValue == b._moveValue;
         }
 
+        public override string ToString()
+        {
+            // TODO: handle Promotion.
+            // Promotion Example: "a7a8q"
+            var sb = new StringBuilder();
+            var startingSquare = new Square(StartingSquare);
+            var targetSquare = new Square(TargetSquare);
+            sb.Append(startingSquare.File.ToString().ToLower() + startingSquare.Rank.ToString() + targetSquare.File.ToString().ToLower() + targetSquare.Rank.ToString());
+            if(PromotedType != null)
+            {
+                if(PromotedType == PieceTypes.Queen)
+                {
+                    sb.Append("q");
+                }
+                else if(PromotedType == PieceTypes.Knight)
+                {
+                    sb.Append("n");
+                }
+                else if(PromotedType == PieceTypes.Bishop)
+                {
+                    sb.Append("b");
+                }
+                else if(PromotedType == PieceTypes.Rook)
+                {
+                    sb.Append("r");
+                }
+            }
+            return sb.ToString();
+        }
+
         public static bool operator ==(Move lhs, Move rhs) => lhs._moveValue == rhs._moveValue;
 
         public static bool operator !=(Move lhs, Move rhs) => lhs._moveValue != rhs._moveValue;

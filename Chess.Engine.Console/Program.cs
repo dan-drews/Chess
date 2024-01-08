@@ -8,8 +8,13 @@ public class Program
     private static Engine? _whiteEngine;
     private static Engine? _blackEngine;
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
+
+
+        //Console.WriteLine(await response.Content.ReadAsStringAsync());
+
+
         if (!Directory.Exists("logs"))
         {
             Directory.CreateDirectory("logs");
@@ -27,7 +32,7 @@ public class Program
             CenterBorderValue = 30,
             PawnValue = 120,
             KingValue = 99999,
-            MaxTimeMilliseconds = 1_000, //300_000,// Int32.MaxValue, //10000,
+            MaxTimeMilliseconds = 30_000, //300_000,// Int32.MaxValue, //10000,
             QueenValue = 900,
             RookValue = 600,
             StartingDepth = 1,
