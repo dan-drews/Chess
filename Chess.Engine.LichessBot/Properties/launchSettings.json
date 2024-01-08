@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Chess.Engine.LichessBot": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
