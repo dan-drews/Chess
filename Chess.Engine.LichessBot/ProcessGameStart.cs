@@ -49,7 +49,7 @@ namespace Chess.Engine.LichessBot
                 CenterBorderValue = 30,
                 PawnValue = 120,
                 KingValue = 99999,
-                MaxTimeMilliseconds = 100_000, //300_000,// Int32.MaxValue, //10000,
+                MaxTimeMilliseconds = 10_000, //300_000,// Int32.MaxValue, //10000,
                 QueenValue = 900,
                 RookValue = 600,
                 StartingDepth = 1,

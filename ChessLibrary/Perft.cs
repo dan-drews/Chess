@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChessLibrary.MoveGeneration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,9 +23,9 @@ namespace ChessLibrary
                 return 1;
             }
             ulong count = 0;
-            var moves = game.GetAllLegalMoves().OrderBy(x => x.StartingSquare);
             if (isFirstMove)
             {
+                var moves = game.GetAllLegalMoves().OrderBy(x => x.StartingSquare);
                 Parallel.ForEach(
                     moves,
                     x =>
@@ -45,12 +46,18 @@ namespace ChessLibrary
             }
             else
             {
+                Span<Move> moves = stackalloc Move[256];
+                var container = new MoveListContainer(moves);
+                game.GetAllLegalMoves(container);//.OrderBy(x => x.StartingSquare);
                 foreach (var move in moves)
                 {
-                    game.AddMove(move, false);
-                    var childrenMoves = ExecutePerft(game, depth - 1, false);
-                    count += childrenMoves;
-                    game.UndoLastMove();
+                    if (move != Move.NullMove)
+                    {
+                        game.AddMove(move, false);
+                        var childrenMoves = ExecutePerft(game, depth - 1, false);
+                        count += childrenMoves;
+                        game.UndoLastMove();
+                    }
                 }
             }
 

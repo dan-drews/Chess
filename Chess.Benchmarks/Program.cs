@@ -6,6 +6,7 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using ChessLibrary;
 using ChessLibrary.Evaluation;
+using ChessLibrary.MoveGeneration;
 
 namespace Chess.Benchmarks
 {
@@ -115,10 +116,10 @@ namespace Chess.Benchmarks
             {
                 RecurseMoves(BitBoard, move, 2);
             }
-        }
+        }*/
 
         [Benchmark]
-        public void Perft4()
+        public void Perft6()
         {
             var moves = BitBoard.MoveGenerator.GetAllLegalMoves(
                 BitBoard.Board,
@@ -131,15 +132,15 @@ namespace Chess.Benchmarks
             );
             foreach (var move in moves)
             {
-                RecurseMoves(BitBoard, move, 3);
+                RecurseMoves(BitBoard, move, 5);
             }
-        }*/
-
-        [Benchmark]
-        public void ZobristHash()
-        {
-            ZobristTable.CalculateZobristHash(BitBoard);
         }
+
+        //[Benchmark]
+        //public void ZobristHash()
+        //{
+        //    ZobristTable.CalculateZobristHash(BitBoard);
+        //}
 
         //[Benchmark]
         //public void LoadFen()
@@ -155,11 +156,16 @@ namespace Chess.Benchmarks
             {
                 return;
             }
+            Span<Move> moves = stackalloc Move[256];
+            MoveListContainer container = new MoveListContainer(moves);
             BitBoard.AddMove(move, false);
-            var moves = BitBoard.GetAllLegalMoves();
+            BitBoard.GetAllLegalMoves(container);
             foreach (var move2 in moves)
             {
-                RecurseMoves(g, move2, depth - 1);
+                if (move2 != Move.NullMove)
+                {
+                    RecurseMoves(g, move2, depth - 1);
+                }
             }
             BitBoard.UndoLastMove();
         }

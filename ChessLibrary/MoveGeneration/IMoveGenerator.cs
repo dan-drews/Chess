@@ -1,9 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using ChessLibrary.MoveGeneration;
+using System.Collections.Generic;
 
 namespace ChessLibrary
 {
     public interface IMoveGenerator
     {
+
+        void GetAllLegalMoves(
+            MoveListContainer moves,
+            FullBitBoard b,
+            Colors color,
+            Files? enPassantFile,
+            bool blackCanLongCastle,
+            bool blackCanShortCastle,
+            bool whiteCanLongCastle,
+            bool whiteCanShortCastle,
+            bool includeQuietMoves = true
+        );
+
         Move[] GetAllLegalMoves(
             FullBitBoard b,
             Colors color,

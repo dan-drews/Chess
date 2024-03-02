@@ -142,6 +142,21 @@ namespace ChessLibrary
             return MoveGenerator.HasAnyLegalMoves(Board, PlayerToMove, EnPassantFile, BlackCanLongCastle, BlackCanShortCastle, WhiteCanLongCastle, WhiteCanShortCastle);
         }
 
+        public void GetAllLegalMoves(MoveListContainer moves, bool includeQuietMoves = true)
+        {
+            MoveGenerator.GetAllLegalMoves(
+                        moves,
+                        Board,
+                        PlayerToMove,
+                        EnPassantFile,
+                        BlackCanLongCastle,
+                        BlackCanShortCastle,
+                        WhiteCanLongCastle,
+                        WhiteCanShortCastle,
+                        includeQuietMoves
+                    );
+        }
+
         public Move[] GetAllLegalMoves(bool includeQuietMoves = true)
         {
             if (includeQuietMoves)
