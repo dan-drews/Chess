@@ -162,10 +162,11 @@ namespace Chess.Benchmarks
             BitBoard.GetAllLegalMoves(container);
             foreach (var move2 in moves)
             {
-                if (move2 != Move.NullMove)
+                if (move2 == Move.NullMove)
                 {
-                    RecurseMoves(g, move2, depth - 1);
+                    break;
                 }
+                RecurseMoves(g, move2, depth - 1);
             }
             BitBoard.UndoLastMove();
         }
